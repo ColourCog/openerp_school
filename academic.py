@@ -12,12 +12,12 @@ class school_academic_year(osv.osv):
     _description = 'Academic Year'
     _columns = {
         'name': fields.char('Name', size=64),
-        'date_start': fields.date(
-            'Start date',
-            required=True,
-            select=True),
         'date_end': fields.date(
             'End date',
+            required=True,
+            select=True),
+        'date_start': fields.date(
+            'Start date',
             required=True,
             select=True),
     }

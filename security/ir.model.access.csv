@@ -6,4 +6,4 @@ access_school_language,access_school_language,model_school_language,,1,1,1,1
 access_school_student_relative,access_school_student_relative,model_school_student_relative,,1,1,1,1
 access_school_student,access_school_student,model_school_student,,1,1,1,1
 access_school_roster,access_school_roster,model_school_roster,,1,1,1,1
-access_school_roster_enrolment,access_school_roster_enrolment,model_school_roster_enrolment,,1,1,1,1
+access_school_roster_enrollment,access_school_roster_enrollment,model_school_roster_enrollment,,1,1,1,1

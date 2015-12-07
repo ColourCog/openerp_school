@@ -1,11 +1,11 @@
 <openerp>
   <data noupdate="0">
 
-    <record id="view_school_roster_enrolment_tree" model="ir.ui.view">
-      <field name="name">school.roster.enrolment.tree</field>
-      <field name="model">school.roster.enrolment</field>
+    <record id="view_school_roster_enrollment_tree" model="ir.ui.view">
+      <field name="name">school.roster.enrollment.tree</field>
+      <field name="model">school.roster.enrollment</field>
       <field name="arch" type="xml">
-        <tree string="Enrolments">
+        <tree string="enrollments">
           <field name="student_id"/>
           <field name="roster_id"/>
           <field name="state"/>
@@ -13,19 +13,19 @@
       </field>
     </record>
 
-    <record id="view_school_roster_enrolment_form" model="ir.ui.view">
-      <field name="name">school.roster.enrolment.form</field>
-      <field name="model">school.roster.enrolment</field>
+    <record id="view_school_roster_enrollment_form" model="ir.ui.view">
+      <field name="name">school.roster.enrollment.form</field>
+      <field name="model">school.roster.enrollment</field>
       <field name="arch" type="xml">
-        <form string="Enrolment" version="7.0">
+        <form string="Enrollment" version="7.0">
           <header>
-            <button name="enrolment_draft" states="cancelled" string="Set to Draft" type="object" />
+            <button name="enrollment_draft" states="cancelled" string="Set to Draft" type="object" />
             <button name="validate" states="draft" string="Validate"/>
             <button name="cancel" states="draft,pending" string="Cancel"/>
             <field name="state" widget="statusbar" statusbar_visible="draft,pending,done" statusbar_colors='{"cancelled":"red"}'/>
           </header>
           <sheet>
-            <h1> <label string="Enrolment"/> <field name="name" class="oe_inline" readonly="1"/> </h1>
+            <h1> <label string="Enrollment"/> <field name="name" class="oe_inline" readonly="1"/> </h1>
             <group>
               <group>
                 <field name="date"/>
@@ -46,11 +46,11 @@
       </field>
     </record>
 
-    <record id="view_school_roster_enrolment_filter" model="ir.ui.view">
-      <field name="name">school.roster.enrolment.filter</field>
-      <field name="model">school.roster.enrolment</field>
+    <record id="view_school_roster_enrollment_filter" model="ir.ui.view">
+      <field name="name">school.roster.enrollment.filter</field>
+      <field name="model">school.roster.enrollment</field>
       <field name="arch" type="xml">
-        <search string="Search Enrolments">
+        <search string="Search enrollments">
           <field name="name"/>
           <field name="student_id"/>
           <field name="roster_id"/>
@@ -65,24 +65,24 @@
       </field>
     </record>
 
-    <record id="action_school_roster_enrolment_form" model="ir.actions.act_window">
-      <field name="name">Enrolments</field>
+    <record id="action_school_roster_enrollment_form" model="ir.actions.act_window">
+      <field name="name">Enrollments</field>
       <field name="type">ir.actions.act_window</field>
-      <field name="res_model">school.roster.enrolment</field>
+      <field name="res_model">school.roster.enrollment</field>
       <field name="view_type">form</field>
       <field name="view_mode">tree,form</field>
-      <field name="search_view_id" ref="view_school_roster_enrolment_filter"/>
+      <field name="search_view_id" ref="view_school_roster_enrollment_filter"/>
       <field name="context">{"search_default_not_paid":1}</field>
       <field name="help" type="html">
         <p class="oe_view_nocontent_create">
-          Click to create a new Enrolment.
+          Click to create a new enrollment.
         </p><p>
-          Use this form to create a new Enrolment for a student.
+          Use this form to create a new enrollment for a student.
         </p>
       </field>
     </record>
 
-    <menuitem action="action_school_roster_enrolment_form" id="menu_school_roster_enrolment" parent="menu_school_academic" sequence="10" />
+    <menuitem action="action_school_roster_enrollment_form" id="menu_school_roster_enrollment" parent="menu_school_academic" sequence="10" />
 
   </data>
 </openerp>

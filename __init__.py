@@ -1,6 +1,6 @@
 import academic
 import student
 import roster
-import enrolment
+import enrollment
 import res_config
 

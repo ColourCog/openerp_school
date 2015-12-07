@@ -11,8 +11,8 @@ class school_roster(osv.osv):
     _name = 'school.roster'
     _description = 'Grade Roster'
 
-    def _get_roster_from_enrolment(self, cr, uid, ids, context=None):
-        enrol_obj = self.pool.get('school.roster.enrolment')
+    def _get_roster_from_enrollment(self, cr, uid, ids, context=None):
+        enrol_obj = self.pool.get('school.roster.enrollment')
         return [e.roster_id.id
                 for e in enrol_obj.browse(cr, uid, ids, context=context)]
 
@@ -21,25 +21,25 @@ class school_roster(osv.osv):
             return {}
         res = {}
         for roster in self.browse(cr, uid, ids, context=context):
-            res[roster.id] = roster.seats_max - len([e for e in roster.enrolment_ids])
+            res[roster.id] = roster.seats_max - len([e for e in roster.enrollment_ids])
         return res
 
     _columns = {
         'name': fields.char('Name', size=64, select=True, readonly=True),
         'year_id': fields.many2one('school.academic.year', 'Academic Year', required=True),
         'grade_id': fields.many2one('school.academic.grade', 'Grade', required=True),
-        'enrolment_ids': fields.one2many(
-            'school.roster.enrolment',
+        'enrollment_ids': fields.one2many(
+            'school.roster.enrollment',
             'roster_id',
-            'Enrolments'),
-        'seats_max': fields.integer('Maximum seats', required=True),
+            'enrollments'),
+        'seats_max': fields.integer('Capacity', required=True),
         'seats_free': fields.function(
             _get_free_seats,
             type='integer',
-            string='Available seats',
+            string='Available',
             store={
-                _name: (lambda self, cr, uid, ids, c: ids, ['enrolment_ids', 'seats_max'], 10),
-                'school.roster.enrolment': (_get_roster_from_enrolment, None, 10),
+                _name: (lambda self, cr, uid, ids, c: ids, ['enrollment_ids', 'seats_max'], 10),
+                'school.roster.enrollment': (_get_roster_from_enrollment, None, 10),
             }),
     }
 

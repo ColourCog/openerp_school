@@ -8,16 +8,16 @@ from openerp import pooler
 _logger = logging.getLogger(__name__)
 
 
-class school_roster_enrolment(osv.osv):
-    _name = 'school.roster.enrolment'
-    _description = 'Roster Enrolment'
+class school_roster_enrollment(osv.osv):
+    _name = 'school.roster.enrollment'
+    _description = 'Roster enrollment'
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     _track = {
         'state': {
-          'school_roster_enrolment.mt_reg_accepted': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'accepted',
-          'school_roster_enrolment.mt_reg_cancelled': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'cancelled',
-          'school_roster_enrolment.mt_reg_pending': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'pending',
-          'school_roster_enrolment.mt_reg_done': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'done',
+          'school_roster_enrollment.mt_reg_accepted': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'accepted',
+          'school_roster_enrollment.mt_reg_cancelled': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'cancelled',
+          'school_roster_enrollment.mt_reg_pending': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'pending',
+          'school_roster_enrollment.mt_reg_done': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'done',
         },
     }
 
@@ -52,7 +52,7 @@ class school_roster_enrolment(osv.osv):
 
     def create(self, cr, uid, vals, context=None):
         if vals.get('name', '/') == '/':
-            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'school.roster.enrolment') or '/'
-        return super(school_roster_enrolment, self).create(cr, uid, vals, context=context)
+            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'school.roster.enrollment') or '/'
+        return super(school_roster_enrollment, self).create(cr, uid, vals, context=context)
 
-school_roster_enrolment()
+school_roster_enrollment()
