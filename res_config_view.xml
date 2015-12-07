@@ -3,54 +3,51 @@
     <data noupdate="1">
         <!-- After installation of the module, open the related menu -->
         <record id="action_client_school_menu" model="ir.actions.client">
-            <field name="name">Open School Menu</field>
-            <field name="tag">reload</field>
-            <field name="params" eval="{'menu_id': ref('menu_school_root')}"/>
+          <field name="name">Open School Menu</field>
+          <field name="tag">reload</field>
+          <field name="params" eval="{'menu_id': ref('menu_school_root')}"/>
         </record>
         <record id="base.open_menu" model="ir.actions.todo">
-            <field name="action_id" ref="action_client_school_menu"/>
-            <field name="state">open</field>
+          <field name="action_id" ref="action_client_school_menu"/>
+          <field name="state">open</field>
         </record>
     </data>
     <data>
-        <record id="view_school_configuration" model="ir.ui.view">
-            <field name="name">school settings</field>
-            <field name="model">school.config.settings</field>
-            <field name="arch" type="xml">
-                <form string="Configure School" version="7.0" class="oe_form_configuration">
-                    <header>
-                        <button string="Apply" type="object" name="execute" class="oe_highlight"/>
-                        or
-                        <button string="Cancel" type="object" name="cancel" class="oe_link"/>
-                    </header>
-                    <separator string="School Management"/>
-                    <group name="recruitment_grp">
-                        <label for="id" string="Talent Management"/>
-                        <div name="recruitment">
-                            <div>
-                                <field name="module_hr_recruitment" class="oe_inline"/>
-                                <label for="module_hr_recruitment"/>
-                            </div>
-                            <div>
-                                <field name="module_hr_evaluation" class="oe_inline"/>
-                                <label for="module_hr_evaluation"/>
-                            </div>
-                        </div>
-                    </group>
-                </form>
-            </field>
-        </record>
+      <record id="view_school_configuration" model="ir.ui.view">
+        <field name="name">school settings</field>
+        <field name="model">school.config.settings</field>
+        <field name="arch" type="xml">
+          <form string="Configure School" version="7.0" class="oe_form_configuration">
+            <header>
+              <button string="Apply" type="object" name="execute" class="oe_highlight"/>
+                or
+              <button string="Cancel" type="object" name="cancel" class="oe_link"/>
+            </header>
+            <separator string="School Management"/>
+            <field
+              name="company_id"
+              invisible="1"
+              on_change="onchange_company_id(company_id, context)"/>
+            <group name="enrolment_grp">
+              <label for="id" string="Enrolment"/>
+                <group>
+                  <field name="default_registration_fee_id"/>
+                </group>
+            </group>
+          </form>
+        </field>
+      </record>
 
-        <record id="action_school_configuration" model="ir.actions.act_window">
-            <field name="name">Configure School</field>
-            <field name="res_model">school.config.settings</field>
-            <field name="view_id" ref="view_school_configuration"/>
-            <field name="view_mode">form</field>
-            <field name="target">inline</field>
-        </record>
+      <record id="action_school_configuration" model="ir.actions.act_window">
+          <field name="name">Configure School</field>
+          <field name="res_model">school.config.settings</field>
+          <field name="view_id" ref="view_school_configuration"/>
+          <field name="view_mode">form</field>
+          <field name="target">inline</field>
+      </record>
 
-        <menuitem id="menu_school_configuration" name="School" parent="base.menu_config"
-            sequence="15" action="action_human_resources_configuration"/>
+      <menuitem id="menu_school_settings_configuration" name="School" parent="base.menu_config"
+          sequence="15" action="action_school_configuration"/>
 
     </data>
 </openerp>

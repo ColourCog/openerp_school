@@ -7,11 +7,6 @@ from openerp import netsvc
 from openerp import pooler
 _logger = logging.getLogger(__name__)
 
-class school_roster_extra(osv.osv):
-    _name = 'school.roster.extra'
-    _description = 'Enrolment Extra-curicular'
-
-school_roster_enrolment()
 
 class school_roster_enrolment(osv.osv):
     _name = 'school.roster.enrolment'
@@ -34,7 +29,7 @@ class school_roster_enrolment(osv.osv):
 
     _columns = {
         'name': fields.char('Name', size=64, select=True, readonly=True),
-        'roster_id': fields.many2one('school.roster', 'Academic Year', required=True),
+        'roster_id': fields.many2one('school.roster', 'Grade', required=True),
         'student_id': fields.many2one('school.student', 'Student', required=True),
         'registration_fee_id': fields.many2one('product.product', 'Registration Fee', required=True),
         'user_id': fields.many2one('res.users', 'User', required=True),
@@ -49,7 +44,6 @@ class school_roster_enrolment(osv.osv):
     }
 
     _defaults = {
-        'company_id': lambda s, cr, uid, c: s.pool.get('res.company')._company_default_get(cr, uid, 'hr.employee', context=c),
         'registration_fee_id': _default_registration_fee,
         'date': fields.date.context_today,
         'state': 'draft',

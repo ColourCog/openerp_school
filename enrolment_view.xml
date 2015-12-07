@@ -37,7 +37,6 @@
                 <field name="user_id"/>
               </group>
             </group>
-
           </sheet>
           <div class="oe_chatter">
             <field name="message_follower_ids" widget="mail_followers"/>
@@ -83,7 +82,7 @@
       </field>
     </record>
 
-    <menuitem action="action_school_roster_enrolment_form" id="menu_school_roster_enrolment" parent="menu_school_root" sequence="10" />
+    <menuitem action="action_school_roster_enrolment_form" id="menu_school_roster_enrolment" parent="menu_school_academic" sequence="10" />
 
   </data>
 </openerp>

@@ -72,7 +72,7 @@
       </field>
     </record>
 
-    <menuitem action="action_school_student_form" id="menu_school_student" parent="menu_school_root" sequence="5" />
+    <menuitem action="action_school_student_form" id="menu_school_student" parent="menu_school_student_root" sequence="1" />
 
   </data>
 </openerp>

@@ -21,7 +21,7 @@ class school_roster(osv.osv):
             return {}
         res = {}
         for roster in self.browse(cr, uid, ids, context=context):
-            res[roster.id] = len([e for e in roster.enrolment_ids if e.state == "done"])
+            res[roster.id] = roster.seats_max - len([e for e in roster.enrolment_ids])
         return res
 
     _columns = {
@@ -30,12 +30,12 @@ class school_roster(osv.osv):
         'grade_id': fields.many2one('school.academic.grade', 'Grade', required=True),
         'enrolment_ids': fields.one2many(
             'school.roster.enrolment',
-            'rester_id',
+            'roster_id',
             'Enrolments'),
         'seats_max': fields.integer('Maximum seats', required=True),
         'seats_free': fields.function(
             _get_free_seats,
-            type='int',
+            type='integer',
             string='Available seats',
             store={
                 _name: (lambda self, cr, uid, ids, c: ids, ['enrolment_ids', 'seats_max'], 10),

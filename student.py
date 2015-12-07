@@ -53,22 +53,25 @@ class school_student(osv.osv):
     _name = 'school.student'
     _description = 'Student'
     _columns = {
-        'surname': fields.char('Family Name', size=255, select=True, readonly=True),
-        'firstname': fields.char('First Name(s)', size=255, select=True, readonly=True),
+        'name': fields.char('Name', size=255, select=True, readonly=True),
+        'surname': fields.char('Family Name', size=255, required=True),
+        'firstname': fields.char('First Name(s)', size=255, required=True),
         'gender': fields.selection([
-            ('m', 'Male'),
-            ('f', 'Female')], required=True),
+            ('male', 'Male'),
+            ('female', 'Female'),
+            ],
+            'Gender'),
         'birthday': fields.date('Date of birth', required=True),
         'birthplace': fields.char('Place of birth', size=255),
-        'nationality_id': fields.many2one('res.country', 'Nationality', required=True),
+        'nationality_id': fields.many2one('res.country', 'Nationality'),
         'nationality_ids': fields.many2many(
             'res.country',
             'student_country_rel',
             'student_id',
             'country_id',
             'Other Nationalities'),
-        'religion_id': fields.many2one('school.religion', 'Family Religion', required=True),
-        'language_id': fields.many2one('school.language', 'First Language', required=True),
+        'religion_id': fields.many2one('school.religion', 'Family Religion'),
+        'language_id': fields.many2one('school.language', 'First Language'),
         'language_ids': fields.many2many(
             'school.language',
             'student_language_rel',
@@ -79,6 +82,12 @@ class school_student(osv.osv):
             'school.student.relative',
             'student_id',
             'Relative or Guardian'),
-        'billing_partner_id': fields.many2one('res.partner', 'Billing', required=True),
+        'billing_partner_id': fields.many2one('res.partner', 'Billing...', required=True),
     }
+
+    def create(self, cr, uid, vals, context=None):
+        if vals.get('name', '/') == '/':
+            vals['name'] = ' '.join([vals.get('surname').upper(), vals.get('firstname').capitalize()])
+        return super(school_student, self).create(cr, uid, vals, context=context)
+
 school_student()

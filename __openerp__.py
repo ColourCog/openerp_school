@@ -12,7 +12,7 @@
         "sale",
         "account",
     ],
-    "summary" : "Modifies standard OpenERP functionality",
+    "summary" : "Adds School Management functionalities",
     "description" : """
 School Management
 ========================
@@ -24,6 +24,7 @@ Features:
 * Registration process
     """,
     "data" : [
+      "security/ir.model.access.csv",
       'top_menu.xml',
       'roster_view.xml',
       'student_view.xml',
