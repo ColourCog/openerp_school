@@ -1,0 +1,66 @@
+<openerp>
+  <data noupdate="0">
+
+    <record id="view_school_roster_tree" model="ir.ui.view">
+      <field name="name">school.roster.tree</field>
+      <field name="model">school.roster</field>
+      <field name="arch" type="xml">
+        <tree string="Rosters">
+          <field name="year_id"/>
+          <field name="grade_id"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_school_roster_form" model="ir.ui.view">
+      <field name="name">school.roster.form</field>
+      <field name="model">school.roster</field>
+      <field name="arch" type="xml">
+        <form string="Roster" version="7.0">
+          <sheet>
+            <h1> <label string="Roster"/> <field name="name" class="oe_inline" readonly="1"/> </h1>
+            <group>
+              <group>
+                <field name="year_id"/>
+                <field name="grade_id"/>
+              </group>
+              <group>
+                <field name="seats_max" />
+                <field name="seats_free"/>
+              </group>
+            </group>
+
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_school_roster_filter" model="ir.ui.view">
+      <field name="name">school.roster.filter</field>
+      <field name="model">school.roster</field>
+      <field name="arch" type="xml">
+        <search string="Search Enrolments">
+          <field name="name"/>
+        </search>
+      </field>
+    </record>
+
+    <record id="action_school_roster_form" model="ir.actions.act_window">
+      <field name="name">Rosters</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.roster</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="search_view_id" ref="view_school_roster_filter"/>
+      <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+          Click to create a new Roster.
+        </p><p>
+        </p>
+      </field>
+    </record>
+
+    <menuitem action="action_school_roster_form" id="menu_school_roster" parent="menu_school_configuration" sequence="10" />
+
+  </data>
+</openerp>

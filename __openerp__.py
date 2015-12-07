@@ -24,6 +24,12 @@ Features:
 * Registration process
     """,
     "data" : [
+      'top_menu.xml',
+      'roster_view.xml',
+      'student_view.xml',
+      'enrolment_view.xml',
+      'enrolment_data.xml',
+      'res_config_view.xml',
     ],
     "application": False,
     "installable": True

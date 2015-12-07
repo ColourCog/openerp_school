@@ -1,0 +1,78 @@
+<openerp>
+  <data noupdate="0">
+
+    <record id="view_school_student_tree" model="ir.ui.view">
+      <field name="name">school.student.tree</field>
+      <field name="model">school.student</field>
+      <field name="arch" type="xml">
+        <tree string="Students">
+          <field name="surname"/>
+          <field name="firstname"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_school_student_form" model="ir.ui.view">
+      <field name="name">school.student.form</field>
+      <field name="model">school.student</field>
+      <field name="arch" type="xml">
+        <form string="Students" version="7.0">
+          <sheet>
+            <group>
+              <group>
+                <field name="surname"/>
+                <field name="firstname"/>
+                <field name="gender"/>
+              </group>
+              <group>
+                <field name="birthday"/>
+                <field name="birthplace"/>
+                <field name="nationality_id"/>
+                <field name="religion_id"/>
+                <field name="language_id"/>
+              </group>
+            </group>
+            <group>
+                <field name="billing_partner_id"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_school_student_filter" model="ir.ui.view">
+      <field name="name">school.student.filter</field>
+      <field name="model">school.student</field>
+      <field name="arch" type="xml">
+        <search string="Search Students">
+          <field name="surname"/>
+          <separator/>
+          <group expand="0" string="Group By..." >
+            <filter string="Surname" icon="terp-stock_effects-object-colorize" domain="[]" context="{'group_by':'surname'}"/>
+          </group>
+        </search>
+      </field>
+    </record>
+
+    <record id="action_school_student_form" model="ir.actions.act_window">
+      <field name="name">Students</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.student</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="search_view_id" ref="view_school_student_filter"/>
+      <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+          Click to create a new Student.
+        </p><p>
+            Use this form to create a new Student.
+        </p><p>
+          Please note that Student is an informational entity which has no bearing on enrolment.
+        </p>
+      </field>
+    </record>
+
+    <menuitem action="action_school_student_form" id="menu_school_student" parent="menu_school_root" sequence="5" />
+
+  </data>
+</openerp>
