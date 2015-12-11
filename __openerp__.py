@@ -26,10 +26,7 @@ Features:
     "data" : [
       "security/ir.model.access.csv",
       'top_menu.xml',
-      'roster_view.xml',
       'student_view.xml',
-      'enrollment_view.xml',
-      'enrollment_data.xml',
       'res_config_view.xml',
     ],
     "application": False,

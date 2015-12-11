@@ -5,9 +5,9 @@ class res_company(osv.osv):
     _inherit = "res.company"
 
     _columns = {
-        'default_registration_fee_id': fields.many2one(
+        'default_enrolment_fee_id': fields.many2one(
             'product.product',
-            'Registration Fee'),
+            'enrolment Fee'),
     }
 
 res_company()
@@ -19,12 +19,12 @@ class school_config_settings(osv.osv_memory):
     _columns = {
         'company_id': fields.many2one('res.company', 'Company', required=True),
 
-        'default_registration_fee_id': fields.related(
+        'default_enrolment_fee_id': fields.related(
             'company_id',
-            'default_registration_fee_id',
+            'default_enrolment_fee_id',
             type='many2one',
             relation='product.product',
-            string="Registration Fee"),
+            string="Enrolment Fee"),
     }
 
     def _default_company(self, cr, uid, context=None):
@@ -49,11 +49,11 @@ class school_config_settings(osv.osv_memory):
     def onchange_company_id(self, cr, uid, ids, company_id, context=None):
         # update related fields
         values = {
-            'default_registration_fee_id': False,
+            'default_enrolment_fee_id': False,
         }
         if company_id:
             company = self.pool.get('res.company').browse(cr, uid, company_id, context=context)
             values.update({
-                'default_registration_fee_id': company.default_registration_fee_id and company.default_registration_fee_id.id or False,
+                'default_enrolment_fee_id': company.default_enrolment_fee_id and company.default_enrolment_fee_id.id or False,
             })
         return {'value': values}
