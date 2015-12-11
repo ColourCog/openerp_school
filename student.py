@@ -20,7 +20,7 @@ class school_school(osv.osv):
     _description = 'School'
 
     _columns = {
-        'name': fields.char('Name', size=255),
+        'name': fields.char('Name', size=255, required=True),
         'street': fields.char('Street', size=128),
         'street2': fields.char('Street2', size=128),
         'zip': fields.char('Zip', change_default=True, size=24),
@@ -56,14 +56,14 @@ class school_language(osv.osv):
 school_language()
 
 
-class school_student_previous(osv.osv):
-    _name = 'school.student.previous'
+class school_student_education(osv.osv):
+    _name = 'school.student.education'
 
     _columns = {
         'name': fields.related(
             'school_id',
             'name',
-            type='many2one',
+            type='char',
             relation='school.school',
             string="School Name"),
         'student_id': fields.many2one('school.student', 'Student', required=True),
@@ -73,7 +73,7 @@ class school_student_previous(osv.osv):
 
     }
 
-school_student_previous()
+school_student_education()
 
 
 class school_student_relative(osv.osv):
@@ -81,7 +81,11 @@ class school_student_relative(osv.osv):
 
     _columns = {
         'student_id': fields.many2one('school.student', 'Student', required=True),
-        'partner_id': fields.many2one('res.partner', 'Relative', required=True),
+        'partner_id': fields.many2one(
+            'res.partner',
+            'Relative',
+            required=True,
+            domain=[('customer','=',True)]),
         'relationship': fields.selection([
             ('father', 'Father'),
             ('mother', 'Mother'),
@@ -148,10 +152,14 @@ class school_student(osv.osv):
             'student_id',
             'Relative or Guardian'),
         'previous_ids': fields.one2many(
-            'school.student.previous',
+            'school.student.education',
             'student_id',
             'Previous Schools'),
-        'billing_partner_id': fields.many2one('res.partner', 'Bill to', required=True),
+        'billing_partner_id': fields.many2one(
+            'res.partner',
+            'Bill to',
+            required=True,
+            domain=[('customer','=',True)]),
         'enrolment_fee_id': fields.many2one('product.product', 'Enrolment Fee', required=True),
         'reference': fields.char(
             'Payment reference',
@@ -191,6 +199,12 @@ class school_student(osv.osv):
         'state': 'draft',
         'user_id': lambda cr, uid, id, c={}: id,
     }
+
+    _sql_constraints = [(
+        'student_fullname_unique',
+        'unique (surname, firstname)',
+        "Student full name (surname + firstnames) must be unique !"),
+    ]
 
     def create(self, cr, uid, vals, context=None):
         if vals.get('name', '/') == '/':
@@ -244,7 +258,7 @@ class school_student(osv.osv):
                 raise osv.except_osv(
                     _('No Vaccination!'),
                     _('Proof of Vaccination must have been provided'))
-            if not student.previous_report:
+            if not student.education_report:
                 raise osv.except_osv(
                     _('No School Report!'),
                     _('Previous School reports must have been provided'))

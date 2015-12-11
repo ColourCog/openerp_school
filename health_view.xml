@@ -1,0 +1,117 @@
+<openerp>
+  <data noupdate="0">
+
+    <!-- Enrolment / Student -->
+    <record id="view_school_student_health_form" model="ir.ui.view">
+      <field name="name">school.student.form..inherit</field>
+      <field name="model">school.student</field>
+      <field name="inherit_id" ref="school.view_school_student_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//page[@string='Relatives']" position="after">
+          <page string="Medical">
+            <group>
+              <field name="health_ids" context="{'default_student_id': active_id}"/>
+            </group>
+          </page>
+        </xpath>
+
+      </field>
+    </record>
+
+    <!-- Health -->
+    <record id="view_school_health_tree" model="ir.ui.view">
+      <field name="name">school.health.tree</field>
+      <field name="model">school.health</field>
+      <field name="arch" type="xml">
+        <tree string="Student Health Records">
+          <field name="student_id"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_school_health_filter" model="ir.ui.view">
+      <field name="name">school.health.filter</field>
+      <field name="model">school.health</field>
+      <field name="arch" type="xml">
+        <search string="Search Health Records">
+          <field name="student_id"/>
+        </search>
+      </field>
+    </record>
+
+    <record id="view_school_health_form" model="ir.ui.view">
+      <field name="name">school.health.form</field>
+      <field name="model">school.health</field>
+      <field name="arch" type="xml">
+        <form string="Student Health Record" version="7.0">
+          <sheet>
+            <separator string="Basic"/>
+            <group>
+              <group>
+                <field name="student_id"/>
+              </group>
+              <group>
+                <field name="height"/>
+                <field name="weight"/>
+                <field name="blood_group"/>
+              </group>
+            </group>
+            <separator string="More"/>
+            <group>
+              <group>
+                <field name="eye_glasses"/>
+                <field name="eye_glasses_no" attrs="{'invisible': [('eye_glasses','=',False)]}"/>
+              </group>
+              <group>
+                <field name="physical_challenges"/>
+                <field name="physical_challenges_note" attrs="{'invisible': [('physical_challenges','=',False)]}"/>
+              </group>
+            </group>
+            <group>
+              <group>
+                <field name="allergies"/>
+                <field name="allergies_note" attrs="{'invisible': [('allergies','=',False)]}"/>
+              </group>
+              <group>
+                <field name="special_diet"/>
+                <field name="special_diet_note" attrs="{'invisible': [('special_diet','=',False)]}"/>
+              </group>
+            </group>
+            <separator string="Checkups"/>
+            <group>
+              <field name="regular_checkup"/>
+            </group>
+            <field
+              name="previous_ids"
+              attrs="{'invisible': [('regular_checkup','=',False)]}"
+              context="{'default_health_id': active_id}">
+              <tree>
+                <field name="date"/>
+                <field name="name"/>
+                <field name="recommendation"/>
+              </tree>
+            </field>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_school_health_form" model="ir.actions.act_window">
+      <field name="name">Health Records</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.health</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="context">{}</field>
+      <field name="search_view_id" ref="view_school_health_filter"/>
+      <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+          Click to create a new Student Health Status.
+        </p>
+      </field>
+    </record>
+
+    <menuitem action="action_school_health_form" id="menu_school_health" parent="menu_school_student_root" sequence="4" />
+
+  </data>
+</openerp>

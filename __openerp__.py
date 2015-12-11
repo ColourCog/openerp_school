@@ -28,6 +28,7 @@ Features:
       'top_menu.xml',
       'student_view.xml',
       'student_workflow.xml',
+      'health_view.xml',
       'res_config_view.xml',
     ],
     "application": False,

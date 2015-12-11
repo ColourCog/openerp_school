@@ -1,6 +1,7 @@
 <openerp>
   <data noupdate="0">
 
+    <!-- Enrolment / Student -->
     <record id="view_school_student_tree" model="ir.ui.view">
       <field name="name">school.student.tree</field>
       <field name="model">school.student</field>
@@ -21,7 +22,7 @@
             <button name="student_draft" states="cancel" string="Set to Draft" type="object" />
             <button name="validate" states="draft" string="Validate" class="oe_highlight"/>
             <button name="cancel" states="draft,student" string="Cancel"/>
-            <field name="state" widget="statusbar" statusbar_visible="draft,student" statusbar_colors='{"cancel":"red"}'/>
+            <field name="state" widget="statusbar" statusbar_visible="draft,student" statusbar_colors='{"student":"red"}'/>
           </header>
           <sheet>
             <separator string="Student Information"/>
@@ -62,15 +63,17 @@
                 <field name="user_valid"/>
               </group>
             </group>
-            <notebook>
+            <notebook name="details">
               <page string="Education">
                 <field name="previous_ids" context="{'default_student_id': active_id}">
                   <tree string="Previous schools">
                     <field name="school_id"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
                   </tree>
                 </field>
               </page>
-              <page String="Additional">
+              <page string="Additional">
                 <group>
                   <field name="language_ids"/>
                 </group>
@@ -78,16 +81,14 @@
                   <field name="nationality_ids" context="{'default_student_id': active_id}"/>
                 </group>
               </page>
-              <page String="Relatives">
-                <group>
-                  <field name="relative_ids" context="{'default_student_id': active_id}">
-                    <tree string="Relatives">
-                      <field name="student_id" invisible="1"/>
-                      <field name="partner_id"/>
-                      <field name="relationship"/>
-                    </tree>
-                  </field>
-                </group>
+              <page string="Relatives">
+                <field name="relative_ids" context="{'default_student_id': active_id}">
+                  <tree string="Relatives">
+                    <field name="student_id" invisible="1"/>
+                    <field name="partner_id"/>
+                    <field name="relationship"/>
+                  </tree>
+                </field>
               </page>
             </notebook>
           </sheet>
@@ -154,6 +155,143 @@
 
     <menuitem action="action_school_enrolment_form" id="menu_school_enrolment" parent="menu_school_student_root" sequence="1" />
     <menuitem action="action_school_student_form" id="menu_school_student" parent="menu_school_student_root" sequence="2" />
+
+    <!-- Education / Previous school -->
+    <record id="view_school_student_education_tree" model="ir.ui.view">
+      <field name="name">school.student.education.tree</field>
+      <field name="model">school.student.education</field>
+      <field name="arch" type="xml">
+        <tree string="Student Education">
+          <field name="student_id"/>
+          <field name="school_id"/>
+          <field name="date_from"/>
+          <field name="date_to"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_school_student_education_filter" model="ir.ui.view">
+      <field name="name">school.student.education.filter</field>
+      <field name="model">school.student.education</field>
+      <field name="arch" type="xml">
+        <search string="Search Student education">
+          <field name="student_id"/>
+          <field name="school_id"/>
+          <group expand="0" string="Group By..." >
+            <filter string="Student" domain="[]" context="{'group_by':'student_id'}"/>
+            <filter string="School" domain="[]" context="{'group_by':'school_id'}"/>
+          </group>
+        </search>
+      </field>
+    </record>
+
+    <record id="view_school_student_education_form" model="ir.ui.view">
+      <field name="name">school.student.education.form</field>
+      <field name="model">school.student.education</field>
+      <field name="arch" type="xml">
+        <form string="Student Education" version="7.0">
+          <sheet>
+            <group>
+              <group>
+                <field name="student_id"/>
+                <field name="school_id"/>
+              </group>
+              <group>
+                <field name="date_from"/>
+                <field name="date_to"/>
+              </group>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_school_student_education_form" model="ir.actions.act_window">
+      <field name="name">Student Education</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.student.education</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="context">{}</field>
+      <field name="search_view_id" ref="view_school_student_education_filter"/>
+      <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+          Click to create a new Student Education.
+        </p>
+      </field>
+    </record>
+
+    <menuitem action="action_school_student_education_form" id="menu_school_education" parent="menu_school_student_root" sequence="3" />
+
+
+    <!-- School -->
+    <record id="view_school_student_tree" model="ir.ui.view">
+      <field name="name">school.school.tree</field>
+      <field name="model">school.school</field>
+      <field name="arch" type="xml">
+        <tree string="Schools">
+          <field name="name"/>
+          <field name="country_id"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_school_school_filter" model="ir.ui.view">
+      <field name="name">school.school.filter</field>
+      <field name="model">school.school</field>
+      <field name="arch" type="xml">
+        <search string="Search School">
+          <field name="name"/>
+          <field name="country_id"/>
+          <group expand="0" string="Group By..." >
+            <filter string="Country" domain="[]" context="{'group_by':'country_id'}"/>
+          </group>
+        </search>
+      </field>
+    </record>
+
+    <record id="view_school_school_form" model="ir.ui.view">
+      <field name="name">school.school.form</field>
+      <field name="model">school.school</field>
+      <field name="arch" type="xml">
+        <form string="School" version="7.0">
+          <sheet>
+            <group>
+              <field name="name"/>
+              <label for="street" string="Address"/>
+              <div>
+                  <field name="street" placeholder="Street..."/>
+                  <field name="street2"  />
+                  <div class="address_format">
+                      <field name="city" placeholder="City" style="width: 40%%" />
+                      <field name="state_id" class="oe_no_button" placeholder="State" style="width: 37%%" options='{"no_open": True}' />
+                      <field name="zip" placeholder="ZIP" style="width: 20%%" />
+                  </div>
+                  <field name="country_id" placeholder="Country" class="oe_no_button" options='{"no_open": True}' />
+              </div>
+              <field name="website" widget="url" placeholder="e.g. www.openerp.com"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_school_school_form" model="ir.actions.act_window">
+      <field name="name">Schools</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.school</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="context">{}</field>
+      <field name="search_view_id" ref="view_school_school_filter"/>
+      <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+          Click to create a new School.
+        </p>
+      </field>
+    </record>
+
+    <menuitem action="action_school_school_form" id="menu_school_school" parent="menu_school_configuration" sequence="1" />
 
   </data>
 </openerp>
