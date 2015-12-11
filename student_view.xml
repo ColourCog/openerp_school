@@ -42,7 +42,6 @@
             <separator string="Enrolment Requisits"/>
             <group>
               <group>
-                <field name="date"/>
                 <field name="billing_partner_id"/>
                 <field name="enrolment_fee_id"/>
                 <field name="reference"/>
@@ -51,7 +50,16 @@
                 <field name="birth_certificate"/>
                 <field name="vaccination"/>
                 <field name="previous_report"/>
+              </group>
+            </group>
+            <group>
+              <group>
+                <field name="date"/>
                 <field name="user_id"/>
+              </group>
+              <group>
+                <field name="date_valid"/>
+                <field name="user_valid"/>
               </group>
             </group>
             <notebook>

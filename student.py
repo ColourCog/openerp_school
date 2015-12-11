@@ -7,6 +7,7 @@
 # The views are the ones that make the difference; especially
 # the fields_view_get
 
+import time
 import logging
 from openerp.osv import fields, osv
 from openerp.tools.translate import _
@@ -166,8 +167,13 @@ class school_student(osv.osv):
         'previous_report': fields.boolean(
             'Previous school reports',
             help="Check if last school's reports were provided."),
-        'user_id': fields.many2one('res.users', 'User', required=True),
-        'date': fields.date('Enrolment Date', required=True),
+        'user_id': fields.many2one('res.users', 'Created By', required=True),
+        'user_valid': fields.many2one(
+            'res.users',
+            'Validated By',
+            readonly=True),
+        'date': fields.date('Creation Date', required=True),
+        'date_valid': fields.date('Validation Date', readonly=True),
         'state': fields.selection([
             ('draft', 'Enrolment'),
             ('cancel', 'Cancelled'),
@@ -189,28 +195,59 @@ class school_student(osv.osv):
     def create(self, cr, uid, vals, context=None):
         if vals.get('name', '/') == '/':
             vals['name'] = ' '.join([vals.get('surname').upper(), vals.get('firstname').capitalize()])
+        if not vals.get('user_id'):
+            vals['user_id'] = uid
         return super(school_student, self).create(cr, uid, vals, context=context)
+
+
+    def student_draft(self, cr, uid, ids, context=None):
+        wf_service = netsvc.LocalService("workflow")
+        for student in self.browse(cr, uid, ids):
+            wf_service.trg_delete(uid, 'school.student', student.id, cr)
+            wf_service.trg_create(uid, 'school.student', student.id, cr)
+        return self.write(cr, uid, ids, {'state': 'draft', 'date_valid': None, 'user_valid': None}, context=context)
+
+    def student_validate(self, cr, uid, ids, context=None):
+        self.validate_enrolment(cr, uid, ids, context)
+        return self.write(
+            cr,
+            uid,
+            ids,
+            {
+                'state': 'student',
+                'date_valid': time.strftime('%Y-%m-%d'),
+                'user_valid': uid},
+            context=context)
+
+    def student_cancel(self, cr, uid, ids, context=None):
+        return self.write(
+            cr,
+            uid,
+            ids,
+            {'state': 'cancel'},
+            context=context)
+
 
     def validate_enrolment(self, cr, uid, ids, context=None):
         if not context:
             context = {}
-        student = self.browse(cr, uid, ids[0], context=context)
-        if not student.reference:
-            raise osv.except_osv(
-                _('Payment Reference Missing!'),
-                _("Cannot validate unpaid Enrolment fee"))
-        if not student.birth_certificate:
-            raise osv.except_osv(
-                _('No Birth Certificate!'),
-                _('Birth Certificate must have been provided'))
-        if not student.vaccination:
-            raise osv.except_osv(
-                _('No Vaccination!'),
-                _('Proof of Vaccination must have been provided'))
-        if not student.previous_report:
-            raise osv.except_osv(
-                _('No School Report!'),
-                _('Previous School reports must have been provided'))
+        for student in self.browse(cr, uid, ids, context=context):
+            if not student.reference:
+                raise osv.except_osv(
+                    _('Payment Reference Missing!'),
+                    _("Cannot validate unpaid Enrolment fee"))
+            if not student.birth_certificate:
+                raise osv.except_osv(
+                    _('No Birth Certificate!'),
+                    _('Birth Certificate must have been provided'))
+            if not student.vaccination:
+                raise osv.except_osv(
+                    _('No Vaccination!'),
+                    _('Proof of Vaccination must have been provided'))
+            if not student.previous_report:
+                raise osv.except_osv(
+                    _('No School Report!'),
+                    _('Previous School reports must have been provided'))
 
 
 school_student()

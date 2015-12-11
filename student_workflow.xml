@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data noupdate="0">
+
+        <!-- Workflow definition -->
+
+        <record id="wkf_students" model="workflow">
+            <field name="name">school.wkf.students</field>
+            <field name="osv">school.student</field>
+            <field name="on_create">True</field>
+        </record>
+
+        <record id="act_draft" model="workflow.activity">
+            <field name="wkf_id" ref="wkf_students"/>
+            <field name="name">draft</field>
+            <field name="flow_start">True</field>
+        </record>
+
+        <record id="act_student" model="workflow.activity">
+            <field name="wkf_id" ref="wkf_students"/>
+            <field name="name">validate</field>
+            <field name="kind">function</field>
+            <field name="action">student_validate()</field>
+        </record>
+
+        <record id="act_cancel" model="workflow.activity">
+            <field name="wkf_id" ref="wkf_students"/>
+            <field name="name">cancel</field>
+            <field name="kind">function</field>
+            <field name="action">student_cancel()</field>
+            <field name="flow_stop">True</field>
+        </record>
+
+        <!-- Transitions -->
+        <record id="t1" model="workflow.transition">
+            <field name="act_from" ref="act_draft"/>
+            <field name="act_to" ref="act_student"/>
+            <field name="signal">validate</field>
+        </record>
+
+
+        <record id="t2" model="workflow.transition">
+            <field name="act_from" ref="act_student"/>
+            <field name="act_to" ref="act_cancel"/>
+            <field name="signal">cancel</field>
+        </record>
+
+    </data>
+</openerp>
