@@ -24,10 +24,12 @@ Features:
 * Registration process
     """,
     "data" : [
+      "security/ir_rule.xml",
       "security/ir.model.access.csv",
       'top_menu.xml',
       'student_view.xml',
       'student_workflow.xml',
+      'student_data.xml',
       'health_view.xml',
       'res_config_view.xml',
     ],
