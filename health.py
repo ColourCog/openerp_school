@@ -36,7 +36,11 @@ class school_health(osv.osv):
     _description = "Health Detail for Student"
 
     _columns = {
-        'student_id': fields.many2one('school.student', 'Student', required=True),
+        'student_id': fields.many2one(
+            'school.student',
+            'Student',
+            required=True,
+            ondelete='cascade'),
         'name': fields.related(
             'student_id',
             'name',
@@ -74,6 +78,7 @@ school_health()
 
 
 class school_student(osv.osv):
+    #TODO: create student health status on student creation
     _inherit = 'school.student'
     _columns = {
         'health_ids': fields.one2many(

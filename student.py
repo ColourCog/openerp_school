@@ -66,7 +66,11 @@ class school_student_education(osv.osv):
             type='char',
             relation='school.school',
             string="School Name"),
-        'student_id': fields.many2one('school.student', 'Student', required=True),
+        'student_id': fields.many2one(
+            'school.student',
+            'Student',
+            required=True,
+            ondelete='cascade'),
         'school_id': fields.many2one('school.school', 'Previous School', required=True),
         'date_from': fields.date('From'),
         'date_to': fields.date('To'),
