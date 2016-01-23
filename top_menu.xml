@@ -17,9 +17,14 @@
             parent="menu_school_root"
             sequence="2"/>
         <menuitem
+            id="menu_school_academic"
+            name="Academic"
+            parent="menu_school_root"
+            sequence="3"/>
+        <menuitem
             id="menu_school_configuration"
             name="Configuration"
             parent="menu_school_root"
-            sequence="3"/>
+            sequence="4"/>
     </data>
 </openerp>

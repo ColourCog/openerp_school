@@ -26,16 +26,102 @@ class school_academic_level(osv.osv):
 
     _columns = {
         'name': fields.char('Name', size=255, required=True),
+        'registration_fee_id': fields.many2one(
+            'product.product',
+            'registration Fee',
+            required=True),
     }
 
 school_academic_level()
+
+class school_teacher(osv.osv):
+    _name = 'school.teacher'
+    _description = 'Teacher'
+
+    _columns = {
+        'name': fields.related(
+            'employee_id',
+            'name',
+            type='char',
+            relation='hr.employee',
+            string="Teacher Name"),
+        'employee_id': fields.many2one(
+            'hr.employee',
+            'Employee',
+            required=True),
+    }
+
+school_teacher()
+
 
 class school_class(osv.osv):
     _name = 'school.class'
     _description = 'Class'
 
     _columns = {
-        'name': fields.char('Name', size=255, required=True),
+        'name': fields.char('Name', size=255, select=True),
+        'year_id': fields.many2one(
+            'school.academic.year',
+            'Academic Year',
+            required=True),
+        'level_id': fields.many2one(
+            'school.academic.level',
+            'Year',
+            required=True),
+        'teacher_id': fields.many2one(
+            'school.teacher',
+            'Class (Homeroom) Teacher',
+            required=True),
+        'registration_ids': fields.one2many(
+            'school.student.registration',
+            'class_id',
+            'Class Roll'),
     }
 
+    def create(self, cr, uid, vals, context=None):
+        teacher_obj = self.pool.get('school.teacher')
+        level_obj = self.pool.get('school.academic.level')
+        year_obj = self.pool.get('school.academic.year')
+        if vals.get('name', '/') == '/':
+            teacher = teacher_obj.browse(cr, uid, vals['teacher_id'], context)
+            level = level_obj.browse(cr, uid, vals['level_id'], context)
+            year = year_obj.browse(cr, uid, vals['year_id'], context)
+            vals['name'] = ' '.join([level.name, teacher.name, year.name])
+        return super(school_class, self).create(cr, uid, vals, context=context)
+
 school_class()
+
+
+class school_student_registration(osv.osv):
+    _name = 'school.student.registration'
+
+    _columns = {
+        'name': fields.char('Registration No', size=255, required=True,),
+        'student_id': fields.many2one(
+            'school.student',
+            'Student',
+            required=True,
+            domain=[('state','=', 'student')]),
+        'class_id': fields.many2one(
+            'school.class',
+            'Class',
+            required=True),
+        'year_id': fields.related(
+            'class_id',
+            'year_id',
+            type="many2one",
+            relation='school.academic.year',
+            string="Year"),
+    }
+    _sql_constraints = [(
+        'student_registration_unique',
+        'unique (student_id, class_id)',
+        'Class must be unique per Student !'),
+    ]
+
+    def create(self, cr, uid, vals, context=None):
+        if vals.get('name', '/') == '/':
+            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'school.student.registration') or '/'
+        return super(school_student_registration, self).create(cr, uid, vals, context=context)
+
+school_student_registration()

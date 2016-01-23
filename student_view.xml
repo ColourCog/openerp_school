@@ -284,7 +284,7 @@
     </record>
 
     <record id="action_school_school_form" model="ir.actions.act_window">
-      <field name="name">Schools</field>
+      <field name="name">Previous Schools</field>
       <field name="type">ir.actions.act_window</field>
       <field name="res_model">school.school</field>
       <field name="view_type">form</field>
@@ -298,7 +298,7 @@
       </field>
     </record>
 
-    <menuitem action="action_school_school_form" id="menu_school_school" parent="menu_school_configuration" sequence="1" />
+    <menuitem action="action_school_school_form" id="menu_school_school" parent="menu_school_configuration" sequence="10" />
 
   </data>
 </openerp>

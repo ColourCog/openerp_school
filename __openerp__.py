@@ -31,6 +31,8 @@ Features:
       'student_workflow.xml',
       'student_data.xml',
       'health_view.xml',
+      'registration_view.xml',
+      'registration_sequence.xml',
       'res_config_view.xml',
     ],
     "application": False,

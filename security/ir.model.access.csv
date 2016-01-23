@@ -7,3 +7,9 @@ access_school_student_education,access_school_student_education,model_school_stu
 access_school_student_relative,access_school_student_relative,model_school_student_relative,,1,1,1,1
 access_school_health_line,access_school_health_line,model_school_health_line,,1,1,1,1
 access_school_health,access_school_health,model_school_health,,1,1,1,1
+access_school_academic_year,access_school_academic_year,model_school_academic_year,,1,1,1,1
+access_school_academic_level,access_school_academic_level,model_school_academic_level,,1,1,1,1
+access_school_teacher,access_school_teacher,model_school_teacher,,1,1,1,1
+access_school_class,access_school_class,model_school_class,,1,1,1,1
+access_school_student_registration,access_school_student_registration,model_school_student_registration,,1,1,1,1
+
