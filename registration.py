@@ -16,7 +16,35 @@ class school_academic_year(osv.osv):
 
     _columns = {
         'name': fields.char('Name', size=255, required=True),
+        'class_ids': fields.one2many(
+            'school.class',
+            'year_id',
+            'Classes for this Year'),
+        'state': fields.selection([
+            ('open', 'Current'),
+            ('closed', 'Archived')],
+            'Status',
+            readonly=True,
+            track_visibility='onchange',
+            select=True,
+            help="The archive status of this Year" ),
     }
+    _defaults = {
+        'state': "open",
+    }
+
+    def close_year(self, cr, uid, ids, context=None):
+        class_ids = []
+        class_obj = self.pool.get('school.class')
+        for year in self.browse(cr, uid, ids, context=context):
+            class_ids.extend(
+                class_obj.search(
+                    cr,
+                    uid,
+                    [('year_id','=',year.id)],
+                    context=context))
+        class_obj.close_class(cr, uid, class_ids, context=context)
+        self.write(cr, uid, ids, {'state': 'closed'}, context=context)
 
 school_academic_year()
 
@@ -76,6 +104,17 @@ class school_class(osv.osv):
             'school.student.registration',
             'class_id',
             'Class Roll'),
+        'state': fields.selection([
+            ('open', 'Current'),
+            ('closed', 'Archived')],
+            'Status',
+            readonly=True,
+            track_visibility='onchange',
+            select=True,
+            help="The archive status of this class" ),
+    }
+    _defaults = {
+        'state': "open",
     }
 
     def create(self, cr, uid, vals, context=None):
@@ -88,6 +127,16 @@ class school_class(osv.osv):
             year = year_obj.browse(cr, uid, vals['year_id'], context)
             vals['name'] = ' '.join([level.name, teacher.name, year.name])
         return super(school_class, self).create(cr, uid, vals, context=context)
+
+    def close_class(self, cr, uid, ids, context=None):
+        """Archives class and releases students for new registration"""
+        student_ids = []
+        for sclass in self.browse(cr, uid, ids, context=context):
+            for reg in sclass.registration_ids:
+                student_ids.append(reg.student_id.id)
+        student_obj = self.pool.get('school.student')
+        student_obj.write(cr, uid, student_ids, {'registered': False}, context=context)
+        self.write(cr, uid, ids, {'state': 'closed'}, context=context)
 
 school_class()
 
@@ -148,9 +197,13 @@ class school_student(osv.osv):
     _inherit = 'school.student'
     _columns = {
         'registered': fields.boolean(
-            'Registered',
+            'Currently registered',
             readonly=True,
             help="Is the student currently registered?"),
+        'registration_ids': fields.one2many(
+            'school.student.registration',
+            'student_id',
+            'Registration history'),
     }
     _defaults = {
         'registered': False,

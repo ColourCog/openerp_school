@@ -201,7 +201,7 @@ class school_student(osv.osv):
         'state': fields.selection([
             ('draft', 'Enrolment'),
             ('cancel', 'Cancelled'),
-            ('inactive', 'Inactive'),
+            ('suspend', 'Inactive'),
             ('student', 'Student')],
             'Status',
             readonly=True,
@@ -225,7 +225,6 @@ class school_student(osv.osv):
             vals['user_id'] = uid
         return super(school_student, self).create(cr, uid, vals, context=context)
 
-
     def student_draft(self, cr, uid, ids, context=None):
         wf_service = netsvc.LocalService("workflow")
         for student in self.browse(cr, uid, ids):
@@ -245,6 +244,22 @@ class school_student(osv.osv):
                 'user_valid': uid},
             context=context)
 
+    def student_suspend(self, cr, uid, ids, context=None):
+        return self.write(
+            cr,
+            uid,
+            ids,
+            {'state': 'suspend'},
+            context=context)
+
+    def student_resume(self, cr, uid, ids, context=None):
+        return self.write(
+            cr,
+            uid,
+            ids,
+            {'state': 'student'},
+            context=context)
+
     def student_cancel(self, cr, uid, ids, context=None):
         inv_obj = self.pool.get('account.invoice')
         voucher_obj = self.pool.get('account.voucher')
@@ -262,7 +277,6 @@ class school_student(osv.osv):
             ids,
             {'state': 'cancel', 'invoice_id': None},
             context=context)
-
 
     def validate_enrolment(self, cr, uid, ids, context=None):
         if not context:
