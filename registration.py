@@ -101,17 +101,23 @@ class school_student_registration(osv.osv):
             'school.student',
             'Student',
             required=True,
-            domain=[('state','=', 'student')]),
+            ondelete='cascade',
+            domain=[('state','=', 'student'),('registered','=', False)]),
         'class_id': fields.many2one(
             'school.class',
             'Class',
             required=True),
+        'user_id': fields.many2one('res.users', 'Created By', required=True),
         'year_id': fields.related(
             'class_id',
             'year_id',
             type="many2one",
             relation='school.academic.year',
             string="Year"),
+    }
+    _defaults = {
+        'name': "/",
+        'user_id': lambda cr, uid, id, c={}: id,
     }
     _sql_constraints = [(
         'student_registration_unique',
@@ -120,8 +126,33 @@ class school_student_registration(osv.osv):
     ]
 
     def create(self, cr, uid, vals, context=None):
+        student_obj = self.pool.get('school.student')
+        student_obj.write(cr, uid, [vals['student_id']], {'registered': True}, context=context)
         if vals.get('name', '/') == '/':
             vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'school.student.registration') or '/'
         return super(school_student_registration, self).create(cr, uid, vals, context=context)
 
+    def unlink(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        student_obj = self.pool.get('school.student')
+        """Allows to delete sales order lines in draft,cancel states"""
+        for rec in self.browse(cr, uid, ids, context=context):
+            student_obj.write(cr, uid, [rec.student_id.id], {'registered': False}, context=context)
+        return super(school_student_registration, self).unlink(cr, uid, ids, context=context)
+
 school_student_registration()
+
+class school_student(osv.osv):
+    _name = 'school.student'
+    _inherit = 'school.student'
+    _columns = {
+        'registered': fields.boolean(
+            'Registered',
+            readonly=True,
+            help="Is the student currently registered?"),
+    }
+    _defaults = {
+        'registered': False,
+    }
+school_student()

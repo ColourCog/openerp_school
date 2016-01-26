@@ -9,9 +9,7 @@
       <field name="arch" type="xml">
         <xpath expr="//page[@string='Relatives']" position="after">
           <page string="Medical">
-            <group>
-              <field name="health_ids" context="{'default_student_id': active_id}"/>
-            </group>
+            <field name="health_ids" context="{'default_student_id': active_id}"/>
           </page>
         </xpath>
 
