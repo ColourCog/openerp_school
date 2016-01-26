@@ -54,10 +54,11 @@ class school_academic_level(osv.osv):
 
     _columns = {
         'name': fields.char('Name', size=255, required=True),
-        'registration_fee_id': fields.many2one(
+        'tuition_fee_id': fields.many2one(
             'product.product',
-            'registration Fee',
+            'Default tuition Fee',
             required=True),
+        'description': fields.text('Description'),
     }
 
 school_academic_level()
@@ -107,7 +108,7 @@ class school_class(osv.osv):
         'state': fields.related(
             'year_id',
             'state',
-            type='char',
+            type='select',
             relation='school.academic.year',
             string="Status"),
     }

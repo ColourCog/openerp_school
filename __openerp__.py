@@ -21,6 +21,7 @@ This module offers tools to manage primary and secondary schools
 Features:
 -------------------------------
 * Student database
+* Enrolment process
 * Registration process
     """,
     "data" : [

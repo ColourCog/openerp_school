@@ -90,8 +90,15 @@
           <sheet>
             <group>
               <field name="name"/>
-              <field name="registration_fee_id"/>
             </group>
+            <group>
+              <field name="tuition_fee_id"/>
+            </group>
+            <notebook>
+              <page string="Description">
+                <field name="description"/>
+              </page>
+            </notebook>
           </sheet>
         </form>
       </field>
@@ -184,9 +191,6 @@
       <field name="model">school.class</field>
       <field name="arch" type="xml">
         <form string="Class" version="7.0">
-          <header>
-            <field name="state" widget="statusbar" statusbar_visible="open,closed" statusbar_colors='{"closed":"grey"}'/>
-          </header>
           <sheet>
             <h1> <field name="name" class="oe_inline" readonly="1"/> </h1>
             <group>
@@ -199,7 +203,7 @@
               </group>
             </group>
             <notebook>
-              <page string="Roll">
+              <page string="Class Roll">
                 <field name="registration_ids">
                   <tree string="Student Roll">
                     <field name="class_id" invisible="1"/>
