@@ -104,17 +104,12 @@ class school_class(osv.osv):
             'school.student.registration',
             'class_id',
             'Class Roll'),
-        'state': fields.selection([
-            ('open', 'Current'),
-            ('closed', 'Archived')],
-            'Status',
-            readonly=True,
-            track_visibility='onchange',
-            select=True,
-            help="The archive status of this class" ),
-    }
-    _defaults = {
-        'state': "open",
+        'state': fields.related(
+            'year_id',
+            'state',
+            type='char',
+            relation='school.academic.year',
+            string="Status"),
     }
 
     def create(self, cr, uid, vals, context=None):
