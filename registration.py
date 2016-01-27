@@ -110,7 +110,7 @@ class school_class(osv.osv):
         'state': fields.related(
             'year_id',
             'state',
-            type='select',
+            type='selection',
             relation='school.academic.year',
             string="Status"),
     }
@@ -156,6 +156,19 @@ class school_student_registration(osv.osv):
         if context is None: context = {}
         return context.get('class_id', False)
 
+    def onchange_class_id(self, cr, uid, ids, class_id,
+                        context=None):
+        class_obj = self.pool.get('school.class')
+        prod_id = False
+        if class_id:
+            sclass = class_obj.browse(
+                cr,
+                uid,
+                class_id,
+                context=context)
+            prod_id = sclass.level_id.tuition_fee_id.id
+            return {'value': {'tuition_fee_id': prod_id}}
+
     _columns = {
         'name': fields.char('Registration No', size=255, required=True,),
         'student_id': fields.many2one(
@@ -176,6 +189,25 @@ class school_student_registration(osv.osv):
             type="many2one",
             relation='school.academic.year',
             string="Year"),
+        'tuition_fee_id': fields.many2one(
+            'product.product',
+            'Tuition Fee'),
+        'invoice_id': fields.many2one(
+            'account.invoice',
+            'Tuition Invoice',
+            readonly=True),
+        'invoice_state': fields.related(
+            'invoice_id',
+            'state',
+            type='char',
+            string="Invoice status",
+            readonly=True),
+        'state': fields.related(
+            'student_id',
+            'state',
+            type='selection',
+            relation='school.student',
+            string="Status"),
     }
     _defaults = {
         'name': "/",
@@ -222,6 +254,93 @@ class school_student_registration(osv.osv):
             student_obj.write(cr, uid, [rec.student_id.id], {'current_class_id': None}, context=context)
         return super(school_student_registration, self).unlink(cr, uid, ids, context=context)
 
+    def generate_invoice(self, cr, uid, ids, context):
+        if not context:
+            context = {}
+        ctx = context.copy()
+        ctx.update({'account_period_prefer_normal': True})
+        student_obj = self.pool.get('school.student')
+        period_obj = self.pool.get('account.period')
+        inv_obj = self.pool.get('account.invoice')
+        inv_line_obj = self.pool.get('account.invoice.line')
+        total = 0.0
+        for reg in self.browse(cr, uid, ids, context=ctx):
+            if not reg.student_id.invoice_id:
+                if not reg.student_id.waive_fee:
+                    student_obj.generate_invoice(
+                        cr,
+                        uid,
+                        [reg.student_id.id],
+                        context=context)
+            if reg.invoice_id:
+                raise osv.except_osv(
+                    _('Invoice Already Generated!'),
+                    _("Please refer to the linked Tuition Invoice"))
+
+            line = {
+                'name': reg.tuition_fee_id.name,
+                'product_id': reg.tuition_fee_id.id,
+                'quantity': 1,
+                }
+            # run inv_line_obj's onchange to update
+            n = inv_line_obj.product_id_change(
+                cr,
+                uid,
+                ids,
+                reg.tuition_fee_id.id,
+                reg.tuition_fee_id.uom_id.id,
+                qty=1,
+                name='',
+                type='out_invoice',
+                partner_id=reg.student_id.billing_partner_id.id,
+                company_id=None,
+                context=None)['value']
+            line.update(n)
+
+            inv_line = (0, 0, line)
+
+            invoice = {
+                'type': 'out_invoice',
+                'name': " ".join([reg.student_id.name, "Tuition Fee"]),
+                'partner_id': reg.student_id.billing_partner_id.id,
+                'invoice_line': [inv_line],
+                }
+            # run inv_obj's onchange to update
+            n = inv_obj.onchange_partner_id(
+                cr,
+                uid,
+                ids,
+                'out_invoice',
+                reg.student_id.billing_partner_id.id,
+                date_invoice=False,
+                payment_term=False,
+                partner_bank_id=False,
+                company_id=False)['value']
+            invoice.update(n)
+
+            inv_id = inv_obj.create(cr, uid, invoice, context=ctx)
+            inv_obj.action_date_assign(cr,uid,[inv_id],context)
+            inv_obj.action_move_create(cr,uid,[inv_id],context=context)
+            inv_obj.action_number(cr,uid,[inv_id],context)
+            inv_obj.invoice_validate(cr,uid,[inv_id],context=context)
+
+            self.write(cr, uid, [reg.id], {'invoice_id': inv_id}, context=ctx)
+
+        return True
+
+    def cancel_invoice(self, cr, uid, ids, context=None):
+        inv_obj = self.pool.get('account.invoice')
+        reg_ids = [ reg.invoice_id.id for reg in self.browse(cr, uid, ids, context=context)
+                        if reg.invoice_id]
+        if reg_ids:
+            inv_obj.action_cancel(cr, uid, reg_ids, context)
+            inv_obj.action_cancel_draft(cr, uid, reg_ids, context)
+            try:
+                inv_obj.unlink(cr, uid, reg_ids, context=context)
+            except:
+                pass
+        return self.write( cr, uid, ids, {'invoice_id': None}, context=context)
+
 school_student_registration()
 
 class school_student(osv.osv):
@@ -249,5 +368,14 @@ class school_student(osv.osv):
                     view_id = result
         res = super(school_student, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
         return res
+
+    def student_cancel(self, cr, uid, ids, context=None):
+        reg_obj = self.pool.get('school.student.registration')
+        inv_obj = self.pool.get('account.invoice')
+        for student in self.browse(cr, uid, ids, context=context):
+            reg_ids = [ reg.id for reg in student.registration_ids]
+            if reg_ids:
+                reg_obj.cancel_invoice(cr, uid, reg_ids, context)
+        return super(school_student, self).student_cancel(cr, uid, ids, context=context)
 
 school_student()

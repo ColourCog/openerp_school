@@ -203,6 +203,7 @@
         <form string="Class" version="7.0">
           <sheet>
             <h1> <field name="name" class="oe_inline" readonly="1"/> </h1>
+            <field name="state" invisible="1"/>
             <group>
               <group>
                 <field name="year_id"/>
@@ -280,15 +281,35 @@
       <field name="model">school.student.registration</field>
       <field name="arch" type="xml">
         <form string="Registration" version="7.0">
+          <header>
+            <button name="generate_invoice" type="object" states="student"
+              string="Generate Invoice"
+              groups="account.group_account_user"/>
+            <button name="cancel_invoice" type="object" states="student"
+              string="Cancel Invoice"
+              groups="account.group_account_user"/>
+          </header>
           <sheet>
             <h1> <label string="No"/> <field name="name" class="oe_inline"/> </h1>
+            <field name="state" invisible="1"/>
+            <separator string="Registration Information"/>
             <group>
               <group>
-                <field name="student_id"/>
-                <field name="class_id"/>
+                <field name="student_id" context="{'stage':'enrolment'}"/>
+                <field name="class_id" on_change="onchange_class_id(class_id)"/>
               </group>
               <group>
                 <field name="user_id"/>
+              </group>
+            </group>
+            <separator string="Tuition Information"/>
+            <group>
+              <group>
+                <field name="invoice_id"/>
+                <field name="invoice_state"/>
+              </group>
+              <group>
+                <field name="tuition_fee_id"/>
               </group>
             </group>
           </sheet>
@@ -423,6 +444,7 @@
       <field name="arch" type="xml">
         <search string="Search Students">
           <field name="surname"/>
+          <field name="firstname"/>
           <separator/>
           <group expand="0" string="Group By..." >
             <filter string="Surname" domain="[]" context="{'group_by':'surname'}"/>

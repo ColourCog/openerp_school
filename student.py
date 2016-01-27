@@ -181,7 +181,8 @@ class school_student(osv.osv):
             'invoice_id',
             'state',
             type='char',
-            string="Invoice status"),
+            string="Invoice status",
+            readonly=True),
         'birth_certificate': fields.boolean(
             'Birth certificate ?',
             help="Check if birth certificate was provided."),
@@ -262,15 +263,15 @@ class school_student(osv.osv):
 
     def student_cancel(self, cr, uid, ids, context=None):
         inv_obj = self.pool.get('account.invoice')
-        voucher_obj = self.pool.get('account.voucher')
-        for student in self.browse(cr, uid, ids, context=context):
-            if student.invoice_id:
-                inv_obj.action_cancel(cr, uid, [student.invoice_id.id], context)
-                inv_obj.action_cancel_draft(cr, uid, [student.invoice_id.id], context)
-                try:
-                    inv_obj.unlink(cr, uid, [student.invoice_id.id], context=context)
-                except:
-                    pass
+        std_ids = [ student.invoice_id.id for student in self.browse(cr, uid, ids, context=context)
+                        if student.invoice_id]
+        if std_ids:
+            inv_obj.action_cancel(cr, uid, std_ids, context)
+            inv_obj.action_cancel_draft(cr, uid, std_ids, context)
+            try:
+                inv_obj.unlink(cr, uid, std_ids, context=context)
+            except:
+                pass
         return self.write(
             cr,
             uid,
@@ -282,11 +283,6 @@ class school_student(osv.osv):
         if not context:
             context = {}
         for student in self.browse(cr, uid, ids, context=context):
-            if not student.waive_fee:
-                if not student.reference:
-                    raise osv.except_osv(
-                        _('Payment Reference Missing!'),
-                        _("Cannot validate unpaid Enrolment fee"))
             if not student.birth_certificate:
                 raise osv.except_osv(
                     _('No Birth Certificate!'),
@@ -375,6 +371,12 @@ class school_student(osv.osv):
         dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'account_voucher', 'view_vendor_receipt_dialog_form')
 
         student = self.browse(cr, uid, ids[0], context=context)
+        if not student.waive_fee:
+            if not student.reference:
+                raise osv.except_osv(
+                    _('Payment Reference Missing!'),
+                    _("Cannot validate unpaid Enrolment fee"))
+
         if not student.invoice_id:
             raise osv.except_osv(
                 _('No Invoice!'),
