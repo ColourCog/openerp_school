@@ -12,4 +12,7 @@ access_school_academic_level,access_school_academic_level,model_school_academic_
 access_school_teacher,access_school_teacher,model_school_teacher,,1,1,1,1
 access_school_class,access_school_class,model_school_class,,1,1,1,1
 access_school_student_registration,access_school_student_registration,model_school_student_registration,,1,1,1,1
+access_school_checklist,access_school_checklist,model_school_checklist,,1,1,1,1
+access_school_checklist_item,access_school_checklist_item,model_school_checklist_item,,1,1,1,1
+access_school_student_checklist,access_school_student_checklist,model_school_student_checklist,,1,1,1,1
 

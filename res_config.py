@@ -7,7 +7,13 @@ class res_company(osv.osv):
     _columns = {
         'default_enrolment_fee_id': fields.many2one(
             'product.product',
-            'enrolment Fee'),
+            'Enrolment fee'),
+        'default_enrolment_checklist_id': fields.many2one(
+            'school.checklist',
+            'Enrolment Checklist'),
+        'default_registration_checklist_id': fields.many2one(
+            'school.checklist',
+            'Registration Checklist'),
     }
 
 res_company()
@@ -25,6 +31,18 @@ class school_config_settings(osv.osv_memory):
             type='many2one',
             relation='product.product',
             string="Enrolment Fee"),
+        'default_enrolment_checklist_id': fields.related(
+            'company_id',
+            'default_enrolment_checklist_id',
+            type='many2one',
+            relation='school.checklist',
+            string="Enrolment Checklist"),
+        'default_registration_checklist_id': fields.related(
+            'company_id',
+            'default_registration_checklist_id',
+            type='many2one',
+            relation='school.checklist',
+            string="Registration Checklist"),
     }
 
     def _default_company(self, cr, uid, context=None):
@@ -50,10 +68,14 @@ class school_config_settings(osv.osv_memory):
         # update related fields
         values = {
             'default_enrolment_fee_id': False,
+            'default_enrolment_checklist_id': False,
+            'default_registration_checklist_id': False,
         }
         if company_id:
             company = self.pool.get('res.company').browse(cr, uid, company_id, context=context)
             values.update({
                 'default_enrolment_fee_id': company.default_enrolment_fee_id and company.default_enrolment_fee_id.id or False,
+                'default_enrolment_checklist_id': company.default_enrolment_checklist_id and company.default_enrolment_checklist_id.id or False,
+                'default_registration_checklist_id': company.default_registration_checklist_id and company.default_registration_checklist_id.id or False,
             })
         return {'value': values}

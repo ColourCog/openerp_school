@@ -382,7 +382,7 @@
             </field>
           </page>
         </xpath>
-        <xpath expr="//button[@name='student_suspend']" position="after">
+        <xpath expr="//button[@name='validate']" position="after">
           <button name="%(action_school_student_registration_pop)d"
             string="Register"
             context="{'student_id':active_id}"

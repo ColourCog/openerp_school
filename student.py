@@ -13,100 +13,35 @@ from openerp.osv import fields, osv
 from openerp.tools.translate import _
 from openerp import netsvc
 from openerp import pooler
+from tools import resolve_id_from_context
 _logger = logging.getLogger(__name__)
 
-class school_school(osv.osv):
-    _name = 'school.school'
-    _description = 'School'
+class school_student_checklist(osv.osv):
+    _name = 'school.student.checklist'
+
+    def _default_student_id(self, cr, uid, context=None):
+        return resolve_id_from_context('student_id', context)
 
     _columns = {
-        'name': fields.char('Name', size=255, required=True),
-        'street': fields.char('Street', size=128),
-        'street2': fields.char('Street2', size=128),
-        'zip': fields.char('Zip', change_default=True, size=24),
-        'city': fields.char('City', size=128),
-        'state_id': fields.many2one("res.country.state", 'State'),
-        'country_id': fields.many2one('res.country', 'Country'),
-        'email': fields.char('Email', size=240),
-        'phone': fields.char('Phone', size=64),
-        'fax': fields.char('Fax', size=64),
-        'website': fields.char('Website', size=64, help="School website"),
-    }
-
-school_school()
-
-
-class school_religion(osv.osv):
-    _name = 'school.religion'
-
-    _columns = {
-        'name': fields.char('Religion', size=255),
-    }
-
-school_religion()
-
-
-class school_language(osv.osv):
-    _name = 'school.language'
-
-    _columns = {
-        'name': fields.char('Language', size=255),
-    }
-
-school_language()
-
-
-class school_student_education(osv.osv):
-    _name = 'school.student.education'
-
-    _columns = {
-        'name': fields.related(
-            'school_id',
-            'name',
-            type='char',
-            relation='school.school',
-            string="School Name"),
         'student_id': fields.many2one(
             'school.student',
             'Student',
             required=True,
             ondelete='cascade'),
-        'school_id': fields.many2one('school.school', 'Previous School', required=True),
-        'date_from': fields.date('From'),
-        'date_to': fields.date('To'),
-
+        'item_id': fields.many2one('school.checklist.item', 'Required', required=True),
+        'done': fields.boolean('Done'),
+    }
+    _defaults = {
+        'student_id':_default_student_id,
     }
 
-school_student_education()
-
-
-class school_student_relative(osv.osv):
-    _name = 'school.student.relative'
-
-    _columns = {
-        'student_id': fields.many2one('school.student', 'Student', required=True),
-        'partner_id': fields.many2one(
-            'res.partner',
-            'Relative',
-            required=True,
-            domain=[('customer','=',True)]),
-        'relationship': fields.selection([
-            ('father', 'Father'),
-            ('mother', 'Mother'),
-            ('guardian', 'Guardian')],
-            'Relationship to student'),
-
-    }
-    _sql_constraints = [(
-        'student_relative_unique',
-        'unique (student_id, partner_id)',
-        'Relationship must be unique per Student !'),
-    ]
-
-school_student_relative()
-
+school_student_checklist()
 
 class school_student(osv.osv):
+    # Enrolment is a financial/administrative concept
+    # We should split the financial side out to another module
+    # maybe school.student.enrolment
+
     _name = 'school.student'
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     _description = 'Student'
@@ -122,6 +57,25 @@ class school_student(osv.osv):
         if user.company_id.default_enrolment_fee_id:
             return user.company_id.default_enrolment_fee_id.id
         return False
+
+    def _default_enrolment_checklist(self, cr, uid, context=None):
+        user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+        if user.company_id.default_enrolment_checklist_id:
+            return user.company_id.default_enrolment_checklist_id.id
+        return False
+
+    def onchange_checklist_id(self, cr, uid, ids, checklist_id,
+                        context=None):
+        chkitem_obj = self.pool.get('school.checklist.item')
+        chk_ids = []
+        if checklist_id:
+            item_ids = chkitem_obj.search(
+                cr,
+                uid,
+                [('checklist_id','=', checklist_id)],
+                context=context)
+            chk_ids = [{'item_id': i} for i in item_ids]
+        return {'value': {'checklist_ids': chk_ids}}
 
     _columns = {
         'name': fields.char('Student Name', size=255, select=True, readonly=True),
@@ -164,34 +118,47 @@ class school_student(osv.osv):
             'Bill to',
             required=True,
             domain=[('customer','=',True)]),
+        #financial
         'enrolment_fee_id': fields.many2one('product.product', 'Enrolment Fee', required=True),
+        # financial
         'waive_fee': fields.boolean(
             'Waive Fee ?',
             help="Allow the Enrolment to proceed without paying the fee."),
+        #financial
         'reference': fields.char(
             'Payment reference',
             size=64,
             help="Check number, or short memo"),
+        #financial
         'invoice_id': fields.many2one(
             'account.invoice',
             'Enrolment Invoice',
             readonly=True,
             ),
+        #financial
         'invoice_state': fields.related(
             'invoice_id',
             'state',
             type='char',
             string="Invoice status",
             readonly=True),
+        # requirement
         'birth_certificate': fields.boolean(
             'Birth certificate ?',
             help="Check if birth certificate was provided."),
+        # requirement
         'vaccination': fields.boolean(
             'Vaccination card ?',
             help="Check if vaccination card was provided."),
+        # requirement
         'education_report': fields.boolean(
             'Previous school reports ?',
             help="Check if last school's reports were provided."),
+        'enrolment_checklist_id': fields.many2one('school.checklist', 'Checklist'),
+        'checklist_ids': fields.one2many(
+            'school.student.checklist',
+            'student_id',
+            'Checklist Items'),
         'user_id': fields.many2one('res.users', 'Created By', required=True),
         'user_valid': fields.many2one(
             'res.users',
@@ -213,6 +180,7 @@ class school_student(osv.osv):
 
     _defaults = {
         'enrolment_fee_id': _default_enrolment_fee,
+        'enrolment_checklist_id': _default_enrolment_checklist,
         'date': fields.date.context_today,
         'state': 'draft',
         'user_id': lambda cr, uid, id, c={}: id,
@@ -245,6 +213,7 @@ class school_student(osv.osv):
                 'user_valid': uid},
             context=context)
 
+    # custom
     def student_suspend(self, cr, uid, ids, context=None):
         return self.write(
             cr,
@@ -253,6 +222,7 @@ class school_student(osv.osv):
             {'state': 'suspend'},
             context=context)
 
+    # custom
     def student_resume(self, cr, uid, ids, context=None):
         return self.write(
             cr,
@@ -283,18 +253,11 @@ class school_student(osv.osv):
         if not context:
             context = {}
         for student in self.browse(cr, uid, ids, context=context):
-            if not student.birth_certificate:
-                raise osv.except_osv(
-                    _('No Birth Certificate!'),
-                    _('Birth Certificate must have been provided'))
-            if not student.vaccination:
-                raise osv.except_osv(
-                    _('No Vaccination!'),
-                    _('Proof of Vaccination must have been provided'))
-            if not student.education_report:
-                raise osv.except_osv(
-                    _('No School Report!'),
-                    _('Previous School reports must have been provided'))
+            for check in student.checklist_ids:
+                if not check.done:
+                    raise osv.except_osv(
+                        _('Validation error!'),
+                        _("Please verify '%s'" % check.item_id.name))
 
     def generate_invoice(self, cr, uid, ids, context):
         if not context:

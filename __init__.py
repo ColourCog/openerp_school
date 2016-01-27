@@ -1,4 +1,5 @@
+import general
 import student
 import health
-import res_config
 import registration
+import res_config

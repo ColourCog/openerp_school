@@ -8,6 +8,7 @@ from openerp.osv import fields, osv
 from openerp.tools.translate import _
 from openerp import netsvc
 from openerp import pooler
+from tools import resolve_id_from_context
 _logger = logging.getLogger(__name__)
 
 class school_academic_year(osv.osv):
@@ -148,13 +149,11 @@ class school_student_registration(osv.osv):
     _name = 'school.student.registration'
     _description = 'Student Registration'
 
-    def _get_student(self, cr, uid, context=None):
-        if context is None: context = {}
-        return context.get('student_id', False)
+    def _default_student_id(self, cr, uid, context=None):
+        return resolve_id_from_context('student_id', context)
 
-    def _get_class(self, cr, uid, context=None):
-        if context is None: context = {}
-        return context.get('class_id', False)
+    def _default_class_id(self, cr, uid, context=None):
+        return resolve_id_from_context('class_id', context)
 
     def onchange_class_id(self, cr, uid, ids, class_id,
                         context=None):
@@ -167,7 +166,7 @@ class school_student_registration(osv.osv):
                 class_id,
                 context=context)
             prod_id = sclass.level_id.tuition_fee_id.id
-            return {'value': {'tuition_fee_id': prod_id}}
+        return {'value': {'tuition_fee_id': prod_id}}
 
     _columns = {
         'name': fields.char('Registration No', size=255, required=True,),
@@ -211,8 +210,8 @@ class school_student_registration(osv.osv):
     }
     _defaults = {
         'name': "/",
-        'student_id': _get_student,
-        'class_id': _get_class,
+        'student_id': _default_student_id,
+        'class_id': _default_class_id,
         'user_id': lambda cr, uid, id, c={}: id,
     }
     _sql_constraints = [(

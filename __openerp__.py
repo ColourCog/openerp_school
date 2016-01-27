@@ -28,6 +28,7 @@ Features:
       "security/ir_rule.xml",
       "security/ir.model.access.csv",
       'top_menu.xml',
+      'general_view.xml',
       'student_view.xml',
       'student_workflow.xml',
       'student_data.xml',
