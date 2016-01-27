@@ -121,7 +121,11 @@
       </field>
     </record>
 
-    <menuitem action="action_school_academic_level_form" id="menu_school_academic_level" parent="menu_school_configuration" sequence="2" />
+    <menuitem action="action_school_academic_level_form"
+      id="menu_school_academic_level"
+      groups="school.group_school_headteacher"
+      parent="menu_school_configuration"
+      sequence="2" />
 
 
     <!-- Teacher -->
@@ -174,7 +178,11 @@
       </field>
     </record>
 
-    <menuitem action="action_school_teacher_form" id="menu_school_teacher" parent="menu_school_configuration" sequence="3" />
+    <menuitem action="action_school_teacher_form"
+      id="menu_school_teacher"
+      groups="school.group_school_headteacher"
+      parent="menu_school_configuration"
+      sequence="3" />
 
     <!-- Class -->
     <record id="view_school_class_tree" model="ir.ui.view">
@@ -248,7 +256,10 @@
       </field>
     </record>
 
-    <menuitem action="action_school_class_form" id="menu_school_class" parent="menu_school_academic" sequence="1" />
+    <menuitem action="action_school_class_form" id="menu_school_class"
+      parent="menu_school_academic"
+      groups="school.group_school_headteacher"
+      sequence="1" />
 
     <!-- Student Registration -->
     <record id="view_school_student_registration_tree" model="ir.ui.view">
@@ -314,7 +325,10 @@
       </field>
     </record>
 
-    <menuitem action="action_school_student_registration_form" id="menu_school_student_registration" parent="menu_school_academic" sequence="2" />
+    <menuitem action="action_school_student_registration_form"
+      id="menu_school_student_registration"
+      groups="school.group_school_headteacher"
+      parent="menu_school_student_root" sequence="2" />
 
     <record id="action_school_student_registration_pop" model="ir.actions.act_window">
       <field name="name">Register Student</field>

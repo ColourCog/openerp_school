@@ -19,6 +19,7 @@
         <menuitem
             id="menu_school_configuration"
             name="Configuration"
+            groups="school.group_school_manager"
             parent="menu_school_root"
             sequence="3"/>
     </data>
