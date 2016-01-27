@@ -7,24 +7,19 @@
             id="menu_school_root"
             sequence="90"/>
         <menuitem
-            id="menu_school_student_root"
-            name="Students"
+            id="menu_school_academic"
+            name="Academic"
             parent="menu_school_root"
             sequence="1"/>
         <menuitem
-            id="menu_school_academic"
-            name="Academic"
+            id="menu_school_student_root"
+            name="Admission"
             parent="menu_school_root"
             sequence="2"/>
-        <menuitem
-            id="menu_school_academic"
-            name="Academic"
-            parent="menu_school_root"
-            sequence="3"/>
         <menuitem
             id="menu_school_configuration"
             name="Configuration"
             parent="menu_school_root"
-            sequence="4"/>
+            sequence="3"/>
     </data>
 </openerp>

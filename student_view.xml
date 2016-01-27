@@ -1,169 +1,6 @@
 <openerp>
   <data noupdate="0">
 
-    <!-- Enrolment / Student -->
-    <record id="view_school_student_tree" model="ir.ui.view">
-      <field name="name">school.student.tree</field>
-      <field name="model">school.student</field>
-      <field name="arch" type="xml">
-        <tree string="Students" colors="red:state=='cancel';grey:state=='suspend'">
-          <field name="surname"/>
-          <field name="firstname"/>
-          <field name="state"/>
-        </tree>
-      </field>
-    </record>
-
-    <record id="view_school_student_form" model="ir.ui.view">
-      <field name="name">school.student.form</field>
-      <field name="model">school.student</field>
-      <field name="arch" type="xml">
-        <form string="Students" version="7.0">
-          <header>
-            <button name="student_draft" states="cancel" string="Set to Draft" type="object" />
-            <button name="validate" states="draft" string="Validate" class="oe_highlight" groups="school.group_school_headteacher"/>
-            <button name="generate_invoice" type="object" states="student" string="Generate Invoice" groups="account.group_account_user"/>
-            <button name="pay_invoice" type="object" states="student" string="Pay Invoice" groups="account.group_account_user"/>
-            <button name="student_suspend" type="object" states="student" string="Deactivate" groups="school.group_school_manager"/>
-            <button name="student_resume" type="object" states="suspend" string="Activate" groups="school.group_school_manager"/>
-            <button name="cancel" states="student" string="Cancel" groups="school.group_school_manager"/>
-            <field name="state" widget="statusbar" statusbar_visible="draft,student" statusbar_colors='{"student":"red"}'/>
-          </header>
-          <sheet>
-            <separator string="Student Information"/>
-            <group>
-              <group>
-                <field name="surname"/>
-                <field name="firstname"/>
-                <field name="gender"/>
-                <field name="birthday"/>
-              </group>
-              <group>
-                <field name="birthplace"/>
-                <field name="nationality_id"/>
-                <field name="language_id"/>
-                <field name="religion_id"/>
-              </group>
-            </group>
-            <separator string="Enrolment Requisits"/>
-            <group>
-              <group>
-                <field name="billing_partner_id"/>
-                <field name="enrolment_fee_id"/>
-                <field name="reference"/>
-                <field name="invoice_id"/>
-                <field name="invoice_state"/>
-              </group>
-              <group>
-                <field name="waive_fee" groups="school.group_school_manager"/>
-                <field name="birth_certificate"/>
-                <field name="vaccination"/>
-                <field name="education_report"/>
-              </group>
-            </group>
-            <group>
-              <group>
-                <field name="date"/>
-                <field name="user_id"/>
-              </group>
-              <group>
-                <field name="date_valid"/>
-                <field name="user_valid"/>
-              </group>
-            </group>
-            <notebook name="details">
-              <page string="Education">
-                <field name="previous_ids" context="{'default_student_id': active_id}">
-                  <tree string="Previous schools">
-                    <field name="school_id"/>
-                    <field name="date_from"/>
-                    <field name="date_to"/>
-                  </tree>
-                </field>
-              </page>
-              <page string="Additional">
-                <group>
-                  <field name="language_ids"/>
-                </group>
-                <group>
-                  <field name="nationality_ids" context="{'default_student_id': active_id}"/>
-                </group>
-              </page>
-              <page string="Relatives">
-                <field name="relative_ids" context="{'default_student_id': active_id}">
-                  <tree string="Relatives">
-                    <field name="student_id" invisible="1"/>
-                    <field name="partner_id"/>
-                    <field name="relationship"/>
-                  </tree>
-                </field>
-              </page>
-            </notebook>
-          </sheet>
-        <div class="oe_chatter">
-            <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
-            <field name="message_ids" widget="mail_thread"/>
-        </div>
-        </form>
-      </field>
-    </record>
-
-    <record id="view_school_student_filter" model="ir.ui.view">
-      <field name="name">school.student.filter</field>
-      <field name="model">school.student</field>
-      <field name="arch" type="xml">
-        <search string="Search Students">
-          <field name="surname"/>
-          <separator/>
-          <filter string="Enrolments" domain="[('state','=','draft')]"/>
-          <filter string="Students" domain="[('state','=','student')]" />
-          <group expand="0" string="Group By..." >
-            <filter string="Surname" domain="[]" context="{'group_by':'surname'}"/>
-            <filter string="Status" domain="[]" context="{'group_by':'state'}"/>
-          </group>
-        </search>
-      </field>
-    </record>
-
-    <record id="action_school_enrolment_form" model="ir.actions.act_window">
-      <field name="name">Enrolments</field>
-      <field name="type">ir.actions.act_window</field>
-      <field name="res_model">school.student</field>
-      <field name="view_type">form</field>
-      <field name="view_mode">tree,form</field>
-      <field name="context">{}</field>
-      <field name="domain">[('state','in',['draft','cancel'])]</field>
-      <field name="search_view_id" ref="view_school_student_filter"/>
-      <field name="help" type="html">
-        <p class="oe_view_nocontent_create">
-          Click to create a new Enrolment.
-        </p><p>
-          A validated enrolment becomes a Student.
-        </p>
-      </field>
-    </record>
-
-    <record id="action_school_student_form" model="ir.actions.act_window">
-      <field name="name">Students</field>
-      <field name="type">ir.actions.act_window</field>
-      <field name="res_model">school.student</field>
-      <field name="view_type">form</field>
-      <field name="view_mode">tree,form</field>
-      <field name="context">{}</field>
-      <field name="domain">[('state','not in',['draft','cancel'])]</field>
-      <field name="search_view_id" ref="view_school_student_filter"/>
-      <field name="help" type="html">
-        <p class="oe_view_nocontent_create">
-          Click to create a new Enrolment.
-        </p><p>
-          A validated enrolment becomes a Student.
-        </p>
-      </field>
-    </record>
-
-    <menuitem action="action_school_enrolment_form" id="menu_school_enrolment" parent="menu_school_student_root" sequence="1" />
-    <menuitem action="action_school_student_form" id="menu_school_student" parent="menu_school_student_root" sequence="2" />
-
     <!-- Education / Previous school -->
     <record id="view_school_student_education_tree" model="ir.ui.view">
       <field name="name">school.student.education.tree</field>
@@ -197,7 +34,7 @@
       <field name="name">school.student.education.form</field>
       <field name="model">school.student.education</field>
       <field name="arch" type="xml">
-        <form string="Student Education" version="7.0">
+        <form string="Previous Education" version="7.0">
           <sheet>
             <group>
               <group>
@@ -215,7 +52,7 @@
     </record>
 
     <record id="action_school_student_education_form" model="ir.actions.act_window">
-      <field name="name">Student Education</field>
+      <field name="name">Previous Education</field>
       <field name="type">ir.actions.act_window</field>
       <field name="res_model">school.student.education</field>
       <field name="view_type">form</field>
@@ -300,6 +137,168 @@
     </record>
 
     <menuitem action="action_school_school_form" id="menu_school_school" parent="menu_school_configuration" sequence="10" />
+
+
+    <!-- Enrolment / Student -->
+    <record id="view_school_enrolment_tree" model="ir.ui.view">
+      <field name="name">school.student.tree</field>
+      <field name="model">school.student</field>
+      <field name="arch" type="xml">
+        <tree string="Students" colors="green:state=='student';grey:state=='suspend'">
+          <field name="surname"/>
+          <field name="firstname"/>
+          <field name="state"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_school_enrolment_form" model="ir.ui.view">
+      <field name="name">school.student.form</field>
+      <field name="model">school.student</field>
+      <field name="arch" type="xml">
+        <form string="Students" version="7.0">
+          <header>
+            <button name="student_draft" states="cancel" string="Set to Draft" type="object" />
+            <button name="validate" states="draft" string="Validate" class="oe_highlight" groups="school.group_school_headteacher"/>
+            <button name="generate_invoice" type="object" states="student"
+              string="Generate Invoice"
+              groups="account.group_account_user"
+              attrs="{'invisible':[('waive_fee','=',True)]}"/>
+            <button name="pay_invoice" type="object" states="student"
+              string="Pay Invoice"
+              groups="account.group_account_user"
+              attrs="{'invisible':[('waive_fee','=',True)]}"/>
+            <button name="student_suspend" type="object" states="student"
+              string="Deactivate" groups="school.group_school_manager"/>
+            <button name="student_resume" type="object" states="suspend" string="Activate" groups="school.group_school_manager"/>
+            <button name="cancel" states="student" string="Cancel" groups="school.group_school_manager"/>
+            <field name="state" widget="statusbar" statusbar_visible="draft,student" statusbar_colors='{"student":"red"}'/>
+          </header>
+          <sheet>
+            <separator string="Student Information"/>
+            <group>
+              <group>
+                <field name="surname"/>
+                <field name="firstname"/>
+                <field name="gender"/>
+                <field name="birthday"/>
+              </group>
+              <group>
+                <field name="birthplace"/>
+                <field name="nationality_id"/>
+                <field name="language_id"/>
+                <field name="religion_id"/>
+              </group>
+            </group>
+            <separator string="Enrolment Requisits"/>
+            <group>
+              <group>
+                <field name="billing_partner_id"/>
+                <field name="enrolment_fee_id"/>
+                <field name="reference"/>
+                <field name="invoice_id"/>
+                <field name="invoice_state"/>
+              </group>
+              <group>
+                <field name="waive_fee" groups="school.group_school_manager"/>
+                <field name="birth_certificate"/>
+                <field name="vaccination"/>
+                <field name="education_report"/>
+              </group>
+            </group>
+            <group>
+              <group>
+                <field name="date"/>
+                <field name="user_id"/>
+              </group>
+              <group>
+                <field name="date_valid"/>
+                <field name="user_valid"/>
+              </group>
+            </group>
+            <notebook name="details">
+              <page string="Education">
+                <field name="previous_ids" context="{'default_student_id': active_id}">
+                  <tree string="Previous schools">
+                    <field name="school_id"/>
+                    <field name="date_from"/>
+                    <field name="date_to"/>
+                  </tree>
+                </field>
+              </page>
+              <page string="Additional">
+                <group>
+                  <field name="language_ids"/>
+                </group>
+                <group>
+                  <field name="nationality_ids" context="{'default_student_id': active_id}"/>
+                </group>
+              </page>
+              <page string="Relatives">
+                <field name="relative_ids" context="{'default_student_id': active_id}">
+                  <tree string="Relatives">
+                    <field name="student_id" invisible="1"/>
+                    <field name="partner_id"/>
+                    <field name="relationship"/>
+                  </tree>
+                </field>
+              </page>
+            </notebook>
+          </sheet>
+        <div class="oe_chatter">
+            <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
+            <field name="message_ids" widget="mail_thread"/>
+        </div>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_school_enrolment_filter" model="ir.ui.view">
+      <field name="name">school.student.filter</field>
+      <field name="model">school.student</field>
+      <field name="arch" type="xml">
+        <search string="Search Students">
+          <field name="surname"/>
+          <separator/>
+          <filter string="Enrolments" domain="[('state','=','draft')]"/>
+          <filter string="Students" domain="[('state','=','student')]" />
+          <group expand="0" string="Group By..." >
+            <filter string="Surname" domain="[]" context="{'group_by':'surname'}"/>
+            <filter string="Status" domain="[]" context="{'group_by':'state'}"/>
+          </group>
+        </search>
+      </field>
+    </record>
+
+    <record id="action_school_enrolment" model="ir.actions.act_window">
+      <field name="name">Enrolments</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.student</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="view_id" ref="view_school_enrolment_tree"/>
+      <field name="search_view_id" ref="view_school_enrolment_filter"/>
+    </record>
+
+    <record id="action_school_enrolment_live" model="ir.actions.act_window">
+      <field name="name">Enrolments</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.student</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field eval="False" name="view_id"/>
+      <field name="context">{'stage':'enrolment'}</field>
+      <field name="search_view_id" ref="view_school_enrolment_filter"/>
+      <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+          Click to create a new Enrolment.
+        </p><p>
+          A validated enrolment becomes a Student.
+        </p>
+      </field>
+    </record>
+
+    <menuitem action="action_school_enrolment_live" id="menu_school_enrolment" parent="menu_school_student_root" sequence="1" />
 
   </data>
 </openerp>

@@ -410,4 +410,17 @@ class school_student(osv.osv):
             }
         }
 
+    def fields_view_get(self, cr, uid, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
+        mod_obj = self.pool.get('ir.model.data')
+        if context is None: context = {}
+
+        if view_type == 'form':
+            if not view_id and context.get('stage'):
+                if context.get('stage') == 'enrolment':
+                    result = mod_obj.get_object_reference(cr, uid, 'school', 'view_school_enrolment_form')
+                    result = result and result[1] or False
+                    view_id = result
+        res = super(school_student, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
+        return res
+
 school_student()
