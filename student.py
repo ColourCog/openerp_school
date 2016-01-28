@@ -37,6 +37,7 @@ class school_student_checklist(osv.osv):
 
 school_student_checklist()
 
+
 class school_student(osv.osv):
     # Enrolment is a financial/administrative concept
     # We should split the financial side out to another module
@@ -122,7 +123,7 @@ class school_student(osv.osv):
         'enrolment_fee_id': fields.many2one('product.product', 'Enrolment Fee', required=True),
         # financial
         'waive_fee': fields.boolean(
-            'Waive Fee ?',
+            'Waive enrolment fee',
             help="Allow the Enrolment to proceed without paying the fee."),
         #financial
         'reference': fields.char(
@@ -142,19 +143,11 @@ class school_student(osv.osv):
             type='char',
             string="Invoice status",
             readonly=True),
-        # requirement
-        'birth_certificate': fields.boolean(
-            'Birth certificate ?',
-            help="Check if birth certificate was provided."),
-        # requirement
-        'vaccination': fields.boolean(
-            'Vaccination card ?',
-            help="Check if vaccination card was provided."),
-        # requirement
-        'education_report': fields.boolean(
-            'Previous school reports ?',
-            help="Check if last school's reports were provided."),
-        'enrolment_checklist_id': fields.many2one('school.checklist', 'Checklist'),
+        'enrolment_checklist_id': fields.many2one(
+            'school.checklist',
+            'Checklist',
+            readonly=True,
+            states={'draft': [('readonly', False)]}),
         'checklist_ids': fields.one2many(
             'school.student.checklist',
             'student_id',

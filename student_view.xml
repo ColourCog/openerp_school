@@ -56,24 +56,14 @@
             <group>
               <group>
                 <field name="billing_partner_id"/>
-                <field name="enrolment_fee_id"/>
                 <field name="reference"/>
                 <field name="invoice_id"/>
                 <field name="invoice_state"/>
               </group>
               <group>
                 <field name="waive_fee" groups="school.group_school_manager"/>
+                <field name="enrolment_fee_id"/>
                 <field name="enrolment_checklist_id" on_change="onchange_checklist_id(enrolment_checklist_id)"/>
-              </group>
-            </group>
-            <group>
-              <group>
-                <field name="date"/>
-                <field name="user_id"/>
-              </group>
-              <group>
-                <field name="date_valid"/>
-                <field name="user_valid"/>
               </group>
             </group>
             <notebook name="details">
@@ -94,13 +84,11 @@
                   </tree>
                 </field>
               </page>
-              <page string="Additional">
-                <group>
-                  <field name="language_ids"/>
-                </group>
-                <group>
-                  <field name="nationality_ids" context="{'default_student_id': active_id}"/>
-                </group>
+              <page string="Languages">
+                <field name="language_ids"/>
+              </page>
+              <page string="Nationalities">
+                <field name="nationality_ids" context="{'default_student_id': active_id}"/>
               </page>
               <page string="Relatives">
                 <field name="relative_ids" context="{'default_student_id': active_id}">
@@ -110,6 +98,18 @@
                     <field name="relationship"/>
                   </tree>
                 </field>
+              </page>
+              <page string="Misc">
+                <group>
+                  <group>
+                    <field name="date"/>
+                    <field name="user_id"/>
+                  </group>
+                  <group>
+                    <field name="date_valid"/>
+                    <field name="user_valid"/>
+                  </group>
+                </group>
               </page>
             </notebook>
           </sheet>

@@ -184,7 +184,7 @@
     </record>
 
     <record id="action_school_school_form" model="ir.actions.act_window">
-      <field name="name">Previous Schools</field>
+      <field name="name">Other Schools</field>
       <field name="type">ir.actions.act_window</field>
       <field name="res_model">school.school</field>
       <field name="view_type">form</field>

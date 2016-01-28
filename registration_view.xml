@@ -369,7 +369,7 @@
       <field name="inherit_id" ref="school.view_school_enrolment_form"/>
       <field name="arch" type="xml">
         <xpath expr="//field[@name='user_id']" position="after">
-          <field name="current_class_id" />
+          <field name="current_class_id" invisible="1"/>
         </xpath>
         <xpath expr="//page[@string='Relatives']" position="after">
           <page string="Registrations">
