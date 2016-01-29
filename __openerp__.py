@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name" : "School Management",
-    "version" : "0.1",
+    "version" : "0.2",
     "category" : "Accounting",
     "sequence": 60,
     "complexity" : "normal",
@@ -23,6 +23,7 @@ Features:
 * Student database
 * Enrolment process
 * Registration process
+* automatic invoice generation
     """,
     "data" : [
       "security/ir_rule.xml",
