@@ -1,0 +1,135 @@
+<openerp>
+  <data noupdate="0">
+
+    <!-- Subjects -->
+    <record id="view_school_subject_tree" model="ir.ui.view">
+      <field name="name">school.subject.tree</field>
+      <field name="model">school.subject</field>
+      <field name="arch" type="xml">
+        <tree string="Subject">
+          <field name="name"/>
+          <field name="grading_method"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_school_subject_form" model="ir.ui.view">
+      <field name="name">school.subject.form</field>
+      <field name="model">school.subject</field>
+      <field name="arch" type="xml">
+        <form string="Subject" version="7.0">
+          <sheet>
+            <group>
+              <field name="name"/>
+            </group>
+            <group>
+              <field name="grading_method"/>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_school_subject_filter" model="ir.ui.view">
+      <field name="name">school.subject.filter</field>
+      <field name="model">school.subject</field>
+      <field name="arch" type="xml">
+        <search string="Search Subjects">
+          <field name="name"/>
+        </search>
+      </field>
+    </record>
+
+    <record id="action_school_subject_form" model="ir.actions.act_window">
+      <field name="name">Subjects</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.subject</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="context">{}</field>
+      <field name="search_view_id" ref="view_school_subject_filter"/>
+      <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+          Click to create a new Subject.
+        </p>
+      </field>
+    </record>
+
+    <menuitem action="action_school_subject_form" id="menu_school_subject" parent="menu_school_configuration" sequence="7" />
+
+    <!-- Teacher subjects-->
+    <record id="view_school_teacher_subject_form" model="ir.ui.view">
+      <field name="name">school.teacher.form.grading.inherit</field>
+      <field name="model">school.teacher</field>
+      <field name="inherit_id" ref="school.view_school_teacher_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//group[@name='identity']" position="after">
+          <notebook name="details">
+            <page string="Subjects">
+              <field name="subject_ids"/>
+            </page>
+          </notebook>
+        </xpath>
+      </field>
+    </record>
+
+
+    <!-- Grades -->
+    <record id="view_school_grade_form" model="ir.ui.view">
+      <field name="name">school.grade.form</field>
+      <field name="model">school.grade</field>
+      <field name="arch" type="xml">
+        <form string="Grade" version="7.0">
+          <sheet>
+            <field name="name" invisible="1"/>
+            <group>
+              <group>
+                <field name="registration_id"/>
+                <field name="subject_id" on_change="onchange_subject_id(subject_id)" />
+              </group>
+              <group>
+                <field name="date"/>
+                <field name="teacher_id"/>
+              </group>
+            </group>
+            <separator string="Grading" />
+            <group attrs="{'invisible': [('grading_method','=',False)]}">
+              <group>
+                <field name="grading_method"/>
+              </group>
+              <group>
+                <field name="alpha_val" attrs="{'invisible': [('grading_method','=','numeric')]}"/>
+                <span attrs="{'invisible': [('grading_method','=','alpha')]}">
+                  <field name="numeric_val" class="oe_inline"/>
+                  <label string="/"/>
+                  <field name="numeric_ceil" class="oe_inline"/>
+                </span>
+              </group>
+            </group>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <!-- Student Grades -->
+    <record id="view_school_student_grades_form" model="ir.ui.view">
+      <field name="name">school.registration.form.grading.inherit</field>
+      <field name="model">school.registration</field>
+      <field name="inherit_id" ref="school.view_school_student_registered_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//notebook[@name='academics']" position="inside">
+            <page string="Grades">
+              <field name="grade_ids" context="{'default_registration_id': active_id, 'registration_id': active_id}">
+                <tree>
+                  <field name="subject_id"/>
+                  <field name="date"/>
+                  <field name="value"/>
+                </tree>
+              </field>
+            </page>
+        </xpath>
+      </field>
+    </record>
+
+  </data>
+</openerp>
