@@ -10,20 +10,20 @@
             <field name="on_create">True</field>
         </record>
 
-        <record id="act_draft" model="workflow.activity">
+        <record id="std_draft" model="workflow.activity">
             <field name="wkf_id" ref="wkf_students"/>
             <field name="name">draft</field>
             <field name="flow_start">True</field>
         </record>
 
-        <record id="act_student" model="workflow.activity">
+        <record id="std_student" model="workflow.activity">
             <field name="wkf_id" ref="wkf_students"/>
             <field name="name">validate</field>
             <field name="kind">function</field>
             <field name="action">student_validate()</field>
         </record>
 
-        <record id="act_cancel" model="workflow.activity">
+        <record id="std_cancel" model="workflow.activity">
             <field name="wkf_id" ref="wkf_students"/>
             <field name="name">cancel</field>
             <field name="kind">function</field>
@@ -32,16 +32,16 @@
         </record>
 
         <!-- Transitions -->
-        <record id="t1" model="workflow.transition">
-            <field name="act_from" ref="act_draft"/>
-            <field name="act_to" ref="act_student"/>
+        <record id="std_t1" model="workflow.transition">
+            <field name="act_from" ref="std_draft"/>
+            <field name="act_to" ref="std_student"/>
             <field name="signal">validate</field>
         </record>
 
 
-        <record id="t2" model="workflow.transition">
-            <field name="act_from" ref="act_student"/>
-            <field name="act_to" ref="act_cancel"/>
+        <record id="std_t2" model="workflow.transition">
+            <field name="act_from" ref="std_student"/>
+            <field name="act_to" ref="std_cancel"/>
             <field name="signal">cancel</field>
         </record>
 

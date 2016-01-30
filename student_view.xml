@@ -34,7 +34,7 @@
               string="Deactivate" groups="school.group_school_manager"/>
             <button name="student_resume" type="object" states="suspend" string="Activate" groups="school.group_school_manager"/>
             <button name="cancel" states="student" string="Cancel" groups="school.group_school_manager"/>
-            <field name="state" widget="statusbar" statusbar_visible="draft,student" statusbar_colors='{"student":"red"}'/>
+            <field name="state" widget="statusbar" statusbar_visible="draft,student" statusbar_colors='{"cancel":"red"}'/>
           </header>
           <sheet>
             <separator string="Student Information"/>
@@ -63,7 +63,7 @@
               <group>
                 <field name="waive_fee" groups="school.group_school_manager"/>
                 <field name="enrolment_fee_id"/>
-                <field name="enrolment_checklist_id" on_change="onchange_checklist_id(enrolment_checklist_id)"/>
+                <field name="enrolement_checklist_id" on_change="onchange_checklist_id(enrolement_checklist_id)"/>
               </group>
             </group>
             <notebook name="details">
@@ -113,10 +113,10 @@
               </page>
             </notebook>
           </sheet>
-        <div class="oe_chatter">
+          <div class="oe_chatter">
             <field name="message_follower_ids" widget="mail_followers" groups="base.group_user"/>
             <field name="message_ids" widget="mail_thread"/>
-        </div>
+          </div>
         </form>
       </field>
     </record>
@@ -138,24 +138,13 @@
       </field>
     </record>
 
-    <record id="action_school_enrolment" model="ir.actions.act_window">
-      <field name="name">Enrolments</field>
-      <field name="type">ir.actions.act_window</field>
-      <field name="res_model">school.student</field>
-      <field name="view_type">form</field>
-      <field name="view_mode">tree,form</field>
-      <field name="view_id" ref="view_school_enrolment_tree"/>
-      <field name="search_view_id" ref="view_school_enrolment_filter"/>
-    </record>
-
     <record id="action_school_enrolment_live" model="ir.actions.act_window">
       <field name="name">Enrolments</field>
       <field name="type">ir.actions.act_window</field>
       <field name="res_model">school.student</field>
       <field name="view_type">form</field>
       <field name="view_mode">tree,form</field>
-      <field eval="False" name="view_id"/>
-      <field name="context">{'stage':'enrolment'}</field>
+      <field name="context">{}</field>
       <field name="search_view_id" ref="view_school_enrolment_filter"/>
       <field name="help" type="html">
         <p class="oe_view_nocontent_create">

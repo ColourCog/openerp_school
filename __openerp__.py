@@ -23,7 +23,7 @@ Features:
 * Student database
 * Enrolment process
 * Registration process
-* automatic invoice generation
+* Automatic invoice generation
     """,
     "data" : [
       "security/ir_rule.xml",
@@ -36,6 +36,8 @@ Features:
       'health_view.xml',
       'registration_view.xml',
       'registration_sequence.xml',
+      'registration_workflow.xml',
+      'registration_data.xml',
       'res_config_view.xml',
     ],
     "application": False,

@@ -59,7 +59,7 @@ class school_student(osv.osv):
             return user.company_id.default_enrolment_fee_id.id
         return False
 
-    def _default_enrolment_checklist(self, cr, uid, context=None):
+    def _default_checklist(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         if user.company_id.default_enrolment_checklist_id:
             return user.company_id.default_enrolment_checklist_id.id
@@ -143,7 +143,7 @@ class school_student(osv.osv):
             type='char',
             string="Invoice status",
             readonly=True),
-        'enrolment_checklist_id': fields.many2one(
+        'enrolement_checklist_id': fields.many2one(
             'school.checklist',
             'Checklist',
             readonly=True,
@@ -160,7 +160,7 @@ class school_student(osv.osv):
         'date': fields.date('Creation Date', required=True),
         'date_valid': fields.date('Validation Date', readonly=True),
         'state': fields.selection([
-            ('draft', 'Enrolment'),
+            ('draft', 'Draft'),
             ('cancel', 'Cancelled'),
             ('suspend', 'Inactive'),
             ('student', 'Student')],
@@ -168,12 +168,12 @@ class school_student(osv.osv):
             readonly=True,
             track_visibility='onchange',
             select=True,
-            help="Gives the status of the enrolment or studen." ),
+            help="Gives the status of the enrolment" ),
     }
 
     _defaults = {
         'enrolment_fee_id': _default_enrolment_fee,
-        'enrolment_checklist_id': _default_enrolment_checklist,
+        'enrolement_checklist_id': _default_checklist,
         'date': fields.date.context_today,
         'state': 'draft',
         'user_id': lambda cr, uid, id, c={}: id,

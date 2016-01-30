@@ -11,149 +11,49 @@ from openerp import pooler
 from tools import resolve_id_from_context
 _logger = logging.getLogger(__name__)
 
-class school_academic_year(osv.osv):
-    _name = 'school.academic.year'
-    _description = 'Academic Year'
+class school_student__registration_checklist(osv.osv):
+    _name = 'school.registration.checklist'
+
+    def _default_registration_id(self, cr, uid, context=None):
+        return resolve_id_from_context('registration_id', context)
 
     _columns = {
-        'name': fields.char('Name', size=255, required=True),
-        'class_ids': fields.one2many(
-            'school.class',
-            'year_id',
-            'Classes for this Year'),
-        'state': fields.selection([
-            ('open', 'Current'),
-            ('closed', 'Archived')],
-            'Status',
-            readonly=True,
-            track_visibility='onchange',
-            select=True,
-            help="The archive status of this Year" ),
+        'registration_id': fields.many2one(
+            'school.registration',
+            'Registration',
+            required=True,
+            ondelete='cascade'),
+        'item_id': fields.many2one('school.checklist.item', 'Required', required=True),
+        'done': fields.boolean('Done'),
     }
     _defaults = {
-        'state': "open",
+        'registration_id':_default_registration_id,
     }
 
-    def close_year(self, cr, uid, ids, context=None):
-        class_ids = []
-        class_obj = self.pool.get('school.class')
-        for year in self.browse(cr, uid, ids, context=context):
-            class_ids.extend(
-                class_obj.search(
-                    cr,
-                    uid,
-                    [('year_id','=',year.id)],
-                    context=context))
-        class_obj.close_class(cr, uid, class_ids, context=context)
-        self.write(cr, uid, ids, {'state': 'closed'}, context=context)
+school_student__registration_checklist()
 
-school_academic_year()
-
-class school_academic_level(osv.osv):
-    _name = 'school.academic.level'
-    _description = 'Academic Level'
-
-    _columns = {
-        'name': fields.char('Name', size=255, required=True),
-        'tuition_fee_id': fields.many2one(
-            'product.product',
-            'Default tuition Fee',
-            required=True),
-        'description': fields.text('Description'),
+class school_registration(osv.osv):
+    _name = 'school.registration'
+    _inherit = ['mail.thread', 'ir.needaction_mixin']
+    _description = 'Student Registration for a specific Class'
+    _track = {
+        'state': {
+            'school.mt_registration_registered': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'registered',
+            'school.mt_registration_cancelled': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'cancel',
+        },
     }
-
-school_academic_level()
-
-class school_teacher(osv.osv):
-    _name = 'school.teacher'
-    _description = 'Teacher'
-
-    _columns = {
-        'name': fields.char('Teacher Name', size=255, select=True),
-        'employee_id': fields.many2one(
-            'hr.employee',
-            'Employee'),
-    }
-    def create(self, cr, uid, vals, context=None):
-        hr_obj = self.pool.get('hr.employee')
-        if vals.get('name', '/') == '/':
-            vals['name'] = 'Unnamed Teacher'
-            if vals.get('employee_id', False):
-                employee = hr_obj.browse(cr, uid, vals['employee_id'], context)
-                vals['name'] = employee.name
-        return super(school_teacher, self).create(cr, uid, vals, context=context)
-
-school_teacher()
-
-
-class school_class(osv.osv):
-    _name = 'school.class'
-    _description = 'Class'
-
-    _columns = {
-        'name': fields.char('Name', size=255, select=True),
-        'year_id': fields.many2one(
-            'school.academic.year',
-            'Academic Year',
-            required=True),
-        'level_id': fields.many2one(
-            'school.academic.level',
-            'Year',
-            required=True),
-        'teacher_id': fields.many2one(
-            'school.teacher',
-            'Class (Homeroom) Teacher',
-            required=True),
-        'registration_ids': fields.one2many(
-            'school.student.registration',
-            'class_id',
-            'Class Roll'),
-        'state': fields.related(
-            'year_id',
-            'state',
-            type='selection',
-            relation='school.academic.year',
-            string="Status"),
-    }
-    _sql_constraints = [(
-        'level_year_unique',
-        'unique (year_id, level_id)',
-        'Level must be unique per Year !'),
-    ]
-
-    def create(self, cr, uid, vals, context=None):
-        teacher_obj = self.pool.get('school.teacher')
-        level_obj = self.pool.get('school.academic.level')
-        year_obj = self.pool.get('school.academic.year')
-        if vals.get('name', '/') == '/':
-            teacher = teacher_obj.browse(cr, uid, vals['teacher_id'], context)
-            level = level_obj.browse(cr, uid, vals['level_id'], context)
-            year = year_obj.browse(cr, uid, vals['year_id'], context)
-            vals['name'] = ' '.join([level.name, teacher.name, year.name])
-        return super(school_class, self).create(cr, uid, vals, context=context)
-
-    def close_class(self, cr, uid, ids, context=None):
-        """Archives class and releases students for new registration"""
-        student_ids = []
-        for sclass in self.browse(cr, uid, ids, context=context):
-            for reg in sclass.registration_ids:
-                student_ids.append(reg.student_id.id)
-        student_obj = self.pool.get('school.student')
-        student_obj.write(cr, uid, student_ids, {'current_class_id': None}, context=context)
-        self.write(cr, uid, ids, {'state': 'closed'}, context=context)
-
-school_class()
-
-
-class school_student_registration(osv.osv):
-    _name = 'school.student.registration'
-    _description = 'Student Registration'
 
     def _default_student_id(self, cr, uid, context=None):
         return resolve_id_from_context('student_id', context)
 
     def _default_class_id(self, cr, uid, context=None):
         return resolve_id_from_context('class_id', context)
+
+    def _default_checklist(self, cr, uid, context=None):
+        user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+        if user.company_id.default_registration_checklist_id:
+            return user.company_id.default_registration_checklist_id.id
+        return False
 
     def onchange_class_id(self, cr, uid, ids, class_id,
                         context=None):
@@ -165,8 +65,22 @@ class school_student_registration(osv.osv):
                 uid,
                 class_id,
                 context=context)
-            prod_id = sclass.level_id.tuition_fee_id.id
+            if sclass.level_id.tuition_fee_id:
+                prod_id = sclass.level_id.tuition_fee_id.id
         return {'value': {'tuition_fee_id': prod_id}}
+
+    def onchange_checklist_id(self, cr, uid, ids, checklist_id,
+                        context=None):
+        chkitem_obj = self.pool.get('school.checklist.item')
+        chk_ids = []
+        if checklist_id:
+            item_ids = chkitem_obj.search(
+                cr,
+                uid,
+                [('checklist_id','=', checklist_id)],
+                context=context)
+            chk_ids = [{'item_id': i} for i in item_ids]
+        return {'value': {'checklist_ids': chk_ids}}
 
     _columns = {
         'name': fields.char('Registration No', size=255, required=True,),
@@ -181,6 +95,12 @@ class school_student_registration(osv.osv):
             'Class',
             domain=[('state','=', 'open')],
             required=True),
+        'class_state': fields.related(
+            'class_id',
+            'state',
+            type='selection',
+            relation='school.class',
+            string="Class status"),
         'user_id': fields.many2one('res.users', 'Created By', required=True),
         'year_id': fields.related(
             'class_id',
@@ -201,17 +121,38 @@ class school_student_registration(osv.osv):
             type='char',
             string="Invoice status",
             readonly=True),
-        'state': fields.related(
-            'student_id',
-            'state',
-            type='selection',
-            relation='school.student',
-            string="Status"),
+        'registration_checklist_id': fields.many2one(
+            'school.checklist',
+            'Checklist',
+            readonly=True,
+            states={'draft': [('readonly', False)]}),
+        'checklist_ids': fields.one2many(
+            'school.registration.checklist',
+            'registration_id',
+            'Checklist Items'),
+        'user_valid': fields.many2one(
+            'res.users',
+            'Validated By',
+            readonly=True),
+        'date': fields.date('Creation Date', required=True),
+        'date_valid': fields.date('Validation Date', readonly=True),
+        'state': fields.selection([
+            ('draft', 'Draft'),
+            ('cancel', 'Cancelled'),
+            ('registered', 'Registered')],
+            'Status',
+            readonly=True,
+            track_visibility='onchange',
+            select=True,
+            help="Gives the status of the registration" ),
     }
     _defaults = {
         'name': "/",
+        'date': fields.date.context_today,
         'student_id': _default_student_id,
         'class_id': _default_class_id,
+        'registration_checklist_id': _default_checklist,
+        'state': 'draft',
         'user_id': lambda cr, uid, id, c={}: id,
     }
     _sql_constraints = [(
@@ -241,8 +182,8 @@ class school_student_registration(osv.osv):
             {'current_class_id': vals['class_id']},
             context=context)
         if vals.get('name', '/') == '/':
-            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'school.student.registration') or '/'
-        return super(school_student_registration, self).create(cr, uid, vals, context=context)
+            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'school.registration') or '/'
+        return super(school_registration, self).create(cr, uid, vals, context=context)
 
     def unlink(self, cr, uid, ids, context=None):
         if context is None:
@@ -251,7 +192,54 @@ class school_student_registration(osv.osv):
         """Allows to delete sales order lines in draft,cancel states"""
         for rec in self.browse(cr, uid, ids, context=context):
             student_obj.write(cr, uid, [rec.student_id.id], {'current_class_id': None}, context=context)
-        return super(school_student_registration, self).unlink(cr, uid, ids, context=context)
+        return super(school_registration, self).unlink(cr, uid, ids, context=context)
+
+    def registration_draft(self, cr, uid, ids, context=None):
+        wf_service = netsvc.LocalService("workflow")
+        for registration in self.browse(cr, uid, ids):
+            wf_service.trg_delete(uid, 'school.registration', registration.id, cr)
+            wf_service.trg_create(uid, 'school.registration', registration.id, cr)
+        return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
+
+    def registration_validate(self, cr, uid, ids, context=None):
+        self.validate_registration(cr, uid, ids, context)
+        return self.write(
+            cr,
+            uid,
+            ids,
+            {
+                'state': 'registered',
+                'date_valid': time.strftime('%Y-%m-%d'),
+                'user_valid': uid},
+            context=context)
+
+    def registration_cancel(self, cr, uid, ids, context=None):
+        inv_obj = self.pool.get('account.invoice')
+        std_ids = [ registration.invoice_id.id for registration in self.browse(cr, uid, ids, context=context)
+                        if registration.invoice_id]
+        if std_ids:
+            inv_obj.action_cancel(cr, uid, std_ids, context)
+            inv_obj.action_cancel_draft(cr, uid, std_ids, context)
+            try:
+                inv_obj.unlink(cr, uid, std_ids, context=context)
+            except:
+                pass
+        return self.write(
+            cr,
+            uid,
+            ids,
+            {'state': 'cancel', 'invoice_id': None},
+            context=context)
+
+    def validate_registration(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
+        for registration in self.browse(cr, uid, ids, context=context):
+            for check in registration.checklist_ids:
+                if not check.done:
+                    raise osv.except_osv(
+                        _('Validation error!'),
+                        _("Please verify '%s'" % check.item_id.name))
 
     def generate_invoice(self, cr, uid, ids, context):
         if not context:
@@ -271,6 +259,10 @@ class school_student_registration(osv.osv):
                         uid,
                         [reg.student_id.id],
                         context=context)
+            if not reg.tuition_fee_id:
+                raise osv.except_osv(
+                    _("Can't generate invoice"),
+                    _("No tuition fee found."))
             if reg.invoice_id:
                 raise osv.except_osv(
                     _('Invoice Already Generated!'),
@@ -340,14 +332,14 @@ class school_student_registration(osv.osv):
                 pass
         return self.write( cr, uid, ids, {'invoice_id': None}, context=context)
 
-school_student_registration()
+school_registration()
 
 class school_student(osv.osv):
     _name = 'school.student'
     _inherit = 'school.student'
     _columns = {
         'registration_ids': fields.one2many(
-            'school.student.registration',
+            'school.registration',
             'student_id',
             'Registration history'),
          'current_class_id': fields.many2one(
@@ -355,21 +347,8 @@ class school_student(osv.osv):
             'Current class'),
     }
 
-    def fields_view_get(self, cr, uid, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
-        mod_obj = self.pool.get('ir.model.data')
-        if context is None: context = {}
-
-        if view_type == 'form':
-            if not view_id and context.get('stage'):
-                if context.get('stage') == 'academic':
-                    result = mod_obj.get_object_reference(cr, uid, 'school', 'view_school_student_form')
-                    result = result and result[1] or False
-                    view_id = result
-        res = super(school_student, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)
-        return res
-
     def student_cancel(self, cr, uid, ids, context=None):
-        reg_obj = self.pool.get('school.student.registration')
+        reg_obj = self.pool.get('school.registration')
         inv_obj = self.pool.get('account.invoice')
         for student in self.browse(cr, uid, ids, context=context):
             reg_ids = [ reg.id for reg in student.registration_ids]
