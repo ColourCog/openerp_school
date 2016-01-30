@@ -16,3 +16,5 @@ access_school_checklist,access_school_checklist,model_school_checklist,,1,1,1,1
 access_school_checklist_item,access_school_checklist_item,model_school_checklist_item,,1,1,1,1
 access_school_student_checklist,access_school_student_checklist,model_school_student_checklist,,1,1,1,1
 access_school_registration_checklist,access_school_registration_checklist,model_school_registration_checklist,,1,1,1,1
+access_school_subject,access_school_subject,model_school_subject,,1,1,1,1
+access_school_grade,access_school_grade,model_school_grade,,1,1,1,1

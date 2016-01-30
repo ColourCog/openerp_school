@@ -163,10 +163,7 @@
                 <field name="class_id"/>
               </group>
             </group>
-            <notebook name="academics">
-              <page string="Grades">
-              </page>
-            </notebook>
+            <notebook name="academics"/>
           </sheet>
         </form>
       </field>

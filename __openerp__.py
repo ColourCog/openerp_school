@@ -38,6 +38,7 @@ Features:
       'registration_sequence.xml',
       'registration_workflow.xml',
       'registration_data.xml',
+      'grading_view.xml',
       'res_config_view.xml',
     ],
     "application": False,

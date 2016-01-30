@@ -146,7 +146,7 @@
       <field name="arch" type="xml">
         <form string="Teachers" version="7.0">
           <sheet>
-            <group>
+            <group name="identity">
               <field name="employee_id"/>
             </group>
           </sheet>
