@@ -106,8 +106,14 @@ class school_registration(osv.osv):
             'class_id',
             'year_id',
             type="many2one",
-            relation='school.academic.year',
-            string="Year"),
+            relation='school.academic.period',
+            string="Academic period"),
+        'teacher_id': fields.related(
+            'class_id',
+            'year_id',
+            type="many2one",
+            relation='school.teacher',
+            string="Class Teacher"),
         'tuition_fee_id': fields.many2one(
             'product.product',
             'Tuition Fee'),

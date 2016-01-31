@@ -21,6 +21,7 @@ class school_subject(osv.osv):
             ('alpha', 'Alphabetic')],
             'Grading method',
             select=True),
+        'description': fields.text('Description'),
     }
 
     def get_grading_method(self, cr, uid, sub_id, context=None):
@@ -28,7 +29,6 @@ class school_subject(osv.osv):
         if sub:
             return sub.grading_method
         return False
-
 school_subject()
 
 
@@ -121,6 +121,7 @@ class school_grade(osv.osv):
             _display_grade,
             string='Grade',
             type='char'),
+        'description': fields.text('Comment'),
     }
 
     _defaults = {
@@ -140,8 +141,8 @@ class school_grade(osv.osv):
         if vals.get('name', '/') == '/':
             vals['name'] = '-'.join([sub.name, reg.name])
         return super(school_grade, self).create(cr, uid, vals, context=context)
-
 school_grade()
+
 
 class school_registration(osv.osv):
     _name = 'school.registration'
@@ -153,3 +154,17 @@ class school_registration(osv.osv):
             'Grades'),
     }
 school_registration()
+
+
+class school_academic_year(osv.osv):
+    _name = 'school.academic.year'
+    _inherit = 'school.academic.year'
+    _columns = {
+        'subject_ids': fields.many2many(
+            'school.subject',
+            'level_subject_rel',
+            'level_id',
+            'subject_id',
+            'Subjects'),
+    }
+school_academic_year()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name" : "School Management",
-    "version" : "0.2",
+    "version" : "0.3",
     "category" : "Accounting",
     "sequence": 60,
     "complexity" : "normal",
@@ -24,6 +24,7 @@ Features:
 * Enrolment process
 * Registration process
 * Automatic invoice generation
+* Subjects and grading
     """,
     "data" : [
       "security/ir_rule.xml",
@@ -40,6 +41,7 @@ Features:
       'registration_data.xml',
       'grading_view.xml',
       'res_config_view.xml',
+      'school_data.xml',
     ],
     "application": False,
     "installable": True

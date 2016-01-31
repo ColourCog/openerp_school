@@ -129,9 +129,9 @@ class school_checklist_item(osv.osv):
 school_checklist_item()
 
 
-class school_academic_year(osv.osv):
-    _name = 'school.academic.year'
-    _description = 'Academic Year'
+class school_academic_period(osv.osv):
+    _name = 'school.academic.period'
+    _description = 'Academic Period'
 
     _columns = {
         'name': fields.char('Name', size=255, required=True),
@@ -164,12 +164,12 @@ class school_academic_year(osv.osv):
                     context=context))
         class_obj.archive_class(cr, uid, class_ids, context=context)
         self.write(cr, uid, ids, {'state': 'archived'}, context=context)
-school_academic_year()
+school_academic_period()
 
 
-class school_academic_level(osv.osv):
-    _name = 'school.academic.level'
-    _description = 'Academic Level'
+class school_academic_year(osv.osv):
+    _name = 'school.academic.year'
+    _description = 'Year'
 
     _columns = {
         'name': fields.char('Name', size=255, required=True),
@@ -178,7 +178,7 @@ class school_academic_level(osv.osv):
             'Default tuition Fee'),
         'description': fields.text('Description'),
     }
-school_academic_level()
+school_academic_year()
 
 
 class school_teacher(osv.osv):
@@ -190,6 +190,7 @@ class school_teacher(osv.osv):
         'employee_id': fields.many2one(
             'hr.employee',
             'Employee'),
+        'description': fields.text('Description'),
     }
     def create(self, cr, uid, vals, context=None):
         hr_obj = self.pool.get('hr.employee')
@@ -209,12 +210,12 @@ class school_class(osv.osv):
     _columns = {
         'name': fields.char('Name', size=255, select=True),
         'year_id': fields.many2one(
-            'school.academic.year',
-            'Academic Year',
+            'school.academic.period',
+            'Academic period',
             domain=[('state','=','open')],
             required=True),
         'level_id': fields.many2one(
-            'school.academic.level',
+            'school.academic.year',
             'Year',
             required=True),
         'teacher_id': fields.many2one(
@@ -246,8 +247,8 @@ class school_class(osv.osv):
 
     def create(self, cr, uid, vals, context=None):
         teacher_obj = self.pool.get('school.teacher')
-        level_obj = self.pool.get('school.academic.level')
-        year_obj = self.pool.get('school.academic.year')
+        level_obj = self.pool.get('school.academic.year')
+        year_obj = self.pool.get('school.academic.period')
         if vals.get('name', '/') == '/':
             teacher = teacher_obj.browse(cr, uid, vals['teacher_id'], context)
             level = level_obj.browse(cr, uid, vals['level_id'], context)
