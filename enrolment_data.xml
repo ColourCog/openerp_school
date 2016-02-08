@@ -1,0 +1,19 @@
+<openerp>
+    <data noupdate="1">
+
+        <!-- Student-related subtypes for messaging / Chatter -->
+        <record id="mt_reg_enrolled" model="mail.message.subtype">
+            <field name="name">Student enrolled</field>
+            <field name="res_model">school.enrolment</field>
+            <field name="default" eval="False"/>
+            <field name="description">Student enrolled</field>
+        </record>
+        <record id="mt_reg_cancelled" model="mail.message.subtype">
+            <field name="name">Enrolment Cancelled</field>
+            <field name="res_model">school.enrolment</field>
+            <field name="default" eval="False"/>
+            <field name="description">Enrolment cancelled</field>
+        </record>
+
+  </data>
+</openerp>

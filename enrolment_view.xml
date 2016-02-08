@@ -1,14 +1,14 @@
 <openerp>
   <data noupdate="0">
 
-    <!-- Student Registration -->
-    <record id="view_school_registration_tree" model="ir.ui.view">
-      <field name="name">school.registration.tree</field>
-      <field name="model">school.registration</field>
+    <!-- Student enrolment -->
+    <record id="view_school_enrolment_tree" model="ir.ui.view">
+      <field name="name">school.enrolment.tree</field>
+      <field name="model">school.enrolment</field>
       <field name="arch" type="xml">
         <tree string="Classes" colors="red:state=='cancel';grey:state=='suspend'">
           <field name="year_id"/>
-          <field name="name"/>
+          <field name="date_valid"/>
           <field name="student_id"/>
           <field name="class_id"/>
           <field name="state"/>
@@ -16,39 +16,39 @@
       </field>
     </record>
 
-    <record id="view_school_registration_form" model="ir.ui.view">
-      <field name="name">school.registration.form</field>
-      <field name="model">school.registration</field>
+    <record id="view_school_enrolment_form" model="ir.ui.view">
+      <field name="name">school.enrolment.form</field>
+      <field name="model">school.enrolment</field>
       <field name="arch" type="xml">
-        <form string="Registration" version="7.0">
+        <form string="enrolment" version="7.0">
           <header>
             <button name="validate" states="draft" string="Validate" class="oe_highlight" groups="school.group_school_headteacher"/>
-            <button name="generate_invoice" type="object" states="registered"
+            <button name="generate_invoice" type="object" states="enrolled"
               string="Generate Invoice"
               groups="account.group_account_user"/>
-            <button name="cancel_invoice" type="object" states="registered"
+            <button name="cancel_invoice" type="object" states="enrolled"
               string="Cancel Invoice"
               groups="account.group_account_user"/>
-            <button name="cancel" states="registered" string="Cancel" groups="school.group_school_manager"/>
-            <button name="registration_draft" states="cancel" string="Set to Draft" type="object" />
-            <field name="state" widget="statusbar" statusbar_visible="draft,registered" statusbar_colors='{"cancel":"red"}'/>
+            <button name="cancel" states="enrolled" string="Cancel" groups="school.group_school_manager"/>
+            <button name="enrolment_draft" states="cancel" string="Set to Draft" type="object" />
+            <field name="state" widget="statusbar" statusbar_visible="draft,enrolled" statusbar_colors='{"cancel":"red"}'/>
           </header>
           <sheet>
-            <h1> <label string="No"/> <field name="name" class="oe_inline"/> </h1>
-            <separator string="Registration Information"/>
+            <h1> <field name="student_id" context="{'stage':'registration'}"/></h1>
+            <separator string="enrolment Information"/>
             <group>
               <group>
-                <field name="student_id" context="{'stage':'enrolment'}"/>
+                <field name="date_valid"/>
                 <field name="class_id" on_change="onchange_class_id(class_id)"/>
               </group>
               <group>
                 <field name="user_id"/>
-                <field name="registration_checklist_id" on_change="onchange_checklist_id(registration_checklist_id)"/>
+                <field name="enrolment_checklist_id" on_change="onchange_checklist_id(enrolment_checklist_id)"/>
               </group>
             </group>
             <notebook name="details">
               <page string="Checklist">
-                <field name="checklist_ids" context="{'registration_id': active_id}">
+                <field name="checklist_ids" context="{'enrolment_id': active_id}">
                   <tree string="Checklist" editable="bottom">
                     <field name="item_id"/>
                     <field name="done"/>
@@ -72,11 +72,11 @@
       </field>
     </record>
 
-    <record id="view_school_registration_filter" model="ir.ui.view">
-      <field name="name">school.registration.filter</field>
-      <field name="model">school.registration</field>
+    <record id="view_school_enrolment_filter" model="ir.ui.view">
+      <field name="name">school.enrolment.filter</field>
+      <field name="model">school.enrolment</field>
       <field name="arch" type="xml">
-        <search string="Search Registrations">
+        <search string="Search enrolments">
           <field name="class_id"/>
           <field name="student_id"/>
           <group expand="0" string="Group By..." >
@@ -87,58 +87,58 @@
       </field>
     </record>
 
-    <record id="action_school_registration" model="ir.actions.act_window">
-      <field name="name">Registrations</field>
+    <record id="action_school_enrolment" model="ir.actions.act_window">
+      <field name="name">enrolments</field>
       <field name="type">ir.actions.act_window</field>
-      <field name="res_model">school.registration</field>
+      <field name="res_model">school.enrolment</field>
       <field name="view_type">form</field>
       <field name="view_mode">tree,form</field>
       <field name="context">{'stage': 'administrative'}</field>
-      <field name="search_view_id" ref="view_school_registration_filter"/>
-      <field name="view_id" ref="view_school_registration_tree"/>
+      <field name="search_view_id" ref="view_school_enrolment_filter"/>
+      <field name="view_id" ref="view_school_enrolment_tree"/>
       <field name="help" type="html">
         <p class="oe_view_nocontent_create">
-          Click to create a new registration.
+          Click to create a new enrolment.
         </p>
       </field>
     </record>
 
-    <record id="action_school_registration_tree" model="ir.actions.act_window.view">
+    <record id="action_school_enrolment_tree" model="ir.actions.act_window.view">
         <field eval="1" name="sequence"/>
         <field name="view_mode">tree</field>
-        <field name="view_id" ref="view_school_registration_tree"/>
-        <field name="act_window_id" ref="action_school_registration"/>
+        <field name="view_id" ref="view_school_enrolment_tree"/>
+        <field name="act_window_id" ref="action_school_enrolment"/>
     </record>
-    <record id="action_school_registration_form" model="ir.actions.act_window.view">
+    <record id="action_school_enrolment_form" model="ir.actions.act_window.view">
         <field eval="2" name="sequence"/>
         <field name="view_mode">form</field>
-        <field name="view_id" ref="view_school_registration_form"/>
-        <field name="act_window_id" ref="action_school_registration"/>
+        <field name="view_id" ref="view_school_enrolment_form"/>
+        <field name="act_window_id" ref="action_school_enrolment"/>
     </record>
 
-    <menuitem action="action_school_registration"
-      id="menu_school_registration"
+    <menuitem action="action_school_enrolment"
+      id="menu_school_enrolment"
       groups="school.group_school_headteacher"
       parent="menu_school_student_root" sequence="2" />
 
 
-    <record id="action_school_registration_pop" model="ir.actions.act_window">
+    <record id="action_school_enrolment_pop" model="ir.actions.act_window">
       <field name="name">Register Student</field>
       <field name="type">ir.actions.act_window</field>
-      <field name="res_model">school.registration</field>
+      <field name="res_model">school.enrolment</field>
       <field name="view_type">form</field>
       <field name="view_mode">form</field>
       <field name="context">{'default_student_id': student_id, 'student_id': student_id}</field>
-      <field name="view_id" ref="view_school_registration_form"/>
+      <field name="view_id" ref="view_school_enrolment_form"/>
       <field name="target">current</field>
     </record>
 
 
 
     <!-- Student academic -->
-    <record id="view_school_student_registered_tree" model="ir.ui.view">
-      <field name="name">school.registration.tree.academic</field>
-      <field name="model">school.registration</field>
+    <record id="view_school_student_enrolled_tree" model="ir.ui.view">
+      <field name="name">school.enrolment.tree.academic</field>
+      <field name="model">school.enrolment</field>
       <field name="arch" type="xml">
         <tree string="Students" colors="red:state=='cancel';grey:state=='suspend'">
           <field name="student_id"/>
@@ -149,9 +149,9 @@
       </field>
     </record>
 
-    <record id="view_school_student_registered_form" model="ir.ui.view">
-      <field name="name">school.registration.form.academic</field>
-      <field name="model">school.registration</field>
+    <record id="view_school_student_enrolled_form" model="ir.ui.view">
+      <field name="name">school.enrolment.form.academic</field>
+      <field name="model">school.enrolment</field>
       <field name="arch" type="xml">
         <form string="Student" version="7.0">
           <sheet>
@@ -170,9 +170,9 @@
       </field>
     </record>
 
-    <record id="view_school_student_registered_filter" model="ir.ui.view">
-      <field name="name">school.registration.filter.academic</field>
-      <field name="model">school.registration</field>
+    <record id="view_school_student_enrolled_filter" model="ir.ui.view">
+      <field name="name">school.enrolment.filter.academic</field>
+      <field name="model">school.enrolment</field>
       <field name="arch" type="xml">
         <search string="Search Students">
           <field name="student_id"/>
@@ -185,56 +185,56 @@
       </field>
     </record>
 
-    <record id="action_school_student_registered" model="ir.actions.act_window">
+    <record id="action_school_student_enrolled" model="ir.actions.act_window">
       <field name="name">Students</field>
       <field name="type">ir.actions.act_window</field>
-      <field name="res_model">school.registration</field>
+      <field name="res_model">school.enrolment</field>
       <field name="view_mode">tree,form</field>
       <field name="view_type">form</field>
       <field name="context">{'stage': 'academic', 'search_default_open': 1}</field>
-      <field name="search_view_id" ref="view_school_student_registered_filter"/>
-      <field name="view_id" ref="view_school_student_registered_tree"/>
+      <field name="search_view_id" ref="view_school_student_enrolled_filter"/>
+      <field name="view_id" ref="view_school_student_enrolled_tree"/>
       <field name="target">current</field>
     </record>
 
-    <record id="action_school_student_registered_tree" model="ir.actions.act_window.view">
+    <record id="action_school_student_enrolled_tree" model="ir.actions.act_window.view">
         <field eval="1" name="sequence"/>
         <field name="view_mode">tree</field>
-        <field name="view_id" ref="view_school_student_registered_tree"/>
-        <field name="act_window_id" ref="action_school_student_registered"/>
+        <field name="view_id" ref="view_school_student_enrolled_tree"/>
+        <field name="act_window_id" ref="action_school_student_enrolled"/>
     </record>
-    <record id="action_school_student_registered_form" model="ir.actions.act_window.view">
+    <record id="action_school_student_enrolled_form" model="ir.actions.act_window.view">
         <field eval="2" name="sequence"/>
         <field name="view_mode">form</field>
-        <field name="view_id" ref="view_school_student_registered_form"/>
-        <field name="act_window_id" ref="action_school_student_registered"/>
+        <field name="view_id" ref="view_school_student_enrolled_form"/>
+        <field name="act_window_id" ref="action_school_student_enrolled"/>
     </record>
 
-    <menuitem action="action_school_student_registered" id="menu_school_academic_student_registered" parent="menu_school_academic" sequence="3" />
+    <menuitem action="action_school_student_enrolled" id="menu_school_academic_student_enrolled" parent="menu_school_academic" sequence="3" />
 
 
-    <!-- Enrolment -->
-    <record id="view_school_student_registration_form" model="ir.ui.view">
-      <field name="name">school.student.form.registration.inherit</field>
+    <!-- enrolments -->
+    <record id="view_school_student_enrolment_form" model="ir.ui.view">
+      <field name="name">school.student.form.enrolment.inherit</field>
       <field name="model">school.student</field>
-      <field name="inherit_id" ref="school.view_school_enrolment_form"/>
+      <field name="inherit_id" ref="school.view_school_registration_form"/>
       <field name="arch" type="xml">
         <xpath expr="//field[@name='user_id']" position="after">
           <field name="current_class_id" invisible="1"/>
         </xpath>
         <xpath expr="//page[@string='Relatives']" position="after">
-          <page string="Registrations">
-            <field name="registration_ids" context="{'default_student_id': active_id}">
-              <tree string="Student Roll">
+          <page string="enrolments">
+            <field name="enrolment_ids" context="{'default_student_id': active_id}">
+              <tree string="Student Enrolments">
                 <field name="year_id"/>
-                <field name="name" />
                 <field name="class_id"/>
+                <field name="date_valid" />
               </tree>
             </field>
           </page>
         </xpath>
         <xpath expr="//button[@name='validate']" position="after">
-          <button name="%(action_school_registration_pop)d"
+          <button name="%(action_school_enrolment_pop)d"
             string="Register"
             context="{'student_id':active_id}"
             type="action"

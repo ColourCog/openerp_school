@@ -4,43 +4,43 @@
 
         <!-- Workflow definition -->
 
-        <record id="wkf_registrations" model="workflow">
-            <field name="name">school.wkf.registrations</field>
-            <field name="osv">school.registration</field>
+        <record id="wkf_enrolments" model="workflow">
+            <field name="name">school.wkf.enrolments</field>
+            <field name="osv">school.enrolment</field>
             <field name="on_create">True</field>
         </record>
 
         <record id="reg_draft" model="workflow.activity">
-            <field name="wkf_id" ref="wkf_registrations"/>
+            <field name="wkf_id" ref="wkf_enrolments"/>
             <field name="name">draft</field>
             <field name="flow_start">True</field>
         </record>
 
-        <record id="reg_registration" model="workflow.activity">
-            <field name="wkf_id" ref="wkf_registrations"/>
+        <record id="reg_enrolment" model="workflow.activity">
+            <field name="wkf_id" ref="wkf_enrolments"/>
             <field name="name">validate</field>
             <field name="kind">function</field>
-            <field name="action">registration_validate()</field>
+            <field name="action">enrolment_validate()</field>
         </record>
 
         <record id="reg_cancel" model="workflow.activity">
-            <field name="wkf_id" ref="wkf_registrations"/>
+            <field name="wkf_id" ref="wkf_enrolments"/>
             <field name="name">cancel</field>
             <field name="kind">function</field>
-            <field name="action">registration_cancel()</field>
+            <field name="action">enrolment_cancel()</field>
             <field name="flow_stop">True</field>
         </record>
 
         <!-- Transitions -->
         <record id="reg_t1" model="workflow.transition">
             <field name="act_from" ref="reg_draft"/>
-            <field name="act_to" ref="reg_registration"/>
+            <field name="act_to" ref="reg_enrolment"/>
             <field name="signal">validate</field>
         </record>
 
 
         <record id="eg_t2" model="workflow.transition">
-            <field name="act_from" ref="reg_registration"/>
+            <field name="act_from" ref="reg_enrolment"/>
             <field name="act_to" ref="reg_cancel"/>
             <field name="signal">cancel</field>
         </record>

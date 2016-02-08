@@ -1,6 +1,6 @@
 #/bin/env python2
 
-## REGISTRATION
+## enrolment
 
 import time
 import logging
@@ -50,8 +50,8 @@ school_teacher()
 class school_grade(osv.osv):
     _name = 'school.grade'
 
-    def _default_registration_id(self, cr, uid, context=None):
-        return resolve_id_from_context('registration_id', context)
+    def _default_enrolment_id(self, cr, uid, context=None):
+        return resolve_id_from_context('enrolment_id', context)
 
     def _default_teacher_id(self, cr, uid, context=None):
         return resolve_id_from_context('teacher_id', context)
@@ -80,8 +80,8 @@ class school_grade(osv.osv):
 
     _columns = {
         'name': fields.char('Grade for', size=255, required=True,),
-        'registration_id': fields.many2one(
-            'school.registration',
+        'enrolment_id': fields.many2one(
+            'school.enrolment',
             'Student',
             required=True,
             ondelete='cascade'),
@@ -127,16 +127,16 @@ class school_grade(osv.osv):
     _defaults = {
         'name': "/",
         'date': fields.date.context_today,
-        'registration_id': _default_registration_id,
+        'enrolment_id': _default_enrolment_id,
         'teacher_id': _default_teacher_id,
         'subject_id': _default_subject_id,
     }
 
     def create(self, cr, uid, vals, context=None):
         sub_obj = self.pool.get('school.subject')
-        reg_obj = self.pool.get('school.registration')
+        reg_obj = self.pool.get('school.enrolment')
         sub = sub_obj.browse(cr, uid, vals['subject_id'], context=context)
-        reg = reg_obj.browse(cr, uid, vals['registration_id'], context=context)
+        reg = reg_obj.browse(cr, uid, vals['enrolment_id'], context=context)
         class_obj = self.pool.get('school.class')
         if vals.get('name', '/') == '/':
             vals['name'] = '-'.join([sub.name, reg.name])
@@ -144,16 +144,16 @@ class school_grade(osv.osv):
 school_grade()
 
 
-class school_registration(osv.osv):
-    _name = 'school.registration'
-    _inherit = 'school.registration'
+class school_enrolment(osv.osv):
+    _name = 'school.enrolment'
+    _inherit = 'school.enrolment'
     _columns = {
         'grade_ids': fields.one2many(
             'school.grade',
-            'registration_id',
+            'enrolment_id',
             'Grades'),
     }
-school_registration()
+school_enrolment()
 
 
 class school_academic_year(osv.osv):

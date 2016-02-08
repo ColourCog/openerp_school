@@ -2,8 +2,8 @@
 
 ## STUDENT
 # The sudent database works like the sales database. The first stage
-# of a student is an enrolment.
-# A validated enrolment becomes a student.
+# of a student is an registration.
+# A validated registration becomes a student.
 # The views are the ones that make the difference; especially
 # the fields_view_get
 
@@ -222,13 +222,13 @@ class school_class(osv.osv):
             'school.teacher',
             'Class (Homeroom) Teacher',
             required=True),
-        'registration_ids': fields.one2many(
-            'school.registration',
+        'enrolment_ids': fields.one2many(
+            'school.enrolment',
             'class_id',
             'Class Roll'),
         'state': fields.selection([
-            ('open', 'Registrations open'),
-            ('closed', 'Registrations closed'),
+            ('open', 'enrolments open'),
+            ('closed', 'enrolments closed'),
             ('archive', 'Archived')],
             'Status',
             readonly=True,
@@ -257,20 +257,20 @@ class school_class(osv.osv):
         return super(school_class, self).create(cr, uid, vals, context=context)
 
     def close_class(self, cr, uid, ids, context=None):
-        """Archives class and releases students for new registration"""
+        """Archives class and releases students for new enrolment"""
         student_ids = []
         for sclass in self.browse(cr, uid, ids, context=context):
-            for reg in sclass.registration_ids:
+            for reg in sclass.enrolment_ids:
                 student_ids.append(reg.student_id.id)
         student_obj = self.pool.get('school.student')
         student_obj.write(cr, uid, student_ids, {'current_class_id': None}, context=context)
         self.write(cr, uid, ids, {'state': 'closed'}, context=context)
 
     def archive_class(self, cr, uid, ids, context=None):
-        """Archives class and releases students for new registration"""
+        """Archives class and releases students for new enrolment"""
         student_ids = []
         for sclass in self.browse(cr, uid, ids, context=context):
-            for reg in sclass.registration_ids:
+            for reg in sclass.enrolment_ids:
                 student_ids.append(reg.student_id.id)
         student_obj = self.pool.get('school.student')
         student_obj.write(cr, uid, student_ids, {'current_class_id': None}, context=context)

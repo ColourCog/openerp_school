@@ -2,8 +2,8 @@
 
 ## STUDENT
 # The sudent database works like the sales database. The first stage
-# of a student is an enrolment.
-# A validated enrolment becomes a student.
+# of a student is an registration.
+# A validated registration becomes a student.
 # The views are the ones that make the difference; especially
 # the fields_view_get
 
@@ -39,9 +39,9 @@ school_student_checklist()
 
 
 class school_student(osv.osv):
-    # Enrolment is a financial/administrative concept
+    # registration is a financial/administrative concept
     # We should split the financial side out to another module
-    # maybe school.student.enrolment
+    # maybe school.student.registration
 
     _name = 'school.student'
     _inherit = ['mail.thread', 'ir.needaction_mixin']
@@ -53,16 +53,16 @@ class school_student(osv.osv):
         },
     }
 
-    def _default_enrolment_fee(self, cr, uid, context=None):
+    def _default_registration_fee(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
-        if user.company_id.default_enrolment_fee_id:
-            return user.company_id.default_enrolment_fee_id.id
+        if user.company_id.default_registration_fee_id:
+            return user.company_id.default_registration_fee_id.id
         return False
 
     def _default_checklist(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
-        if user.company_id.default_enrolment_checklist_id:
-            return user.company_id.default_enrolment_checklist_id.id
+        if user.company_id.default_registration_checklist_id:
+            return user.company_id.default_registration_checklist_id.id
         return False
 
     def onchange_checklist_id(self, cr, uid, ids, checklist_id,
@@ -120,11 +120,11 @@ class school_student(osv.osv):
             required=True,
             domain=[('customer','=',True)]),
         #financial
-        'enrolment_fee_id': fields.many2one('product.product', 'Enrolment Fee', required=True),
+        'registration_fee_id': fields.many2one('product.product', 'registration Fee', required=True),
         # financial
         'waive_fee': fields.boolean(
-            'Waive enrolment fee',
-            help="Allow the Enrolment to proceed without paying the fee."),
+            'Waive registration fee',
+            help="Allow the registration to proceed without paying the fee."),
         #financial
         'reference': fields.char(
             'Payment reference',
@@ -133,7 +133,7 @@ class school_student(osv.osv):
         #financial
         'invoice_id': fields.many2one(
             'account.invoice',
-            'Enrolment Invoice',
+            'registration Invoice',
             readonly=True,
             ),
         #financial
@@ -152,6 +152,7 @@ class school_student(osv.osv):
             'school.student.checklist',
             'student_id',
             'Checklist Items'),
+        'reg_num': fields.char('Registration No', size=255),
         'user_id': fields.many2one('res.users', 'Created By', required=True),
         'user_valid': fields.many2one(
             'res.users',
@@ -168,11 +169,11 @@ class school_student(osv.osv):
             readonly=True,
             track_visibility='onchange',
             select=True,
-            help="Gives the status of the enrolment" ),
+            help="Gives the status of the registration" ),
     }
 
     _defaults = {
-        'enrolment_fee_id': _default_enrolment_fee,
+        'registration_fee_id': _default_registration_fee,
         'enrolement_checklist_id': _default_checklist,
         'date': fields.date.context_today,
         'state': 'draft',
@@ -181,10 +182,13 @@ class school_student(osv.osv):
 
 
     def create(self, cr, uid, vals, context=None):
+        vals['firstname'] = vals.get('firstname').capitalize()
+        vals['surname'] = vals.get('surname').upper()
         if vals.get('name', '/') == '/':
-            vals['name'] = ' '.join([vals.get('surname').upper(), vals.get('firstname').capitalize()])
+            vals['name'] = ' '.join([vals.get('surname'), vals.get('firstname')])
         if not vals.get('user_id'):
             vals['user_id'] = uid
+            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'school.enrolment') or '/'
         return super(school_student, self).create(cr, uid, vals, context=context)
 
     def student_draft(self, cr, uid, ids, context=None):
@@ -195,7 +199,7 @@ class school_student(osv.osv):
         return self.write(cr, uid, ids, {'state': 'draft', 'date_valid': None, 'user_valid': None}, context=context)
 
     def student_validate(self, cr, uid, ids, context=None):
-        self.validate_enrolment(cr, uid, ids, context)
+        self.validate_registration(cr, uid, ids, context)
         return self.write(
             cr,
             uid,
@@ -203,6 +207,7 @@ class school_student(osv.osv):
             {
                 'state': 'student',
                 'date_valid': time.strftime('%Y-%m-%d'),
+                'reg_num': self.pool.get('ir.sequence').get(cr, uid, 'school.registration'),
                 'user_valid': uid},
             context=context)
 
@@ -242,7 +247,7 @@ class school_student(osv.osv):
             {'state': 'cancel', 'invoice_id': None},
             context=context)
 
-    def validate_enrolment(self, cr, uid, ids, context=None):
+    def validate_registration(self, cr, uid, ids, context=None):
         if not context:
             context = {}
         for student in self.browse(cr, uid, ids, context=context):
@@ -264,16 +269,16 @@ class school_student(osv.osv):
         for student in self.browse(cr, uid, ids, context=ctx):
             if student.waive_fee:
                 raise osv.except_osv(
-                    _('Cannot generate Enrolment invoice!'),
-                    _("Enrolment Fees have been waived."))
+                    _('Cannot generate registration invoice!'),
+                    _("registration Fees have been waived."))
             if student.invoice_id:
                 raise osv.except_osv(
                     _('Invoice Already Generated!'),
-                    _("Please refer to the linked Enrolment Invoice"))
+                    _("Please refer to the linked registration Invoice"))
 
             line = {
-                'name': student.enrolment_fee_id.name,
-                'product_id': student.enrolment_fee_id.id,
+                'name': student.registration_fee_id.name,
+                'product_id': student.registration_fee_id.id,
                 'quantity': 1,
                 }
             # run inv_line_obj's onchange to update
@@ -281,8 +286,8 @@ class school_student(osv.osv):
                 cr,
                 uid,
                 ids,
-                student.enrolment_fee_id.id,
-                student.enrolment_fee_id.uom_id.id,
+                student.registration_fee_id.id,
+                student.registration_fee_id.uom_id.id,
                 qty=1,
                 name='',
                 type='out_invoice',
@@ -295,7 +300,7 @@ class school_student(osv.osv):
 
             invoice = {
                 'type': 'out_invoice',
-                'name': " ".join([student.name, "Enrolment Fee"]),
+                'name': " ".join([student.name, "registration Fee"]),
                 'partner_id': student.billing_partner_id.id,
                 'invoice_line': [inv_line],
                 }
@@ -331,7 +336,7 @@ class school_student(osv.osv):
             if not student.reference:
                 raise osv.except_osv(
                     _('Payment Reference Missing!'),
-                    _("Cannot validate unpaid Enrolment fee"))
+                    _("Cannot validate unpaid registration fee"))
 
         if not student.invoice_id:
             raise osv.except_osv(
@@ -374,8 +379,8 @@ class school_student(osv.osv):
 
         if view_type == 'form':
             if not view_id and context.get('stage'):
-                if context.get('stage') == 'enrolment':
-                    result = mod_obj.get_object_reference(cr, uid, 'school', 'view_school_enrolment_form')
+                if context.get('stage') == 'registration':
+                    result = mod_obj.get_object_reference(cr, uid, 'school', 'view_school_registration_form')
                     result = result and result[1] or False
                     view_id = result
         res = super(school_student, self).fields_view_get(cr, uid, view_id=view_id, view_type=view_type, context=context, toolbar=toolbar, submenu=submenu)

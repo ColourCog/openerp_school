@@ -1,6 +1,6 @@
 #/bin/env python2
 
-## REGISTRATION
+## enrolment
 
 import time
 import logging
@@ -11,35 +11,35 @@ from openerp import pooler
 from tools import resolve_id_from_context
 _logger = logging.getLogger(__name__)
 
-class school_student__registration_checklist(osv.osv):
-    _name = 'school.registration.checklist'
+class school_student__enrolment_checklist(osv.osv):
+    _name = 'school.enrolment.checklist'
 
-    def _default_registration_id(self, cr, uid, context=None):
-        return resolve_id_from_context('registration_id', context)
+    def _default_enrolment_id(self, cr, uid, context=None):
+        return resolve_id_from_context('enrolment_id', context)
 
     _columns = {
-        'registration_id': fields.many2one(
-            'school.registration',
-            'Registration',
+        'enrolment_id': fields.many2one(
+            'school.enrolment',
+            'enrolment',
             required=True,
             ondelete='cascade'),
         'item_id': fields.many2one('school.checklist.item', 'Required', required=True),
         'done': fields.boolean('Done'),
     }
     _defaults = {
-        'registration_id':_default_registration_id,
+        'enrolment_id':_default_enrolment_id,
     }
 
-school_student__registration_checklist()
+school_student__enrolment_checklist()
 
-class school_registration(osv.osv):
-    _name = 'school.registration'
+class school_enrolment(osv.osv):
+    _name = 'school.enrolment'
     _inherit = ['mail.thread', 'ir.needaction_mixin']
-    _description = 'Student Registration for a specific Class'
+    _description = 'Student enrolment for a specific Class'
     _track = {
         'state': {
-            'school.mt_registration_registered': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'registered',
-            'school.mt_registration_cancelled': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'cancel',
+            'school.mt_enrolment_enrolled': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'enrolled',
+            'school.mt_enrolment_cancelled': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'cancel',
         },
     }
 
@@ -51,8 +51,8 @@ class school_registration(osv.osv):
 
     def _default_checklist(self, cr, uid, context=None):
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
-        if user.company_id.default_registration_checklist_id:
-            return user.company_id.default_registration_checklist_id.id
+        if user.company_id.default_enrolment_checklist_id:
+            return user.company_id.default_enrolment_checklist_id.id
         return False
 
     def onchange_class_id(self, cr, uid, ids, class_id,
@@ -83,7 +83,7 @@ class school_registration(osv.osv):
         return {'value': {'checklist_ids': chk_ids}}
 
     _columns = {
-        'name': fields.char('Registration No', size=255, required=True,),
+        'name': fields.char('enrolment No', size=255, required=True,),
         'student_id': fields.many2one(
             'school.student',
             'Student',
@@ -127,14 +127,14 @@ class school_registration(osv.osv):
             type='char',
             string="Invoice status",
             readonly=True),
-        'registration_checklist_id': fields.many2one(
+        'enrolment_checklist_id': fields.many2one(
             'school.checklist',
             'Checklist',
             readonly=True,
             states={'draft': [('readonly', False)]}),
         'checklist_ids': fields.one2many(
-            'school.registration.checklist',
-            'registration_id',
+            'school.enrolment.checklist',
+            'enrolment_id',
             'Checklist Items'),
         'user_valid': fields.many2one(
             'res.users',
@@ -145,24 +145,24 @@ class school_registration(osv.osv):
         'state': fields.selection([
             ('draft', 'Draft'),
             ('cancel', 'Cancelled'),
-            ('registered', 'Registered')],
+            ('enrolled', 'enrolled')],
             'Status',
             readonly=True,
             track_visibility='onchange',
             select=True,
-            help="Gives the status of the registration" ),
+            help="Gives the status of the enrolment" ),
     }
     _defaults = {
         'name': "/",
         'date': fields.date.context_today,
         'student_id': _default_student_id,
         'class_id': _default_class_id,
-        'registration_checklist_id': _default_checklist,
+        'enrolment_checklist_id': _default_checklist,
         'state': 'draft',
         'user_id': lambda cr, uid, id, c={}: id,
     }
     _sql_constraints = [(
-        'student_registration_unique',
+        'student_enrolment_unique',
         'unique (student_id, class_id)',
         'Class must be unique per Student !'),
     ]
@@ -170,7 +170,7 @@ class school_registration(osv.osv):
     def create(self, cr, uid, vals, context=None):
         class_obj = self.pool.get('school.class')
         sclass = class_obj.browse(cr, uid, vals['class_id'], context=context)
-        # assert only registration to current class
+        # assert only enrolment to current class
         if sclass.state == 'closed':
             raise osv.except_osv(
                 _('Error!'),
@@ -180,7 +180,7 @@ class school_registration(osv.osv):
         if student.current_class_id:
             raise osv.except_osv(
                 _('Error!'),
-                _("This student is currently registered in '%s'" % student.current_class_id.name ))
+                _("This student is currently enrolled in '%s'" % student.current_class_id.name ))
         student_obj.write(
             cr,
             uid,
@@ -188,8 +188,8 @@ class school_registration(osv.osv):
             {'current_class_id': vals['class_id']},
             context=context)
         if vals.get('name', '/') == '/':
-            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'school.registration') or '/'
-        return super(school_registration, self).create(cr, uid, vals, context=context)
+            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'school.enrolment') or '/'
+        return super(school_enrolment, self).create(cr, uid, vals, context=context)
 
     def unlink(self, cr, uid, ids, context=None):
         if context is None:
@@ -198,31 +198,31 @@ class school_registration(osv.osv):
         """Allows to delete sales order lines in draft,cancel states"""
         for rec in self.browse(cr, uid, ids, context=context):
             student_obj.write(cr, uid, [rec.student_id.id], {'current_class_id': None}, context=context)
-        return super(school_registration, self).unlink(cr, uid, ids, context=context)
+        return super(school_enrolment, self).unlink(cr, uid, ids, context=context)
 
-    def registration_draft(self, cr, uid, ids, context=None):
+    def enrolment_draft(self, cr, uid, ids, context=None):
         wf_service = netsvc.LocalService("workflow")
-        for registration in self.browse(cr, uid, ids):
-            wf_service.trg_delete(uid, 'school.registration', registration.id, cr)
-            wf_service.trg_create(uid, 'school.registration', registration.id, cr)
+        for enrolment in self.browse(cr, uid, ids):
+            wf_service.trg_delete(uid, 'school.enrolment', enrolment.id, cr)
+            wf_service.trg_create(uid, 'school.enrolment', enrolment.id, cr)
         return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
 
-    def registration_validate(self, cr, uid, ids, context=None):
-        self.validate_registration(cr, uid, ids, context)
+    def enrolment_validate(self, cr, uid, ids, context=None):
+        self.validate_enrolment(cr, uid, ids, context)
         return self.write(
             cr,
             uid,
             ids,
             {
-                'state': 'registered',
+                'state': 'enrolled',
                 'date_valid': time.strftime('%Y-%m-%d'),
                 'user_valid': uid},
             context=context)
 
-    def registration_cancel(self, cr, uid, ids, context=None):
+    def enrolment_cancel(self, cr, uid, ids, context=None):
         inv_obj = self.pool.get('account.invoice')
-        std_ids = [ registration.invoice_id.id for registration in self.browse(cr, uid, ids, context=context)
-                        if registration.invoice_id]
+        std_ids = [ enrolment.invoice_id.id for enrolment in self.browse(cr, uid, ids, context=context)
+                        if enrolment.invoice_id]
         if std_ids:
             inv_obj.action_cancel(cr, uid, std_ids, context)
             inv_obj.action_cancel_draft(cr, uid, std_ids, context)
@@ -237,11 +237,11 @@ class school_registration(osv.osv):
             {'state': 'cancel', 'invoice_id': None},
             context=context)
 
-    def validate_registration(self, cr, uid, ids, context=None):
+    def validate_enrolment(self, cr, uid, ids, context=None):
         if not context:
             context = {}
-        for registration in self.browse(cr, uid, ids, context=context):
-            for check in registration.checklist_ids:
+        for enrolment in self.browse(cr, uid, ids, context=context):
+            for check in enrolment.checklist_ids:
                 if not check.done:
                     raise osv.except_osv(
                         _('Validation error!'),
@@ -338,26 +338,26 @@ class school_registration(osv.osv):
                 pass
         return self.write( cr, uid, ids, {'invoice_id': None}, context=context)
 
-school_registration()
+school_enrolment()
 
 class school_student(osv.osv):
     _name = 'school.student'
     _inherit = 'school.student'
     _columns = {
-        'registration_ids': fields.one2many(
-            'school.registration',
+        'enrolment_ids': fields.one2many(
+            'school.enrolment',
             'student_id',
-            'Registration history'),
+            'enrolment history'),
          'current_class_id': fields.many2one(
             'school.class',
             'Current class'),
     }
 
     def student_cancel(self, cr, uid, ids, context=None):
-        reg_obj = self.pool.get('school.registration')
+        reg_obj = self.pool.get('school.enrolment')
         inv_obj = self.pool.get('account.invoice')
         for student in self.browse(cr, uid, ids, context=context):
-            reg_ids = [ reg.id for reg in student.registration_ids]
+            reg_ids = [ reg.id for reg in student.enrolment_ids]
             if reg_ids:
                 reg_obj.cancel_invoice(cr, uid, reg_ids, context)
         return super(school_student, self).student_cancel(cr, uid, ids, context=context)

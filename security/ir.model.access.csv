@@ -11,10 +11,10 @@ access_school_academic_period,access_school_academic_period,model_school_academi
 access_school_academic_year,access_school_academic_year,model_school_academic_year,,1,1,1,1
 access_school_teacher,access_school_teacher,model_school_teacher,,1,1,1,1
 access_school_class,access_school_class,model_school_class,,1,1,1,1
-access_school_registration,access_school_registration,model_school_registration,,1,1,1,1
+access_school_enrolment,access_school_enrolment,model_school_enrolment,,1,1,1,1
 access_school_checklist,access_school_checklist,model_school_checklist,,1,1,1,1
 access_school_checklist_item,access_school_checklist_item,model_school_checklist_item,,1,1,1,1
 access_school_student_checklist,access_school_student_checklist,model_school_student_checklist,,1,1,1,1
-access_school_registration_checklist,access_school_registration_checklist,model_school_registration_checklist,,1,1,1,1
+access_school_enrolment_checklist,access_school_enrolment_checklist,model_school_enrolment_checklist,,1,1,1,1
 access_school_subject,access_school_subject,model_school_subject,,1,1,1,1
 access_school_grade,access_school_grade,model_school_grade,,1,1,1,1

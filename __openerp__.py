@@ -21,8 +21,8 @@ This module offers tools to manage primary and secondary schools
 Features:
 -------------------------------
 * Student database
-* Enrolment process
-* Registration process
+* registration process
+* enrolment process
 * Automatic invoice generation
 * Subjects and grading
     """,
@@ -33,12 +33,12 @@ Features:
       'general_view.xml',
       'student_view.xml',
       'student_workflow.xml',
+      'student_sequence.xml',
       'student_data.xml',
       'health_view.xml',
-      'registration_view.xml',
-      'registration_sequence.xml',
-      'registration_workflow.xml',
-      'registration_data.xml',
+      'enrolment_view.xml',
+      'enrolment_workflow.xml',
+      'enrolment_data.xml',
       'grading_view.xml',
       'res_config_view.xml',
       'school_data.xml',

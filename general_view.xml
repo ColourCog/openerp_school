@@ -225,7 +225,7 @@
             </group>
             <notebook>
               <page string="Class Roll">
-                <field name="registration_ids">
+                <field name="enrolment_ids">
                   <tree string="Student Roll">
                     <field name="class_id" invisible="1"/>
                     <field name="name" />

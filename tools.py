@@ -1,12 +1,5 @@
 #/bin/env python2
 
-## STUDENT
-# The sudent database works like the sales database. The first stage
-# of a student is an enrolment.
-# A validated enrolment becomes a student.
-# The views are the ones that make the difference; especially
-# the fields_view_get
-
 import time
 import logging
 

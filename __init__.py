@@ -1,6 +1,6 @@
 import general
 import student
 import health
-import registration
+import enrolment
 import grading
 import res_config
