@@ -87,6 +87,7 @@
             <group attrs="{'invisible': [('grading_method','=',False)]}">
               <group>
                 <field name="grading_method"/>
+                <field name="weight"/>
               </group>
               <group>
                 <field name="alpha_val" attrs="{'invisible': [('grading_method','=','numeric')]}"/>
@@ -95,8 +96,8 @@
                   <label string="/"/>
                   <field name="numeric_ceil" class="oe_inline"/>
                 </span>
+                <field name="description"/>
               </group>
-              <field name="description"/>
             </group>
           </sheet>
         </form>

@@ -228,7 +228,7 @@ class school_enrolment(osv.osv):
             student_obj.write(
                 cr,
                 uid,
-                std_ids,
+                [enrolment.student_id.id],
                 {'current_class_id': enrolment.class_id.id, 'is_enrolled': True},
                 context=context)
         return self.write(

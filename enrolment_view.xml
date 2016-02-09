@@ -6,7 +6,7 @@
       <field name="name">school.enrolment.tree</field>
       <field name="model">school.enrolment</field>
       <field name="arch" type="xml">
-        <tree string="Classes" colors="red:state=='cancel';grey:state=='suspend'">
+        <tree string="Enrolments" colors="green:state=='draft';grey:state=='suspend'">
           <field name="year_id"/>
           <field name="date_valid"/>
           <field name="student_id"/>
@@ -55,7 +55,7 @@
               <group>
                 <field name="waive_tuition_fee" groups="school.group_school_manager"/>
                 <field name="tuition_fee_id"/>
-                <field name="is_invoiced"/>
+                <field name="is_invoiced" invisible="1"/>
               </group>
             </group>
             <notebook name="details">
@@ -227,7 +227,7 @@
       <field name="inherit_id" ref="school.view_school_registration_form"/>
       <field name="arch" type="xml">
         <xpath expr="//field[@name='is_invoiced']" position="after">
-          <field name="is_enrolled"/>
+          <field name="is_enrolled" invisible="1"/>
         </xpath>
         <xpath expr="//page[@string='Relatives']" position="after">
           <page string="Enrolments">
