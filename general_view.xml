@@ -19,7 +19,7 @@
       <field name="arch" type="xml">
         <form string="Academic Period" version="7.0">
           <header>
-            <button name="close_year" type="object" states="open" string="Archive" groups="school.group_school_manager"/>
+            <button name="archive_year" type="object" states="open" string="Archive" groups="school.group_school_manager"/>
             <field name="state" widget="statusbar" statusbar_visible="open,archived" statusbar_colors='{"archived":"grey"}'/>
           </header>
           <sheet>
@@ -208,8 +208,9 @@
       <field name="arch" type="xml">
         <form string="Class" version="7.0">
           <header>
-            <button name="close_class" type="object" states="open" string="Close" groups="school.group_school_manager"/>
-            <button name="archive_class" type="object" states="closed" string="Archive" groups="school.group_school_manager"/>
+            <button name="close_class" type="object" states="open" string="Close" groups="school.group_school_headteacher"/>
+            <button name="open_class" type="object" states="closed" string="Re-open" groups="school.group_school_headteacher"/>
+            <button name="archive_class" type="object" states="closed" string="Archive" groups="school.group_school_headteacher"/>
             <field name="state" widget="statusbar" statusbar_visible="open,closed,archived" statusbar_colors='{"archived":"grey"}'/>
           </header>
           <sheet>
@@ -229,7 +230,6 @@
                   <tree string="Student Roll">
                     <field name="class_id" invisible="1"/>
                     <field name="name" />
-                    <field name="student_id"/>
                   </tree>
                 </field>
               </page>

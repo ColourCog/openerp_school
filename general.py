@@ -152,18 +152,12 @@ class school_academic_period(osv.osv):
         'state': "open",
     }
 
-    def close_year(self, cr, uid, ids, context=None):
-        class_ids = []
+    def archive_year(self, cr, uid, ids, context=None):
         class_obj = self.pool.get('school.class')
-        for year in self.browse(cr, uid, ids, context=context):
-            class_ids.extend(
-                class_obj.search(
-                    cr,
-                    uid,
-                    [('year_id','=',year.id)],
-                    context=context))
+        class_ids = class_obj.search(cr, uid, [('year_id','=',year.id)], context=context)
         class_obj.archive_class(cr, uid, class_ids, context=context)
         self.write(cr, uid, ids, {'state': 'archived'}, context=context)
+
 school_academic_period()
 
 
@@ -227,8 +221,8 @@ class school_class(osv.osv):
             'class_id',
             'Class Roll'),
         'state': fields.selection([
-            ('open', 'enrolments open'),
-            ('closed', 'enrolments closed'),
+            ('open', 'Enrolments open'),
+            ('closed', 'Enrolments closed'),
             ('archive', 'Archived')],
             'Status',
             readonly=True,
@@ -239,10 +233,11 @@ class school_class(osv.osv):
     _defaults = {
         'state': 'open',
     }
+
     _sql_constraints = [(
-        'level_year_unique',
-        'unique (year_id, level_id)',
-        'Level must be unique per Year !'),
+        'year_level_teacher_unique',
+        'unique (year_id, level_id, teacher_id)',
+        'This class already exists!'),
     ]
 
     def create(self, cr, uid, vals, context=None):
@@ -257,21 +252,23 @@ class school_class(osv.osv):
         return super(school_class, self).create(cr, uid, vals, context=context)
 
     def close_class(self, cr, uid, ids, context=None):
-        """Archives class and releases students for new enrolment"""
-        student_ids = []
-        for sclass in self.browse(cr, uid, ids, context=context):
-            for reg in sclass.enrolment_ids:
-                student_ids.append(reg.student_id.id)
-        student_obj = self.pool.get('school.student')
-        student_obj.write(cr, uid, student_ids, {'current_class_id': None}, context=context)
+        """lock class for enrolments"""
         self.write(cr, uid, ids, {'state': 'closed'}, context=context)
+
+    def open_class(self, cr, uid, ids, context=None):
+        """re-open class for enrolments"""
+        self.write(cr, uid, ids, {'state': 'open'}, context=context)
 
     def archive_class(self, cr, uid, ids, context=None):
         """Archives class and releases students for new enrolment"""
         student_ids = []
+        enr_ids = []
         for sclass in self.browse(cr, uid, ids, context=context):
-            for reg in sclass.enrolment_ids:
-                student_ids.append(reg.student_id.id)
+            for enr in sclass.enrolment_ids:
+                enr_ids.append(enr.id)
+                student_ids.append(enr.student_id.id)
+        enr_obj = self.pool.get('school.enrolment')
+        enr_obj.write(cr, uid, enr_ids, {'state': 'archived'}, context=context)
         student_obj = self.pool.get('school.student')
         student_obj.write(cr, uid, student_ids, {'current_class_id': None}, context=context)
         self.write(cr, uid, ids, {'state': 'archived'}, context=context)
