@@ -152,7 +152,7 @@ class school_enrolment(osv.osv):
             ('draft', 'Draft'),
             ('cancel', 'Cancelled'),
             ('enrolled', 'Enrolled'),
-            ('closed', 'Archived'),],
+            ('archived', 'Archived'),],
             'Status',
             readonly=True,
             track_visibility='onchange',

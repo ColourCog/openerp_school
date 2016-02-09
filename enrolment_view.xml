@@ -31,7 +31,7 @@
               groups="account.group_account_user"/>
             <button name="cancel" states="enrolled" string="Cancel" groups="school.group_school_manager"/>
             <button name="enrolment_draft" states="cancel" string="Set to Draft" type="object" />
-            <field name="state" widget="statusbar" statusbar_visible="draft,enrolled" statusbar_colors='{"cancel":"red"}'/>
+            <field name="state" widget="statusbar" statusbar_visible="draft,enrolled,archived" statusbar_colors='{"cancel":"red"}'/>
           </header>
           <sheet>
             <h1> <field name="student_id" context="{'stage':'registration'}"/></h1>
@@ -180,7 +180,7 @@
       <field name="arch" type="xml">
         <search string="Search Students">
           <field name="student_id"/>
-          <filter icon="terp-check" name="open" string="Current" domain="[('class_state','=','open')]"/>
+          <filter icon="terp-check" name="open" string="Current" domain="[('state','=','enrolled')]"/>
           <separator/>
           <group expand="0" string="Group By..." >
             <filter string="Class" domain="[]" context="{'group_by':'current_class_id'}"/>
