@@ -1,5 +1,6 @@
 from openerp.tools.translate import _
 from openerp.osv import fields, osv
+from tools import GRADING_METHOD
 
 class res_company(osv.osv):
     _inherit = "res.company"
@@ -7,13 +8,16 @@ class res_company(osv.osv):
     _columns = {
         'default_registration_fee_id': fields.many2one(
             'product.product',
-            'registration fee'),
+            'Registration fee'),
         'default_registration_checklist_id': fields.many2one(
             'school.checklist',
-            'registration Checklist'),
+            'Registration Checklist'),
         'default_enrolment_checklist_id': fields.many2one(
             'school.checklist',
-            'enrolment Checklist'),
+            'Enrolment Checklist'),
+        'default_grading_method': fields.selection(
+            GRADING_METHOD,
+            'Grading method'),
     }
 
 res_company()
@@ -36,13 +40,19 @@ class school_config_settings(osv.osv_memory):
             'default_registration_checklist_id',
             type='many2one',
             relation='school.checklist',
-            string="registration Checklist"),
+            string="Registration Checklist"),
         'default_enrolment_checklist_id': fields.related(
             'company_id',
             'default_enrolment_checklist_id',
             type='many2one',
             relation='school.checklist',
-            string="enrolment Checklist"),
+            string="Enrolment Checklist"),
+        'default_grading_method': fields.related(
+            'company_id',
+            'default_grading_method',
+            type='selection',
+            selection=GRADING_METHOD,
+            string="Default grading method"),
     }
 
     def _default_company(self, cr, uid, context=None):
@@ -70,6 +80,7 @@ class school_config_settings(osv.osv_memory):
             'default_registration_fee_id': False,
             'default_registration_checklist_id': False,
             'default_enrolment_checklist_id': False,
+            'default_grading_method': False,
         }
         if company_id:
             company = self.pool.get('res.company').browse(cr, uid, company_id, context=context)
@@ -77,5 +88,6 @@ class school_config_settings(osv.osv_memory):
                 'default_registration_fee_id': company.default_registration_fee_id and company.default_registration_fee_id.id or False,
                 'default_registration_checklist_id': company.default_registration_checklist_id and company.default_registration_checklist_id.id or False,
                 'default_enrolment_checklist_id': company.default_enrolment_checklist_id and company.default_enrolment_checklist_id.id or False,
+                'default_grading_method': company.default_grading_method and company.default_grading_method or False,
             })
         return {'value': values}

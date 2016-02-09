@@ -29,16 +29,22 @@
               invisible="1"
               on_change="onchange_company_id(company_id, context)"/>
             <group name="registration_grp">
-              <label for="id" string="registration"/>
+              <label for="id" string="Registration"/>
                 <group>
                   <field name="default_registration_fee_id"/>
                   <field name="default_registration_checklist_id"/>
                 </group>
             </group>
             <group name="enrolment_grp">
-              <label for="id" string="enrolment"/>
+              <label for="id" string="Erolment"/>
                 <group>
                   <field name="default_enrolment_checklist_id"/>
+                </group>
+            </group>
+            <group name="grading_grp">
+              <label for="id" string="Grading"/>
+                <group>
+                  <field name="default_grading_method"/>
                 </group>
             </group>
           </form>
