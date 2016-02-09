@@ -179,13 +179,30 @@ class school_teacher(osv.osv):
     _name = 'school.teacher'
     _description = 'Teacher'
 
+    def _default_employee_id(self, cr, uid, context=None):
+        return resolve_id_from_context('employee_id', context)
+
     _columns = {
         'name': fields.char('Teacher Name', size=255, select=True),
         'employee_id': fields.many2one(
             'hr.employee',
             'Employee'),
         'description': fields.text('Description'),
+        'state': fields.selection([
+            ('open', 'Active'),
+            ('archive', 'Archived')],
+            'Status',
+            readonly=True,
+            track_visibility='onchange',
+            select=True,
+            help="The status of this Teacher" ),
     }
+
+    _defaults = {
+        'state': 'open',
+        'employee_id': _default_employee_id,
+    }
+
     def create(self, cr, uid, vals, context=None):
         hr_obj = self.pool.get('hr.employee')
         if vals.get('name', '/') == '/':
@@ -194,12 +211,26 @@ class school_teacher(osv.osv):
                 employee = hr_obj.browse(cr, uid, vals['employee_id'], context)
                 vals['name'] = employee.name
         return super(school_teacher, self).create(cr, uid, vals, context=context)
+
+    def archive_teacher(self, cr, uid, ids, context=None):
+        """Archives Teachers"""
+        self.write(cr, uid, ids, {'state': 'archived'}, context=context)
+
 school_teacher()
 
 
 class school_class(osv.osv):
     _name = 'school.class'
     _description = 'Class'
+
+    def _default_year_id(self, cr, uid, context=None):
+        return resolve_id_from_context('year_id', context)
+
+    def _default_level_id(self, cr, uid, context=None):
+        return resolve_id_from_context('level_id', context)
+
+    def _default_teacher_id(self, cr, uid, context=None):
+        return resolve_id_from_context('teacher_id', context)
 
     _columns = {
         'name': fields.char('Name', size=255, select=True),
@@ -232,6 +263,9 @@ class school_class(osv.osv):
     }
     _defaults = {
         'state': 'open',
+        'year_id': _default_year_id,
+        'level_id': _default_level_id,
+        'teacher_id': _default_teacher_id,
     }
 
     _sql_constraints = [(

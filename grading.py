@@ -166,7 +166,7 @@ class school_class_subject(osv.osv):
 
     _columns = {
         'class_id': fields.many2one(
-            'school.academic.class',
+            'school.class',
             'class',
             required=True),
         'subject_id': fields.many2one(

@@ -19,3 +19,4 @@ access_school_enrolment_checklist,access_school_enrolment_checklist,model_school
 access_school_subject,access_school_subject,model_school_subject,,1,1,1,1
 access_school_grade,access_school_grade,model_school_grade,,1,1,1,1
 access_school_year_subject,access_school_year_subject,model_school_year_subject,,1,1,1,1
+access_school_class_subject,access_school_class_subject,model_school_class_subject,,1,1,1,1
