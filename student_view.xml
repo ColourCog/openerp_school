@@ -124,7 +124,7 @@
         <search string="Search Students">
           <field name="surname"/>
           <separator/>
-          <filter string="registrations" domain="[('state','=','draft')]"/>
+          <filter string="Registrations" domain="[('state','=','draft')]"/>
           <filter string="Students" domain="[('state','=','student')]" />
           <group expand="0" string="Group By..." >
             <filter string="Surname" domain="[]" context="{'group_by':'surname'}"/>
