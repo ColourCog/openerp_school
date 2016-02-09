@@ -26,10 +26,6 @@
               string="Generate Invoice"
               groups="account.group_account_user"
               attrs="{'invisible':[('invoice_id','!=',None)]}"/>
-            <button name="pay_invoice" type="object" states="student"
-              string="Pay Invoice"
-              groups="account.group_account_user"
-              attrs="{'invisible':['|',('invoice_id','=',False),('invoice_state','=','paid')]}"/>
             <button name="student_suspend" type="object" states="student"
               string="Deactivate" groups="school.group_school_manager"/>
             <button name="student_resume" type="object" states="suspend" string="Activate" groups="school.group_school_manager"/>
@@ -52,11 +48,11 @@
                 <field name="religion_id"/>
               </group>
             </group>
-            <separator string="Financial"/>
+            <separator string="Administration"/>
             <group>
               <group>
+                <field name="reg_num"/>
                 <field name="billing_partner_id"/>
-                <field name="reference"/>
                 <field name="invoice_id"/>
                 <field name="invoice_state"/>
               </group>
@@ -139,7 +135,7 @@
     </record>
 
     <record id="action_school_registration_live" model="ir.actions.act_window">
-      <field name="name">registrations</field>
+      <field name="name">Registrations</field>
       <field name="type">ir.actions.act_window</field>
       <field name="res_model">school.student</field>
       <field name="view_type">form</field>
