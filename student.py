@@ -178,7 +178,7 @@ class school_student(osv.osv):
 
 
     def create(self, cr, uid, vals, context=None):
-        vals['firstname'] = vals.get('firstname').capitalize()
+        vals['firstname'] = vals.get('firstname').title()
         vals['surname'] = vals.get('surname').upper()
         if vals.get('reg_num', '/') == '/':
             vals['reg_num'] = self.pool.get('ir.sequence').get(cr, uid, 'school.registration')

@@ -251,9 +251,9 @@
             string="Enroll"
             context="{'student_id':active_id}"
             type="object"
-            state="student"
+            states="student"
             groups="school.group_school_headteacher"
-            attrs="{'invisible': [('current_class_id','&lt;&gt;', False)]}"
+            attrs="{'invisible': [('current_class_id','!=', False)]}"
             class="oe_highlight"/>
         </xpath>
 
