@@ -25,7 +25,7 @@
             <button name="generate_invoice" type="object" states="student"
               string="Generate Invoice"
               groups="account.group_account_user"
-              attrs="{'invisible':[('invoice_id','!=',None)]}"/>
+              attrs="{'invisible':['|',('is_invoiced','=',True),'|',('waive_fee','=',True)]}"/>
             <button name="student_suspend" type="object" states="student"
               string="Deactivate" groups="school.group_school_manager"/>
             <button name="student_resume" type="object" states="suspend" string="Activate" groups="school.group_school_manager"/>
@@ -55,6 +55,7 @@
                 <field name="billing_partner_id"/>
                 <field name="invoice_id"/>
                 <field name="invoice_state"/>
+                <field name="is_invoiced"/>
               </group>
               <group>
                 <field name="waive_fee" groups="school.group_school_manager"/>

@@ -23,12 +23,10 @@
         <form string="enrolment" version="7.0">
           <header>
             <button name="validate" states="draft" string="Validate" class="oe_highlight" groups="school.group_school_headteacher"/>
-            <button name="generate_invoice" type="object" states="enrolled"
+            <button name="generate_invoice" type="object" states="draft"
               string="Generate Invoice"
-              groups="account.group_account_user"/>
-            <button name="cancel_invoice" type="object" states="enrolled"
-              string="Cancel Invoice"
-              groups="account.group_account_user"/>
+              groups="account.group_account_user"
+              attrs="{'invisible':[('is_invoiced','=',True)]}"/>
             <button name="cancel" states="enrolled" string="Cancel" groups="school.group_school_manager"/>
             <button name="enrolment_draft" states="cancel" string="Set to Draft" type="object" />
             <field name="state" widget="statusbar" statusbar_visible="draft,enrolled,archived" statusbar_colors='{"cancel":"red"}'/>
@@ -48,6 +46,17 @@
                 <field name="enrolment_checklist_id" on_change="onchange_checklist_id(enrolment_checklist_id)"/>
               </group>
             </group>
+            <separator string="Financial information"/>
+            <group>
+              <group>
+                <field name="invoice_id"/>
+                <field name="invoice_state"/>
+              </group>
+              <group>
+                <field name="tuition_fee_id"/>
+                <field name="is_invoiced"/>
+              </group>
+            </group>
             <notebook name="details">
               <page string="Checklist">
                 <field name="checklist_ids" context="{'enrolment_id': active_id}">
@@ -56,13 +65,6 @@
                     <field name="done"/>
                   </tree>
                 </field>
-              </page>
-              <page string="Financial">
-                <group>
-                <field name="tuition_fee_id"/>
-                  <field name="invoice_id"/>
-                  <field name="invoice_state"/>
-                </group>
               </page>
             </notebook>
           </sheet>
@@ -223,8 +225,8 @@
       <field name="model">school.student</field>
       <field name="inherit_id" ref="school.view_school_registration_form"/>
       <field name="arch" type="xml">
-        <xpath expr="//field[@name='user_id']" position="after">
-          <field name="current_class_id" invisible="1"/>
+        <xpath expr="//field[@name='is_invoiced']" position="after">
+          <field name="is_enrolled"/>
         </xpath>
         <xpath expr="//page[@string='Relatives']" position="after">
           <page string="Enrolments">
@@ -253,7 +255,7 @@
             type="object"
             states="student"
             groups="school.group_school_headteacher"
-            attrs="{'invisible': [('current_class_id','!=', False)]}"
+            attrs="{'invisible':[('is_enrolled','=',True)]}"
             class="oe_highlight"/>
         </xpath>
 

@@ -127,7 +127,9 @@ class school_student(osv.osv):
             'Waive registration fee',
             help="Allow the registration to proceed without paying the fee."),
         #financial
-        'invoice_id': fields.many2one(
+         'is_invoiced': fields.boolean(
+            'Invoice generated'),
+       'invoice_id': fields.many2one(
             'account.invoice',
             'Registration invoice',
             readonly=True,
@@ -240,7 +242,7 @@ class school_student(osv.osv):
             cr,
             uid,
             ids,
-            {'state': 'cancel', 'invoice_id': None},
+            {'state': 'cancel', 'invoice_id': None, 'is_invoiced': False},
             context=context)
 
     def validate_registration(self, cr, uid, ids, context=None):
@@ -277,7 +279,7 @@ class school_student(osv.osv):
                 "Registration Fee",
                 ctx)
 
-            self.write(cr, uid, [student.id], {'invoice_id': inv_id}, context=ctx)
+            self.write(cr, uid, [student.id], {'invoice_id': inv_id, 'is_invoiced': True}, context=ctx)
 
         return True
 

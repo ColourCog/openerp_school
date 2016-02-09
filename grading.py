@@ -43,20 +43,6 @@ class school_subject(osv.osv):
 school_subject()
 
 
-class school_teacher(osv.osv):
-    _name = 'school.teacher'
-    _inherit = 'school.teacher'
-
-    _columns = {
-        'subject_ids': fields.many2many(
-            'school.subject',
-            'teacher_subject_rel',
-            'teacher_id',
-            'subject_id',
-            'Subjects'),
-    }
-school_teacher()
-
 class school_enrolment(osv.osv):
     _name = 'school.enrolment'
     _inherit = 'school.enrolment'
@@ -228,6 +214,17 @@ class school_class(osv.osv):
 
 school_class()
 
+class school_teacher(osv.osv):
+    _name = 'school.teacher'
+    _inherit = 'school.teacher'
+
+    _columns = {
+        'subject_ids': fields.one2many(
+            'school.class.subject',
+            'teacher_id',
+            'Subjects'),
+    }
+school_teacher()
 class school_grade(osv.osv):
     _name = 'school.grade'
 

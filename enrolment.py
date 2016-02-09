@@ -123,6 +123,8 @@ class school_enrolment(osv.osv):
         'tuition_fee_id': fields.many2one(
             'product.product',
             'Tuition Fee'),
+        'is_invoiced': fields.boolean(
+            'Invoice generated'),
         'invoice_id': fields.many2one(
             'account.invoice',
             'Tuition invoice',
@@ -195,7 +197,7 @@ class school_enrolment(osv.osv):
             cr,
             uid,
             [vals['student_id']],
-            {'current_class_id': vals['class_id']},
+            {'current_class_id': vals['class_id'], 'is_enrolled': True},
             context=context)
         return super(school_enrolment, self).create(cr, uid, vals, context=context)
 
@@ -242,7 +244,7 @@ class school_enrolment(osv.osv):
             cr,
             uid,
             ids,
-            {'state': 'cancel', 'invoice_id': None},
+            {'state': 'cancel', 'invoice_id': None, 'is_invoiced': False},
             context=context)
 
     def validate_enrolment(self, cr, uid, ids, context=None):
@@ -287,24 +289,12 @@ class school_enrolment(osv.osv):
                 "Tuition Fee",
                 ctx)
 
-            self.write(cr, uid, [enr.id], {'invoice_id': inv_id}, context=ctx)
+            self.write(cr, uid, [enr.id], {'invoice_id': inv_id, 'is_invoiced': True}, context=ctx)
 
         return True
 
-    def cancel_invoice(self, cr, uid, ids, context=None):
-        inv_obj = self.pool.get('account.invoice')
-        reg_ids = [ enr.invoice_id.id for enr in self.browse(cr, uid, ids, context=context)
-                        if enr.invoice_id]
-        if reg_ids:
-            inv_obj.action_cancel(cr, uid, reg_ids, context)
-            inv_obj.action_cancel_draft(cr, uid, reg_ids, context)
-            try:
-                inv_obj.unlink(cr, uid, reg_ids, context=context)
-            except:
-                pass
-        return self.write( cr, uid, ids, {'invoice_id': None}, context=context)
-
 school_enrolment()
+
 
 class school_student(osv.osv):
     _name = 'school.student'
@@ -314,9 +304,11 @@ class school_student(osv.osv):
             'school.enrolment',
             'student_id',
             'enrolment history'),
-         'current_class_id': fields.many2one(
+        'current_class_id': fields.many2one(
             'school.class',
             'Current class'),
+        'is_enrolled': fields.boolean(
+            'Currently enrolled'),
     }
 
     def student_cancel(self, cr, uid, ids, context=None):
@@ -325,7 +317,7 @@ class school_student(osv.osv):
         for student in self.browse(cr, uid, ids, context=context):
             reg_ids = [ enr.id for enr in student.enrolment_ids]
             if reg_ids:
-                reg_obj.cancel_invoice(cr, uid, reg_ids, context)
+                reg_obj.enrolment_cancel(cr, uid, reg_ids, context)
                 reg_obj.unlink(cr, uid, reg_ids, context)
         return super(school_student, self).student_cancel(cr, uid, ids, context=context)
 
@@ -334,13 +326,18 @@ class school_student(osv.osv):
 
         student_obj = self.pool.get('school.student')
         student = student_obj.browse(cr, uid, context['student_id'], context=context)
+        if not student.waive_fee:
+            if not student.invoice_id:
+                raise osv.except_osv(
+                    _('No Invoice!'),
+                    _("No invoice has been generated"))
         if student.current_class_id:
             raise osv.except_osv(
-                _('Error!'),
+                _('Duplicate Error!'),
                 _("This student is currently enrolled in '%s'" % student.current_class_id.name ))
         if student.invoice_id and student.invoice_id.state in ['draft', 'open']:
             raise osv.except_osv(
-                _('Error!'),
+                _('Unpaid Error!'),
                 _("Registration invoice '%s' is still pending." % student.invoice_id.number ))
 
         return {
