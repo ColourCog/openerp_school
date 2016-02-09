@@ -9,9 +9,10 @@ from openerp.tools.translate import _
 from openerp import netsvc
 from openerp import pooler
 from tools import resolve_id_from_context
+from tools import generic_generate_invoice
 _logger = logging.getLogger(__name__)
 
-class school_student__enrolment_checklist(osv.osv):
+class school_student_enrolment_checklist(osv.osv):
     _name = 'school.enrolment.checklist'
 
     def _default_enrolment_id(self, cr, uid, context=None):
@@ -30,7 +31,7 @@ class school_student__enrolment_checklist(osv.osv):
         'enrolment_id':_default_enrolment_id,
     }
 
-school_student__enrolment_checklist()
+school_student_enrolment_checklist()
 
 class school_enrolment(osv.osv):
     _name = 'school.enrolment'
@@ -83,7 +84,12 @@ class school_enrolment(osv.osv):
         return {'value': {'checklist_ids': chk_ids}}
 
     _columns = {
-        'name': fields.char('enrolment No', size=255, required=True,),
+        'name': fields.related(
+            'student_id',
+            'name',
+            type='char',
+            relation='school.student',
+            string="Student Name"),
         'student_id': fields.many2one(
             'school.student',
             'Student',
@@ -119,7 +125,7 @@ class school_enrolment(osv.osv):
             'Tuition Fee'),
         'invoice_id': fields.many2one(
             'account.invoice',
-            'Tuition Invoice',
+            'Tuition invoice',
             readonly=True),
         'invoice_state': fields.related(
             'invoice_id',
@@ -145,7 +151,8 @@ class school_enrolment(osv.osv):
         'state': fields.selection([
             ('draft', 'Draft'),
             ('cancel', 'Cancelled'),
-            ('enrolled', 'enrolled')],
+            ('enrolled', 'Enrolled'),
+            ('closed', 'Archived'),],
             'Status',
             readonly=True,
             track_visibility='onchange',
@@ -153,7 +160,6 @@ class school_enrolment(osv.osv):
             help="Gives the status of the enrolment" ),
     }
     _defaults = {
-        'name': "/",
         'date': fields.date.context_today,
         'student_id': _default_student_id,
         'class_id': _default_class_id,
@@ -187,8 +193,6 @@ class school_enrolment(osv.osv):
             [vals['student_id']],
             {'current_class_id': vals['class_id']},
             context=context)
-        if vals.get('name', '/') == '/':
-            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'school.enrolment') or '/'
         return super(school_enrolment, self).create(cr, uid, vals, context=context)
 
     def unlink(self, cr, uid, ids, context=None):
@@ -252,83 +256,41 @@ class school_enrolment(osv.osv):
             context = {}
         ctx = context.copy()
         ctx.update({'account_period_prefer_normal': True})
-        student_obj = self.pool.get('school.student')
-        period_obj = self.pool.get('account.period')
-        inv_obj = self.pool.get('account.invoice')
-        inv_line_obj = self.pool.get('account.invoice.line')
-        total = 0.0
-        for reg in self.browse(cr, uid, ids, context=ctx):
-            if not reg.student_id.invoice_id:
-                if not reg.student_id.waive_fee:
+
+        for enr in self.browse(cr, uid, ids, context=ctx):
+            if not enr.student_id.invoice_id:
+                if not enr.student_id.waive_fee:
                     student_obj.generate_invoice(
                         cr,
                         uid,
-                        [reg.student_id.id],
+                        [enr.student_id.id],
                         context=context)
-            if not reg.tuition_fee_id:
+            if not enr.tuition_fee_id:
                 raise osv.except_osv(
                     _("Can't generate invoice"),
                     _("No tuition fee found."))
-            if reg.invoice_id:
+            if enr.invoice_id:
                 raise osv.except_osv(
                     _('Invoice Already Generated!'),
                     _("Please refer to the linked Tuition Invoice"))
 
-            line = {
-                'name': reg.tuition_fee_id.name,
-                'product_id': reg.tuition_fee_id.id,
-                'quantity': 1,
-                }
-            # run inv_line_obj's onchange to update
-            n = inv_line_obj.product_id_change(
+            inv_id = generic_generate_invoice(
                 cr,
                 uid,
-                ids,
-                reg.tuition_fee_id.id,
-                reg.tuition_fee_id.uom_id.id,
-                qty=1,
-                name='',
-                type='out_invoice',
-                partner_id=reg.student_id.billing_partner_id.id,
-                company_id=None,
-                context=None)['value']
-            line.update(n)
+                enr.tuition_fee_id.id,
+                enr.student_id.billing_partner_id.id,
+                enr.student_id.name,
+                "Tuition Fee",
+                ctx)
 
-            inv_line = (0, 0, line)
-
-            invoice = {
-                'type': 'out_invoice',
-                'name': " ".join([reg.student_id.name, "Tuition Fee"]),
-                'partner_id': reg.student_id.billing_partner_id.id,
-                'invoice_line': [inv_line],
-                }
-            # run inv_obj's onchange to update
-            n = inv_obj.onchange_partner_id(
-                cr,
-                uid,
-                ids,
-                'out_invoice',
-                reg.student_id.billing_partner_id.id,
-                date_invoice=False,
-                payment_term=False,
-                partner_bank_id=False,
-                company_id=False)['value']
-            invoice.update(n)
-
-            inv_id = inv_obj.create(cr, uid, invoice, context=ctx)
-            inv_obj.action_date_assign(cr,uid,[inv_id],context)
-            inv_obj.action_move_create(cr,uid,[inv_id],context=context)
-            inv_obj.action_number(cr,uid,[inv_id],context)
-            inv_obj.invoice_validate(cr,uid,[inv_id],context=context)
-
-            self.write(cr, uid, [reg.id], {'invoice_id': inv_id}, context=ctx)
+            self.write(cr, uid, [enr.id], {'invoice_id': inv_id}, context=ctx)
 
         return True
 
     def cancel_invoice(self, cr, uid, ids, context=None):
         inv_obj = self.pool.get('account.invoice')
-        reg_ids = [ reg.invoice_id.id for reg in self.browse(cr, uid, ids, context=context)
-                        if reg.invoice_id]
+        reg_ids = [ enr.invoice_id.id for enr in self.browse(cr, uid, ids, context=context)
+                        if enr.invoice_id]
         if reg_ids:
             inv_obj.action_cancel(cr, uid, reg_ids, context)
             inv_obj.action_cancel_draft(cr, uid, reg_ids, context)
@@ -357,7 +319,7 @@ class school_student(osv.osv):
         reg_obj = self.pool.get('school.enrolment')
         inv_obj = self.pool.get('account.invoice')
         for student in self.browse(cr, uid, ids, context=context):
-            reg_ids = [ reg.id for reg in student.enrolment_ids]
+            reg_ids = [ enr.id for enr in student.enrolment_ids]
             if reg_ids:
                 reg_obj.cancel_invoice(cr, uid, reg_ids, context)
         return super(school_student, self).student_cancel(cr, uid, ids, context=context)
