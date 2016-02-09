@@ -14,6 +14,7 @@ from openerp.tools.translate import _
 from openerp import netsvc
 from openerp import pooler
 from tools import resolve_id_from_context
+from tools import generic_generate_invoice
 _logger = logging.getLogger(__name__)
 
 class school_student_checklist(osv.osv):
@@ -120,20 +121,15 @@ class school_student(osv.osv):
             required=True,
             domain=[('customer','=',True)]),
         #financial
-        'registration_fee_id': fields.many2one('product.product', 'registration Fee', required=True),
+        'registration_fee_id': fields.many2one('product.product', 'Registration fee', required=True),
         # financial
         'waive_fee': fields.boolean(
             'Waive registration fee',
             help="Allow the registration to proceed without paying the fee."),
         #financial
-        'reference': fields.char(
-            'Payment reference',
-            size=64,
-            help="Check number, or short memo"),
-        #financial
         'invoice_id': fields.many2one(
             'account.invoice',
-            'registration Invoice',
+            'Registration invoice',
             readonly=True,
             ),
         #financial
@@ -262,10 +258,6 @@ class school_student(osv.osv):
             context = {}
         ctx = context.copy()
         ctx.update({'account_period_prefer_normal': True})
-        period_obj = self.pool.get('account.period')
-        inv_obj = self.pool.get('account.invoice')
-        inv_line_obj = self.pool.get('account.invoice.line')
-        total = 0.0
         for student in self.browse(cr, uid, ids, context=ctx):
             if student.waive_fee:
                 raise osv.except_osv(
@@ -276,102 +268,19 @@ class school_student(osv.osv):
                     _('Invoice Already Generated!'),
                     _("Please refer to the linked registration Invoice"))
 
-            line = {
-                'name': student.registration_fee_id.name,
-                'product_id': student.registration_fee_id.id,
-                'quantity': 1,
-                }
-            # run inv_line_obj's onchange to update
-            n = inv_line_obj.product_id_change(
+            inv_id = generic_generate_invoice(
                 cr,
                 uid,
-                ids,
                 student.registration_fee_id.id,
-                student.registration_fee_id.uom_id.id,
-                qty=1,
-                name='',
-                type='out_invoice',
-                partner_id=student.billing_partner_id.id,
-                company_id=None,
-                context=None)['value']
-            line.update(n)
-
-            inv_line = (0, 0, line)
-
-            invoice = {
-                'type': 'out_invoice',
-                'name': " ".join([student.name, "registration Fee"]),
-                'partner_id': student.billing_partner_id.id,
-                'invoice_line': [inv_line],
-                }
-            # run inv_obj's onchange to update
-            n = inv_obj.onchange_partner_id(
-                cr,
-                uid,
-                ids,
-                'out_invoice',
                 student.billing_partner_id.id,
-                date_invoice=False,
-                payment_term=False,
-                partner_bank_id=False,
-                company_id=False)['value']
-            invoice.update(n)
-
-            inv_id = inv_obj.create(cr, uid, invoice, context=ctx)
-            inv_obj.action_date_assign(cr,uid,[inv_id],context)
-            inv_obj.action_move_create(cr,uid,[inv_id],context=context)
-            inv_obj.action_number(cr,uid,[inv_id],context)
-            inv_obj.invoice_validate(cr,uid,[inv_id],context=context)
+                student.name,
+                "Registration Fee",
+                ctx)
 
             self.write(cr, uid, [student.id], {'invoice_id': inv_id}, context=ctx)
 
         return True
 
-    def pay_invoice(self, cr, uid, ids, context=None):
-        if not ids: return []
-        dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'account_voucher', 'view_vendor_receipt_dialog_form')
-
-        student = self.browse(cr, uid, ids[0], context=context)
-        if not student.waive_fee:
-            if not student.reference:
-                raise osv.except_osv(
-                    _('Payment Reference Missing!'),
-                    _("Cannot validate unpaid registration fee"))
-
-        if not student.invoice_id:
-            raise osv.except_osv(
-                _('No Invoice!'),
-                _('Generate an invoice to pay.'))
-
-        inv_obj = self.pool.get('account.invoice')
-        inv = inv_obj.browse(cr, uid, student.invoice_id.id, context=context)
-        if not inv.residual:
-            raise osv.except_osv(
-                _('Invoice Already Paid!'),
-                _('This invoice reports a null residual amount.'))
-
-        return {
-            'name':_("Pay Invoice"),
-            'view_mode': 'form',
-            'view_id': view_id,
-            'view_type': 'form',
-            'res_model': 'account.voucher',
-            'type': 'ir.actions.act_window',
-            'nodestroy': True,
-            'target': 'new',
-            'domain': '[]',
-            'context': {
-                'payment_expected_currency': inv.currency_id.id,
-                'default_partner_id': self.pool.get('res.partner')._find_accounting_partner(inv.partner_id).id,
-                'default_amount': inv.type in ('out_refund', 'in_refund') and -inv.residual or inv.residual,
-                'default_reference': student.reference,
-                'close_after_process': True,
-                'invoice_type': inv.type,
-                'invoice_id': inv.id,
-                'default_type': inv.type in ('out_invoice','out_refund') and 'receipt' or 'payment',
-                'type': inv.type in ('out_invoice','out_refund') and 'receipt' or 'payment'
-            }
-        }
 
     def fields_view_get(self, cr, uid, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):
         mod_obj = self.pool.get('ir.model.data')
