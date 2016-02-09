@@ -116,7 +116,7 @@ class school_enrolment(osv.osv):
             string="Academic period"),
         'teacher_id': fields.related(
             'class_id',
-            'year_id',
+            'teacher_id',
             type="many2one",
             relation='school.teacher',
             string="Class Teacher"),
@@ -191,18 +191,18 @@ class school_enrolment(osv.osv):
         student = student_obj.browse(cr, uid, vals['student_id'], context=context)
         if student.current_class_id:
             raise osv.except_osv(
-                _('Error!'),
+                _('Duplicate Error!'),
                 _("This student is currently enrolled in '%s'" % student.current_class_id.name ))
         if student.invoice_id and student.invoice_id.state in ['draft', 'open']:
             raise osv.except_osv(
-                _('Error!'),
-                _("Registration invoice '%s' is still pending." % student.invoice_id.name ))
+                _('Unpaid Error!'),
+                _("Registration invoice '%s' is still pending." % student.invoice_id.number ))
         student_obj.write(
-            cr,
-            uid,
-            [vals['student_id']],
-            {'current_class_id': vals['class_id'], 'is_enrolled': True},
-            context=context)
+                cr,
+                uid,
+                [vals['student_id']],
+                {'is_enrolled': True},
+                context=context)
         return super(school_enrolment, self).create(cr, uid, vals, context=context)
 
     def unlink(self, cr, uid, ids, context=None):
@@ -223,6 +223,14 @@ class school_enrolment(osv.osv):
 
     def enrolment_validate(self, cr, uid, ids, context=None):
         self.validate_enrolment(cr, uid, ids, context)
+        student_obj = self.pool.get('school.student')
+        for enrolment in self.browse(cr, uid, ids, context=context):
+            student_obj.write(
+                cr,
+                uid,
+                std_ids,
+                {'current_class_id': enrolment.class_id.id, 'is_enrolled': True},
+                context=context)
         return self.write(
             cr,
             uid,
@@ -235,13 +243,21 @@ class school_enrolment(osv.osv):
 
     def enrolment_cancel(self, cr, uid, ids, context=None):
         inv_obj = self.pool.get('account.invoice')
-        std_ids = [ enrolment.invoice_id.id for enrolment in self.browse(cr, uid, ids, context=context)
+        inv_ids = [ enrolment.invoice_id.id for enrolment in self.browse(cr, uid, ids, context=context)
                         if enrolment.invoice_id]
-        if std_ids:
-            inv_obj.action_cancel(cr, uid, std_ids, context)
-            inv_obj.action_cancel_draft(cr, uid, std_ids, context)
+        student_obj = self.pool.get('school.student')
+        std_ids = [ enrolment.student_id.id for enrolment in self.browse(cr, uid, ids, context=context) ]
+        student_obj.write(
+            cr,
+            uid,
+            std_ids,
+            {'current_class_id': None, 'is_enrolled': False},
+            context=context)
+        if inv_ids:
+            inv_obj.action_cancel(cr, uid, inv_ids, context)
+            inv_obj.action_cancel_draft(cr, uid, inv_ids, context)
             try:
-                inv_obj.unlink(cr, uid, std_ids, context=context)
+                inv_obj.unlink(cr, uid, inv_ids, context=context)
             except:
                 pass
         return self.write(
@@ -339,6 +355,10 @@ class school_student(osv.osv):
 
         student_obj = self.pool.get('school.student')
         student = student_obj.browse(cr, uid, context['student_id'], context=context)
+        if student.is_enrolled:
+            raise osv.except_osv(
+                _('Duplicate Error!'),
+                _("It seems an enrolment has already been created for %s.\nPlease check the draft enrolments." % student.name ))
         if not student.waive_registration_fee:
             if not student.invoice_id:
                 raise osv.except_osv(

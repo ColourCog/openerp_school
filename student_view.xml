@@ -6,7 +6,7 @@
       <field name="name">school.student.tree</field>
       <field name="model">school.student</field>
       <field name="arch" type="xml">
-        <tree string="Students" colors="green:state=='student';grey:state=='suspend'">
+        <tree string="Students" colors=";grey:state=='suspend'">
           <field name="surname"/>
           <field name="firstname"/>
           <field name="state"/>

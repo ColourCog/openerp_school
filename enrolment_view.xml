@@ -84,7 +84,7 @@
         <search string="Search enrolments">
           <field name="class_id"/>
           <field name="student_id"/>
-          <filter icon="terp-check" name="open" string="Current" domain="[('state','=','enrolled')]"/>
+          <filter icon="terp-check" name="open" string="Current" domain="[('state','!=','archived')]"/>
           <filter icon="terp-check" name="archived" string="Archived" domain="[('state','=','archived')]"/>
           <group expand="0" string="Group By..." >
             <filter string="Year" domain="[]" context="{'group_by':'year_id'}"/>
