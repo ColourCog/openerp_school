@@ -9,19 +9,29 @@ from openerp.tools.translate import _
 from openerp import netsvc
 from openerp import pooler
 from tools import resolve_id_from_context
+from tools import GRADING_METHOD, ALPHA_GRADING, ALPHA_DICT
 _logger = logging.getLogger(__name__)
 
 class school_subject(osv.osv):
     _name = 'school.subject'
 
+    def _default_grading_method(self, cr, uid, context=None):
+        user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+        if user.company_id.default_grading_method:
+            return user.company_id.default_grading_method
+        return 'alpha'
+
     _columns = {
         'name': fields.char('Subject', size=255, required=True),
-        'grading_method': fields.selection([
-            ('numeric', 'Numeric'),
-            ('alpha', 'Alphabetic')],
+        'grading_method': fields.selection(
+            GRADING_METHOD,
             'Grading method',
             select=True),
         'description': fields.text('Description'),
+    }
+
+    _defaults = {
+        'grading_method': _default_grading_method,
     }
 
     def get_grading_method(self, cr, uid, sub_id, context=None):
@@ -29,6 +39,7 @@ class school_subject(osv.osv):
         if sub:
             return sub.grading_method
         return False
+
 school_subject()
 
 
@@ -46,6 +57,92 @@ class school_teacher(osv.osv):
     }
 school_teacher()
 
+class school_enrolment(osv.osv):
+    _name = 'school.enrolment'
+    _inherit = 'school.enrolment'
+    _columns = {
+        'grade_ids': fields.one2many(
+            'school.grade',
+            'enrolment_id',
+            'Grades'),
+    }
+school_enrolment()
+
+
+class school_year_subject(osv.osv):
+    _name = 'school.year.subject'
+    _description = 'Subjects per Year'
+
+    def _default_level_id(self, cr, uid, context=None):
+        return resolve_id_from_context('level_id', context)
+
+    def _default_subject_id(self, cr, uid, context=None):
+        return resolve_id_from_context('subject_id', context)
+
+    def _default_grading_method(self, cr, uid, context=None):
+        user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+        if user.company_id.default_grading_method:
+            return user.company_id.default_grading_method
+        return 'alpha'
+
+    _columns = {
+        'level_id': fields.many2one(
+            'school.academic.year',
+            'Year',
+            required=True),
+        'subject_id': fields.many2one(
+            'school.subject',
+            'Subject',
+            required=True),
+        'grading_method': fields.selection([
+            ('numeric', 'Numeric'),
+            ('alpha', 'Alphabetic')],
+            'Grading method',
+            select=True),
+        'weight': fields.float('Weight'),
+    }
+
+    _defaults = {
+        'level_id': _default_level_id,
+        'subject_id': _default_subject_id,
+        'grading_method': _default_grading_method,
+        'weight': 1.0,
+    }
+
+    _sql_constraints = [(
+        'subject_level_unique',
+        'unique (level_id, subject_id)',
+        'Subject must be unique per Year !'),
+    ]
+
+    def get_grading_method(self, cr, uid, sub_id, context=None):
+        sub = self.browse(cr, uid, sub_id, context=context)
+        if sub:
+            return sub.grading_method
+        return False
+
+    def get_weight(self, cr, uid, level_id, subject_id, context=None):
+        sub_id = self.search(cr, uid, [('level_id','=',level_id),('subject_id','=',subject_id)], context=context)
+        sub = self.browse(cr, uid, sub_id, context=context)
+        if sub:
+            return sub.weight
+        return 1.0
+
+school_year_subject()
+
+
+class school_academic_year(osv.osv):
+    _name = 'school.academic.year'
+    _inherit = 'school.academic.year'
+
+    _columns = {
+        'subject_ids': fields.one2many(
+            'school.year.subject',
+            'level_id',
+            'Subjects'),
+    }
+
+school_academic_year()
 
 class school_grade(osv.osv):
     _name = 'school.grade'
@@ -60,10 +157,11 @@ class school_grade(osv.osv):
         return resolve_id_from_context('subject_id', context)
 
     def onchange_subject_id(self, cr, uid, ids, sub_id, context=None):
-        """Try and get grading method from subject."""
+        """Try and get grading method."""
         sub_obj = self.pool.get('school.subject')
         grd = False
         if sub_id:
+            #TODO: try the Year first
             grd = sub_obj.get_grading_method(cr, uid, sub_id, context=context)
         return {'value': {'grading_method': grd}}
 
@@ -75,8 +173,16 @@ class school_grade(osv.osv):
             if l.grading_method == 'numeric':
                 res[l.id] = ' / '.join([str(l.numeric_val), str(l.numeric_ceil)])
             if l.grading_method == 'alpha':
-                res[l.id] = l.alpha_val
+                res[l.id] = ALPHA_DICT.get(l.alpha_val, False)
         return res
+
+    def _get_weight(self, cr, uid, subject_id, enr_id, context=None):
+        enr_obj = self.pool.get('school.enrolment')
+        enr = enr_obj.browse(cr, uid, enr_id, context=context)
+        level_id = enr.class_id.level_id.id
+        sub_obj = self.pool.get('school.year.subject')
+
+        return sub_obj.get_weight(cr, uid, level_id, subject_id, context=context)
 
     _columns = {
         'name': fields.char('Grade for', size=255, required=True,),
@@ -102,25 +208,15 @@ class school_grade(osv.osv):
             required=True),
         'numeric_ceil': fields.integer("Maximum"),
         'numeric_val': fields.float("Value"),
-        'alpha_val': fields.selection([
-            ('100', 'A+'),
-            ('90', 'A'),
-            ('80', 'B+'),
-            ('70', 'B'),
-            ('60', 'C+'),
-            ('50', 'C'),
-            ('40', 'D+'),
-            ('30', 'D'),
-            ('20', 'E+'),
-            ('10', 'E'),
-            ('5', 'F+'),
-            ('0', 'F')],
+        'alpha_val': fields.selection(
+            ALPHA_GRADING,
             'Value',
             select=True),
         'value': fields.function(
             _display_grade,
             string='Grade',
             type='char'),
+        'weight': fields.float('Weight'),
         'description': fields.text('Comment'),
     }
 
@@ -130,6 +226,7 @@ class school_grade(osv.osv):
         'enrolment_id': _default_enrolment_id,
         'teacher_id': _default_teacher_id,
         'subject_id': _default_subject_id,
+        'weight': 1,
     }
 
     def create(self, cr, uid, vals, context=None):
@@ -140,31 +237,12 @@ class school_grade(osv.osv):
         class_obj = self.pool.get('school.class')
         if vals.get('name', '/') == '/':
             vals['name'] = '-'.join([sub.name, reg.name])
+        #TODO: get weight from year
+        vals['weight'] = self._get_weight(
+            cr,
+            uid,
+            vals['subject_id'],
+            vals['enrolment_id'],
+            context=context)
         return super(school_grade, self).create(cr, uid, vals, context=context)
 school_grade()
-
-
-class school_enrolment(osv.osv):
-    _name = 'school.enrolment'
-    _inherit = 'school.enrolment'
-    _columns = {
-        'grade_ids': fields.one2many(
-            'school.grade',
-            'enrolment_id',
-            'Grades'),
-    }
-school_enrolment()
-
-
-class school_academic_year(osv.osv):
-    _name = 'school.academic.year'
-    _inherit = 'school.academic.year'
-    _columns = {
-        'subject_ids': fields.many2many(
-            'school.subject',
-            'level_subject_rel',
-            'level_id',
-            'subject_id',
-            'Subjects'),
-    }
-school_academic_year()
