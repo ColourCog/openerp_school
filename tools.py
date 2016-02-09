@@ -94,7 +94,6 @@ def generic_generate_invoice(cr, uid, product_id, partner_id, student_name, tran
 
     invoice = {
         'type': 'out_invoice',
-        'name': " ".join([student_name, transaction_name]),
         'partner_id': partner_id,
         'invoice_line': [inv_line],
         }

@@ -238,12 +238,22 @@
           </page>
         </xpath>
         <xpath expr="//button[@name='validate']" position="after">
+<!--
           <button name="%(action_school_enrolment_pop)d"
             string="Enroll"
             context="{'student_id':active_id}"
             type="action"
             groups="school.group_school_headteacher"
-            attrs="{'invisible': ['|',('current_class_id','&lt;&gt;', False),'|',('state','&lt;&gt;','student')]}"
+            attrs="{'invisible': [('current_class_id','&lt;&gt;', False)]}"
+            class="oe_highlight"/>
+-->
+          <button name="enroll_student"
+            string="Enroll"
+            context="{'student_id':active_id}"
+            type="object"
+            state="student"
+            groups="school.group_school_headteacher"
+            attrs="{'invisible': [('current_class_id','&lt;&gt;', False)]}"
             class="oe_highlight"/>
         </xpath>
 

@@ -187,6 +187,10 @@ class school_enrolment(osv.osv):
             raise osv.except_osv(
                 _('Error!'),
                 _("This student is currently enrolled in '%s'" % student.current_class_id.name ))
+        if student.invoice_id and student.invoice_id.state in ['draft', 'open']:
+            raise osv.except_osv(
+                _('Error!'),
+                _("Registration invoice '%s' is still pending." % student.invoice_id.name ))
         student_obj.write(
             cr,
             uid,
@@ -322,6 +326,34 @@ class school_student(osv.osv):
             reg_ids = [ enr.id for enr in student.enrolment_ids]
             if reg_ids:
                 reg_obj.cancel_invoice(cr, uid, reg_ids, context)
+                reg_obj.unlink(cr, uid, reg_ids, context)
         return super(school_student, self).student_cancel(cr, uid, ids, context=context)
+
+    def enroll_student(self, cr, uid, ids, context=None):
+        dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'school', 'view_school_enrolment_form')
+
+        student_obj = self.pool.get('school.student')
+        student = student_obj.browse(cr, uid, context['student_id'], context=context)
+        if student.current_class_id:
+            raise osv.except_osv(
+                _('Error!'),
+                _("This student is currently enrolled in '%s'" % student.current_class_id.name ))
+        if student.invoice_id and student.invoice_id.state in ['draft', 'open']:
+            raise osv.except_osv(
+                _('Error!'),
+                _("Registration invoice '%s' is still pending." % student.invoice_id.number ))
+
+        return {
+            'name': _("Enroll Student"),
+            'view_mode': 'form',
+            'view_id': view_id,
+            'view_type': 'form',
+            'res_model': 'school.enrolment',
+            'type': 'ir.actions.act_window',
+            'nodestroy': True,
+            'target': 'current',
+            'domain': '[]',
+            'context': context
+        }
 
 school_student()
