@@ -180,11 +180,12 @@ class school_student(osv.osv):
     def create(self, cr, uid, vals, context=None):
         vals['firstname'] = vals.get('firstname').capitalize()
         vals['surname'] = vals.get('surname').upper()
+        if vals.get('reg_num', '/') == '/':
+            vals['reg_num'] = self.pool.get('ir.sequence').get(cr, uid, 'school.registration')
         if vals.get('name', '/') == '/':
             vals['name'] = ' '.join([vals.get('surname'), vals.get('firstname')])
         if not vals.get('user_id'):
             vals['user_id'] = uid
-            vals['name'] = self.pool.get('ir.sequence').get(cr, uid, 'school.enrolment') or '/'
         return super(school_student, self).create(cr, uid, vals, context=context)
 
     def student_draft(self, cr, uid, ids, context=None):
@@ -203,7 +204,6 @@ class school_student(osv.osv):
             {
                 'state': 'student',
                 'date_valid': time.strftime('%Y-%m-%d'),
-                'reg_num': self.pool.get('ir.sequence').get(cr, uid, 'school.registration'),
                 'user_valid': uid},
             context=context)
 

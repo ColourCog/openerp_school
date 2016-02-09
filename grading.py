@@ -144,6 +144,90 @@ class school_academic_year(osv.osv):
 
 school_academic_year()
 
+
+class school_class_subject(osv.osv):
+    _name = 'school.class.subject'
+    _description = 'Subjects per Class'
+
+    def _default_class_id(self, cr, uid, context=None):
+        return resolve_id_from_context('class_id', context)
+
+    def _default_subject_id(self, cr, uid, context=None):
+        return resolve_id_from_context('subject_id', context)
+
+    def _default_teacher_id(self, cr, uid, context=None):
+        return resolve_id_from_context('teacher_id', context)
+
+    def _default_grading_method(self, cr, uid, context=None):
+        user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
+        if user.company_id.default_grading_method:
+            return user.company_id.default_grading_method
+        return 'alpha'
+
+    _columns = {
+        'class_id': fields.many2one(
+            'school.academic.class',
+            'class',
+            required=True),
+        'subject_id': fields.many2one(
+            'school.subject',
+            'Subject',
+            required=True),
+        'teacher_id': fields.many2one(
+            'school.teacher',
+            'Teacher',
+            required=True),
+        'grading_method': fields.selection([
+            ('numeric', 'Numeric'),
+            ('alpha', 'Alphabetic')],
+            'Grading method',
+            select=True),
+        'weight': fields.float('Weight'),
+    }
+
+    _defaults = {
+        'class_id': _default_class_id,
+        'subject_id': _default_subject_id,
+        'teacher_id': _default_teacher_id,
+        'grading_method': _default_grading_method,
+        'weight': 1.0,
+    }
+
+    _sql_constraints = [(
+        'subject_class_unique',
+        'unique (class_id, subject_id)',
+        'Subject must be unique per class !'),
+    ]
+
+    def get_grading_method(self, cr, uid, sub_id, context=None):
+        sub = self.browse(cr, uid, sub_id, context=context)
+        if sub:
+            return sub.grading_method
+        return False
+
+    def get_weight(self, cr, uid, class_id, subject_id, context=None):
+        sub_id = self.search(cr, uid, [('class_id','=',class_id),('subject_id','=',subject_id)], context=context)
+        sub = self.browse(cr, uid, sub_id, context=context)
+        if sub:
+            return sub.weight
+        return 1.0
+
+school_class_subject()
+
+
+class school_class(osv.osv):
+    _name = 'school.class'
+    _inherit = 'school.class'
+
+    _columns = {
+        'subject_ids': fields.one2many(
+            'school.class.subject',
+            'class_id',
+            'Subjects'),
+    }
+
+school_class()
+
 class school_grade(osv.osv):
     _name = 'school.grade'
 

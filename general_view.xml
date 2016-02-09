@@ -224,8 +224,8 @@
                 <field name="teacher_id"/>
               </group>
             </group>
-            <notebook>
-              <page string="Class Roll">
+            <notebook name="details">
+              <page name="classroll" string="Class Roll">
                 <field name="enrolment_ids">
                   <tree string="Student Roll">
                     <field name="class_id" invisible="1"/>

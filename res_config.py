@@ -34,7 +34,7 @@ class school_config_settings(osv.osv_memory):
             'default_registration_fee_id',
             type='many2one',
             relation='product.product',
-            string="registration Fee"),
+            string="Registration fee"),
         'default_registration_checklist_id': fields.related(
             'company_id',
             'default_registration_checklist_id',

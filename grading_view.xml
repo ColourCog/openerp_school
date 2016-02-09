@@ -145,6 +145,25 @@
       </field>
     </record>
 
+    <!-- Class subjects-->
+    <record id="view_school_class_subject_form" model="ir.ui.view">
+      <field name="name">school.class.form.subject.inherit</field>
+      <field name="model">school.class</field>
+      <field name="inherit_id" ref="school.view_school_class_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//page[@name='classroll']" position="after">
+          <page string="Subjects" name="subjects">
+            <field name="subject_ids" context="{'class_id': active_id, 'teacher_id': teacher_id}">
+              <tree editable="bottom">
+                <field name="subject_id"/>
+                <field name="teacher_id"/>
+              </tree>
+            </field>
+          </page>
+        </xpath>
+      </field>
+    </record>
+
     <!-- Teacher subjects-->
     <record id="view_school_teacher_subject_form" model="ir.ui.view">
       <field name="name">school.teacher.form.subject.inherit</field>
