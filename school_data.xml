@@ -1,26 +1,29 @@
 <openerp>
     <data noupdate="0">
 
+
+        <!-- TODO: Rounding method -->
+
         <!-- Checklist -->
-        <record id="school_checklist_enrolment" model="school.checklist">
-            <field name="name">Enrolment</field>
-        </record>
         <record id="school_checklist_registration" model="school.checklist">
             <field name="name">Registration</field>
+        </record>
+        <record id="school_checklist_enrolment" model="school.checklist">
+            <field name="name">Enrolment</field>
         </record>
 
         <!-- Checklist Items-->
         <record id="school_checklist_item_certificate" model="school.checklist.item">
             <field name="name">Birth Certificate</field>
-            <field name="checklist_id" ref="school_checklist_enrolment"/>
+            <field name="checklist_id" ref="school_checklist_registration"/>
         </record>
         <record id="school_checklist_item_vaccination" model="school.checklist.item">
             <field name="name">Vaccination card</field>
-            <field name="checklist_id" ref="school_checklist_enrolment"/>
+            <field name="checklist_id" ref="school_checklist_registration"/>
         </record>
         <record id="school_checklist_item_schoolreports" model="school.checklist.item">
             <field name="name">Previous school reports</field>
-            <field name="checklist_id" ref="school_checklist_enrolment"/>
+            <field name="checklist_id" ref="school_checklist_registration"/>
         </record>
 
         <!-- Academic level-->
