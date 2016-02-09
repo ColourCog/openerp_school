@@ -120,6 +120,10 @@ class school_enrolment(osv.osv):
             type="many2one",
             relation='school.teacher',
             string="Class Teacher"),
+        # financial
+        'waive_tuition_fee': fields.boolean(
+            'Waive tuition fee',
+            help="Allow the enrolment to proceed without paying the fee."),
         'tuition_fee_id': fields.many2one(
             'product.product',
             'Tuition Fee'),
@@ -251,6 +255,11 @@ class school_enrolment(osv.osv):
         if not context:
             context = {}
         for enrolment in self.browse(cr, uid, ids, context=context):
+            if not enrolment.waive_tuition_fee:
+                if not enrolment.invoice_id:
+                    raise osv.except_osv(
+                        _('No Invoice!'),
+                        _("Tuition hasn't been invoiced"))
             for check in enrolment.checklist_ids:
                 if not check.done:
                     raise osv.except_osv(
@@ -265,12 +274,16 @@ class school_enrolment(osv.osv):
 
         for enr in self.browse(cr, uid, ids, context=ctx):
             if not enr.student_id.invoice_id:
-                if not enr.student_id.waive_fee:
+                if not enr.student_id.waive_registration_fee:
                     student_obj.generate_invoice(
                         cr,
                         uid,
                         [enr.student_id.id],
                         context=context)
+            if enr.waive_tuition_fee:
+                raise osv.except_osv(
+                    _('Cannot generate tuition invoice!'),
+                    _("Tuition fees have been waived."))
             if not enr.tuition_fee_id:
                 raise osv.except_osv(
                     _("Can't generate invoice"),
@@ -326,7 +339,7 @@ class school_student(osv.osv):
 
         student_obj = self.pool.get('school.student')
         student = student_obj.browse(cr, uid, context['student_id'], context=context)
-        if not student.waive_fee:
+        if not student.waive_registration_fee:
             if not student.invoice_id:
                 raise osv.except_osv(
                     _('No Invoice!'),

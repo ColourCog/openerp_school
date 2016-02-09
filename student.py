@@ -123,7 +123,7 @@ class school_student(osv.osv):
         #financial
         'registration_fee_id': fields.many2one('product.product', 'Registration fee', required=True),
         # financial
-        'waive_fee': fields.boolean(
+        'waive_registration_fee': fields.boolean(
             'Waive registration fee',
             help="Allow the registration to proceed without paying the fee."),
         #financial
@@ -261,10 +261,10 @@ class school_student(osv.osv):
         ctx = context.copy()
         ctx.update({'account_period_prefer_normal': True})
         for student in self.browse(cr, uid, ids, context=ctx):
-            if student.waive_fee:
+            if student.waive_registration_fee:
                 raise osv.except_osv(
                     _('Cannot generate registration invoice!'),
-                    _("registration Fees have been waived."))
+                    _("Registration fees have been waived."))
             if student.invoice_id:
                 raise osv.except_osv(
                     _('Invoice Already Generated!'),
