@@ -126,7 +126,8 @@ class school_enrolment(osv.osv):
             help="Allow the enrolment to proceed without paying the fee."),
         'tuition_fee_id': fields.many2one(
             'product.product',
-            'Tuition Fee'),
+            'Tuition Fee',
+            domain=[('sale_ok','=',True)]),
         'is_invoiced': fields.boolean(
             'Invoice generated'),
         'invoice_id': fields.many2one(
@@ -276,6 +277,10 @@ class school_enrolment(osv.osv):
                     raise osv.except_osv(
                         _('No Invoice!'),
                         _("Tuition hasn't been invoiced"))
+            if enrolment.invoice_id and enrolment.invoice_id.state == 'draft' :
+                raise osv.except_osv(
+                    _('No validated invoice'),
+                    _("Tuition invoice hasn't been validated"))
             for check in enrolment.checklist_ids:
                 if not check.done:
                     raise osv.except_osv(

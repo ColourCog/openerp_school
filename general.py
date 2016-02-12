@@ -169,7 +169,8 @@ class school_academic_year(osv.osv):
         'name': fields.char('Name', size=255, required=True),
         'tuition_fee_id': fields.many2one(
             'product.product',
-            'Default tuition Fee'),
+            'Default tuition Fee',
+            domain=[('sale_ok','=',True)]),
         'description': fields.text('Description'),
     }
 school_academic_year()

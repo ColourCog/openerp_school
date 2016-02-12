@@ -8,7 +8,8 @@ class res_company(osv.osv):
     _columns = {
         'default_registration_fee_id': fields.many2one(
             'product.product',
-            'Registration fee'),
+            'Registration fee',
+            domain=[('sale_ok','=',True)]),
         'default_registration_checklist_id': fields.many2one(
             'school.checklist',
             'Registration Checklist'),

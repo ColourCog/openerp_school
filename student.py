@@ -121,7 +121,11 @@ class school_student(osv.osv):
             required=True,
             domain=[('customer','=',True)]),
         #financial
-        'registration_fee_id': fields.many2one('product.product', 'Registration fee', required=True),
+        'registration_fee_id': fields.many2one(
+            'product.product',
+            'Registration fee',
+            domain=[('sale_ok','=',True)],
+            required=True),
         # financial
         'waive_registration_fee': fields.boolean(
             'Waive registration fee',
