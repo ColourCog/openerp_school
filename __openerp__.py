@@ -42,6 +42,7 @@ Features:
       'grading_view.xml',
       'res_config_view.xml',
       'school_data.xml',
+      'wizards_view.xml',
     ],
     "application": False,
     "installable": True

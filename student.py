@@ -253,6 +253,15 @@ class school_student(osv.osv):
         if not context:
             context = {}
         for student in self.browse(cr, uid, ids, context=context):
+            if not student.waive_registration_fee:
+                if not student.invoice_id:
+                    raise osv.except_osv(
+                        _('No Invoice!'),
+                        _("Registration hasn't been invoiced"))
+            if student.invoice_id and student.invoice_id.state != 'paid' :
+                raise osv.except_osv(
+                    _('No paid invoice'),
+                    _("Registration invoice hasn't been paid"))
             for check in student.checklist_ids:
                 if not check.done:
                     raise osv.except_osv(
@@ -269,6 +278,10 @@ class school_student(osv.osv):
                 raise osv.except_osv(
                     _('Cannot generate registration invoice!'),
                     _("Registration fees have been waived."))
+            if not student.registration_fee_id:
+                raise osv.except_osv(
+                    _("Can't generate invoice"),
+                    _("No registration fee found."))
             if student.invoice_id:
                 raise osv.except_osv(
                     _('Invoice Already Generated!'),
@@ -302,3 +315,51 @@ class school_student(osv.osv):
         return res
 
 school_student()
+
+
+class school_student_invoice(osv.osv_memory):
+    """
+    This wizard import an invoice into a registration
+    """
+
+    _name = "school.student.invoice"
+    _description = "Import Invoice into registration"
+
+    def _get_partner(self, cr, uid, ctx=None):
+        if not ctx.get('employee_id'):
+            return False
+        emp = self.pool.get('hr.employee').browse(
+            cr,
+            uid,
+            ctx.get('employee_id'), context=ctx)
+        if emp.address_home_id:
+            return emp.address_home_id.id
+        return False
+
+
+    _columns = {
+        'partner_id': fields.many2one(
+            'res.partner',
+            'Partner'),
+        'invoice_id': fields.many2one(
+            'account.invoice',
+            'Invoice to import',
+            required=True),
+    }
+
+    def import_invoice(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        pool_obj = pooler.get_pool(cr.dbname)
+        reg_obj = pool_obj.get('school.student')
+
+        context.update({
+            'partner_id': self.browse(cr, uid, ids)[0].partner_id.id,
+            'invoice_id': self.browse(cr, uid, ids)[0].invoice_id.id,
+            })
+
+        reg_obj.import_invoice(cr, uid, [context.get('active_id')], context=context)
+
+        return {'type': 'ir.actions.act_window_close'}
+
+school_student_invoice()

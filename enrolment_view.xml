@@ -1,5 +1,5 @@
 <openerp>
-  <data noupdate="0">
+  <data>
 
     <!-- Student enrolment -->
     <record id="view_school_enrolment_tree" model="ir.ui.view">
@@ -129,19 +129,6 @@
       parent="menu_school_student_root" sequence="2" />
 
 
-    <record id="action_school_enrolment_pop" model="ir.actions.act_window">
-      <field name="name">Register Student</field>
-      <field name="type">ir.actions.act_window</field>
-      <field name="res_model">school.enrolment</field>
-      <field name="view_type">form</field>
-      <field name="view_mode">form</field>
-      <field name="context">{'default_student_id': student_id, 'student_id': student_id}</field>
-      <field name="view_id" ref="view_school_enrolment_form"/>
-      <field name="target">current</field>
-    </record>
-
-
-
     <!-- Student academic -->
     <record id="view_school_student_enrolled_tree" model="ir.ui.view">
       <field name="name">school.enrolment.tree.academic</field>
@@ -241,15 +228,6 @@
           </page>
         </xpath>
         <xpath expr="//button[@name='validate']" position="after">
-<!--
-          <button name="%(action_school_enrolment_pop)d"
-            string="Enroll"
-            context="{'student_id':active_id}"
-            type="action"
-            groups="school.group_school_headteacher"
-            attrs="{'invisible': [('current_class_id','&lt;&gt;', False)]}"
-            class="oe_highlight"/>
--->
           <button name="enroll_student"
             string="Enroll"
             context="{'student_id':active_id}"

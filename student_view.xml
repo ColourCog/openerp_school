@@ -22,9 +22,12 @@
           <header>
             <button name="student_draft" states="cancel" string="Set to Draft" type="object" />
             <button name="validate" states="draft" string="Validate" class="oe_highlight" groups="school.group_school_headteacher"/>
-            <button name="generate_invoice" type="object" states="student"
+            <button
+              name="generate_invoice"
+              type="object"
               string="Generate Invoice"
               groups="account.group_account_user"
+              states="draft"
               attrs="{'invisible':['|',('is_invoiced','=',True),'|',('waive_registration_fee','=',True)]}"/>
             <button name="student_suspend" type="object" states="student"
               string="Deactivate" groups="school.group_school_manager"/>
