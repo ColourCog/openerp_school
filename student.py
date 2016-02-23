@@ -131,9 +131,9 @@ class school_student(osv.osv):
             'Waive registration fee',
             help="Allow the registration to proceed without paying the fee."),
         #financial
-         'is_invoiced': fields.boolean(
+        'is_invoiced': fields.boolean(
             'Invoice generated'),
-       'invoice_id': fields.many2one(
+        'invoice_id': fields.many2one(
             'account.invoice',
             'Registration invoice',
             readonly=True,

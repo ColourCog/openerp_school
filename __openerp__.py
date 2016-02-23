@@ -43,6 +43,7 @@ Features:
       'res_config_view.xml',
       'school_data.xml',
       'wizards_view.xml',
+      'school_report.xml',
     ],
     "application": False,
     "installable": True
