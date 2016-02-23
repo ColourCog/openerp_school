@@ -219,7 +219,7 @@
             <field name="state" widget="statusbar" statusbar_visible="open,closed,archived" statusbar_colors='{"archived":"grey"}'/>
           </header>
           <sheet>
-            <h1> <field name="name" class="oe_inline" readonly="1"/> </h1>
+            <h1> <field name="name" class="oe_inline" /> </h1>
             <group>
               <group>
                 <field name="year_id"/>

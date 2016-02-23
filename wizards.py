@@ -1,11 +1,8 @@
 #/bin/env python2
 
-## STUDENT
-# The sudent database works like the sales database. The first stage
-# of a student is an registration.
-# A validated registration becomes a student.
-# The views are the ones that make the difference; especially
-# the fields_view_get
+## Custom wizards
+#~ The wizards here are utilities to ease certain actions that, while
+#~ not common, are still useful to have.
 
 import time
 import logging
