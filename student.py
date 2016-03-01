@@ -47,6 +47,7 @@ class school_student(osv.osv):
     _name = 'school.student'
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     _description = 'Student'
+    _order = "surname"
     _track = {
         'state': {
             'school.mt_student_student': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'student',

@@ -13,9 +13,16 @@ class school_report_family(report_sxw.rml_parse):
                 name,
                 context=context)
 
+    def set_context(self, objects, data, ids, report_type=None):
+        new_ids = ids
+        if (data['model'] == 'ir.ui.menu'):
+            new_ids = self.pool.get('school.student').search(self.cr, self.uid, [('state','=','student')])
+            objects = self.pool.get('school.student').browse(self.cr, self.uid, new_ids)
+        return super(report_account_common, self).set_context(objects, data, new_ids, report_type=report_type)
+
 report_sxw.report_sxw(
-    'report.school.family',
-    'school.report',
+    'report.school.student.print.family',
+    'school.student',
     'addons/school/report/school_family_list.rml',
     parser=school_report_family,
     header="internal")

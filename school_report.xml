@@ -2,16 +2,13 @@
 <openerp>
     <data>
 
-        <record id="school_family_list_report" model="ir.actions.report.xml">
-            <field name="auto" eval="False"/>
-            <field name="multi" eval="True"/>
-            <field name="model">school.student</field>
-            <field name="report_name">school.student.family</field>
-            <field name="report_type">pdf</field>
-            <field name="report_rml">school/report/school_family_list.rml</field>
-            <field name="name">Student Family List</field>
-            <field name="attachment_use" eval="False"/>
-        </record>
+    <report id="school_family_list_report"
+            string="Student Family List"
+            model="school.student"
+            name="school.student.print.family"
+            rml="school/report/school_family_list.rml"
+            multi="True"
+            auto="False"/>
 
     </data>
 </openerp>
