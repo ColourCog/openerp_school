@@ -193,10 +193,9 @@ class school_student(osv.osv):
     def create(self, cr, uid, vals, context=None):
         vals['firstname'] = vals.get('firstname').title()
         vals['surname'] = vals.get('surname').upper()
+        vals['name'] = ' '.join([vals.get('surname'), vals.get('firstname')])
         if vals.get('reg_num', '/') == '/':
             vals['reg_num'] = self.pool.get('ir.sequence').get(cr, uid, 'school.registration')
-        if vals.get('name', '/') == '/':
-            vals['name'] = ' '.join([vals.get('surname'), vals.get('firstname')])
         if not vals.get('user_id'):
             vals['user_id'] = uid
         return super(school_student, self).create(cr, uid, vals, context=context)
@@ -205,8 +204,7 @@ class school_student(osv.osv):
         for student in self.browse(cr, uid, ids, context=context):
             if not student.reg_num:
                 vals['reg_num'] = self.pool.get('ir.sequence').get(cr, uid, 'school.registration')
-            if not student.name:
-                vals['name'] = ' '.join([student.surname, student.firstname])
+            vals['name'] = ' '.join([student.surname.upper(), student.firstname.title()])
             student_id = super(school_student, self).write(cr, uid, [student.id], vals, context=context)
         return ids
 
@@ -214,9 +212,9 @@ class school_student(osv.osv):
         """We need to drop any invoice issues for now"""
         if not default:
             default = {}
-        old_student = self.browse(cr, uid, student_id, context=context)
         default.update({
-            'name':False,
+            'name':None,
+            'reg_num':False,
             'invoice_id':False,
             'is_invoiced':False,
             'date_valid':False,

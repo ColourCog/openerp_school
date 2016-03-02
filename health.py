@@ -81,4 +81,14 @@ class school_student(osv.osv):
             'student_id',
             'Medical Status'),
     }
+
+    def copy(self, cr, uid, student_id, default=None, context=None):
+        if not default:
+            default = {}
+        default.update({
+            'health_ids':[],
+            })
+        new_id = super(school_student, self).copy(cr, uid, student_id, default, context=context)
+        return new_id
+
 school_student()

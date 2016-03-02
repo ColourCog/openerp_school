@@ -347,6 +347,18 @@ class school_student(osv.osv):
             'Currently enrolled'),
     }
 
+    def copy(self, cr, uid, student_id, default=None, context=None):
+        """We need to drop any invoice issues for now"""
+        if not default:
+            default = {}
+        default.update({
+            'current_class_id':False,
+            'is_enrolled':False,
+            'enrolment_ids':[],
+            })
+
+        new_id = super(school_student, self).copy(cr, uid, student_id, default, context=context)
+        return new_id
     def student_cancel(self, cr, uid, ids, context=None):
         reg_obj = self.pool.get('school.enrolment')
         inv_obj = self.pool.get('account.invoice')
