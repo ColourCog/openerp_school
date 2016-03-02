@@ -183,6 +183,12 @@ class school_student(osv.osv):
         'user_id': lambda cr, uid, id, c={}: id,
     }
 
+    _sql_constraints = [(
+        'reg_num_unique',
+        'unique (reg_num)',
+        'This registration number has already been used!'),
+    ]
+
 
     def create(self, cr, uid, vals, context=None):
         vals['firstname'] = vals.get('firstname').title()
@@ -194,6 +200,31 @@ class school_student(osv.osv):
         if not vals.get('user_id'):
             vals['user_id'] = uid
         return super(school_student, self).create(cr, uid, vals, context=context)
+
+    def write(self, cr, uid, ids, vals, context=None):
+        for student in self.browse(cr, uid, ids, context=context):
+            if not student.reg_num:
+                vals['reg_num'] = self.pool.get('ir.sequence').get(cr, uid, 'school.registration')
+            if not student.name:
+                vals['name'] = ' '.join([student.surname, student.firstname])
+            student_id = super(school_student, self).write(cr, uid, [student.id], vals, context=context)
+        return ids
+
+    def copy(self, cr, uid, student_id, default=None, context=None):
+        """We need to drop any invoice issues for now"""
+        if not default:
+            default = {}
+        old_student = self.browse(cr, uid, student_id, context=context)
+        default.update({
+            'name':False,
+            'invoice_id':False,
+            'is_invoiced':False,
+            'date_valid':False,
+            'user_valid':False,
+            })
+
+        new_id = super(school_student, self).copy(cr, uid, student_id, default, context=context)
+        return new_id
 
     def student_draft(self, cr, uid, ids, context=None):
         wf_service = netsvc.LocalService("workflow")

@@ -10,5 +10,13 @@
             multi="True"
             auto="False"/>
 
+    <report id="school_class_list_report"
+            string="Student Class List"
+            model="school.class"
+            name="school.class.print.surname"
+            rml="school/report/school_class_list.rml"
+            multi="True"
+            auto="False"/>
+
     </data>
 </openerp>

@@ -42,3 +42,24 @@ class school_student(osv.osv):
         }
 
 school_student()
+
+class school_class(osv.osv):
+    _inherit = 'school.class'
+
+    def print_report(self, cr, uid, ids, context=None):
+        report_map = {
+            'surname': 'school.class.print.surname',
+        }
+        return {
+            'type': 'ir.actions.report.xml',
+            'report_name': report_map.get(context.get('format')),
+            'datas': {
+                    'model':'school.class',
+                    'id': ids and ids[0] or False,
+                    'ids': ids and ids or [],
+                    'report_type': 'pdf'
+                },
+            'nodestroy': True
+        }
+
+school_class()

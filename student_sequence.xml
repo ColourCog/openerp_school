@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data noupdate="1">
+    <data noupdate="0">
 
         <!-- Sequences for school.registration -->
         <record id="seq_type_school_registration" model="ir.sequence.type">

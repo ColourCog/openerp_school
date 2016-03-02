@@ -1,6 +1,6 @@
 #/bin/env python2
 
-import time
+from datetime import datetime, date
 import logging
 from openerp import pooler
 from openerp.osv import fields, osv

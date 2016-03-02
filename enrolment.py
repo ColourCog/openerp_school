@@ -37,6 +37,7 @@ class school_enrolment(osv.osv):
     _name = 'school.enrolment'
     _inherit = ['mail.thread', 'ir.needaction_mixin']
     _description = 'Student enrolment for a specific Class'
+    _order = "name"
     _track = {
         'state': {
             'school.mt_enrolment_enrolled': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'enrolled',
@@ -89,7 +90,8 @@ class school_enrolment(osv.osv):
             'name',
             type='char',
             relation='school.student',
-            string="Student Name"),
+            string="Student Name",
+            store=True),
         'student_id': fields.many2one(
             'school.student',
             'Student',
