@@ -189,6 +189,10 @@ class school_teacher(osv.osv):
             'hr.employee',
             'Employee'),
         'description': fields.text('Description'),
+        'class_ids': fields.one2many(
+            'school.class',
+            'teacher_id',
+            'Classes'),
         'state': fields.selection([
             ('open', 'Active'),
             ('archive', 'Archived')],

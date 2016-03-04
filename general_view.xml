@@ -156,6 +156,14 @@
               <page string="Notes">
                 <field name="description"/>
               </page>
+              <page string="Classes">
+              <field name="class_ids" context="{'teacher_id': active_id}">
+                <tree editable="bottom">
+                  <field name="name"/>
+                  <field name="year_id"/>
+                </tree>
+              </field>
+              </page>
             </notebook>
           </sheet>
         </form>
