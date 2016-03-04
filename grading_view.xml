@@ -173,12 +173,12 @@
       <field name="arch" type="xml">
         <xpath expr="//notebook[@name='details']" position="inside">
             <page string="Subjects">
-            <field name="subject_ids" context="{'teacher_id': active_id}">
-              <tree editable="bottom">
-                <field name="subject_id"/>
-                <field name="class_id"/>
-              </tree>
-            </field>
+              <field name="subject_ids" context="{'teacher_id': active_id}">
+                <tree editable="bottom">
+                  <field name="subject_id"/>
+                  <field name="class_id"/>
+                </tree>
+              </field>
             </page>
         </xpath>
       </field>
