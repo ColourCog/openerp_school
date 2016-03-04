@@ -14,6 +14,7 @@ class school_report_family(report_sxw.rml_parse):
                 context=context)
         self.localcontext.update({
             'age': self._age,
+            'count': self._count,
         })
 
     def set_context(self, objects, data, ids, report_type=None):
@@ -32,6 +33,17 @@ class school_report_family(report_sxw.rml_parse):
         year = on.year - when.year - (earl)
         month = earl and (11 - when.month + on.month) or (on.month - when.month)
         return "{0}yrs. {1}m.".format(year, month)
+
+    def _count(self, items, children=None):
+        if children:
+            sums = 0
+            for item in items:
+                try:
+                    sums += len(getattr(item, children, 0))
+                except AttributeError:
+                    pass
+            return sums
+        return len(items)
 
 report_sxw.report_sxw(
     'report.school.student.print.family',

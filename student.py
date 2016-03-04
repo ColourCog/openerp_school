@@ -181,6 +181,7 @@ class school_student(osv.osv):
         'date': fields.date.context_today,
         'state': 'draft',
         'user_id': lambda cr, uid, id, c={}: id,
+        'reg_num': '/',
     }
 
     _sql_constraints = [(
@@ -202,8 +203,6 @@ class school_student(osv.osv):
 
     def write(self, cr, uid, ids, vals, context=None):
         for student in self.browse(cr, uid, ids, context=context):
-            if not student.reg_num:
-                vals['reg_num'] = self.pool.get('ir.sequence').get(cr, uid, 'school.registration')
             vals['name'] = ' '.join([student.surname.upper(), student.firstname.title()])
             student_id = super(school_student, self).write(cr, uid, [student.id], vals, context=context)
         return ids
