@@ -117,3 +117,25 @@ def generic_generate_invoice(cr, uid, product_id, partner_id, student_name, tran
     #~ inv_obj.invoice_validate(cr,uid,[inv_id],context=context)
 
     return inv_id
+
+def age(when, on=None):
+    fmt = '%Y-%m-%d'
+    when = datetime.strptime(when, fmt)
+    if on is None:
+        on = date.today()
+    earl = (on.month, on.day) < (when.month, when.day)
+    year = on.year - when.year - (earl)
+    month = earl and (11 - when.month + on.month) or (on.month - when.month)
+    return "{0}yrs. {1}m.".format(year, month)
+
+def count(items, children=None):
+    if children:
+        sums = 0
+        for item in items:
+            try:
+                sums += len(getattr(item, children, 0))
+            except AttributeError:
+                pass
+        return sums
+    return len(items)
+
