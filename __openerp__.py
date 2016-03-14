@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name" : "School Management",
-    "version" : "0.6",
+    "version" : "0.7",
     "category" : "Accounting",
     "sequence": 60,
     "complexity" : "normal",

@@ -200,12 +200,6 @@ class school_enrolment(osv.osv):
             raise osv.except_osv(
                 _('Unpaid Error!'),
                 _("Registration invoice '%s' is still pending." % student.invoice_id.number ))
-        student_obj.write(
-                cr,
-                uid,
-                [vals['student_id']],
-                {'is_enrolled': True},
-                context=context)
         return super(school_enrolment, self).create(cr, uid, vals, context=context)
 
     def unlink(self, cr, uid, ids, context=None):

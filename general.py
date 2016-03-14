@@ -267,6 +267,7 @@ class school_class(osv.osv):
             help="The status of this Class" ),
     }
     _defaults = {
+        'name': '/',
         'state': 'open',
         'year_id': _default_year_id,
         'level_id': _default_level_id,
