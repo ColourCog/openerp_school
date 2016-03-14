@@ -208,6 +208,17 @@
 
 
     <!-- enrolments -->
+    <record id="view_school_registration_tree_enrolment" model="ir.ui.view">
+      <field name="name">school.student.tree.enrolment.inherit</field>
+      <field name="model">school.student</field>
+      <field name="inherit_id" ref="school.view_school_registration_tree"/>
+      <field name="arch" type="xml">
+        <xpath expr="//field[@name='state']" position="after">
+          <field name="is_enrolled"/>
+        </xpath>
+      </field>
+    </record>
+
     <record id="view_school_student_enrolment_form" model="ir.ui.view">
       <field name="name">school.student.form.enrolment.inherit</field>
       <field name="model">school.student</field>
@@ -237,6 +248,17 @@
           </page>
         </xpath>
 
+      </field>
+    </record>
+
+    <record id="view_school_registration_filter_enrolment" model="ir.ui.view">
+      <field name="name">school.student.filter.enrolment.inherit</field>
+      <field name="model">school.student</field>
+      <field name="inherit_id" ref="school.view_school_registration_filter"/>
+      <field name="arch" type="xml">
+        <xpath expr="//filter[@string='Students']" position="after">
+          <filter string="Enrolled" domain="[('is_enrolled','!=',False)]" />
+        </xpath>
       </field>
     </record>
 

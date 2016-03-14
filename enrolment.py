@@ -359,6 +359,7 @@ class school_student(osv.osv):
 
         new_id = super(school_student, self).copy(cr, uid, student_id, default, context=context)
         return new_id
+
     def student_cancel(self, cr, uid, ids, context=None):
         reg_obj = self.pool.get('school.enrolment')
         inv_obj = self.pool.get('account.invoice')
