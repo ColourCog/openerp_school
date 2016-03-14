@@ -310,7 +310,7 @@ class school_class(osv.osv):
         enr_obj = self.pool.get('school.enrolment')
         enr_obj.write(cr, uid, enr_ids, {'state': 'archived'}, context=context)
         student_obj = self.pool.get('school.student')
-        student_obj.write(cr, uid, student_ids, {'current_class_id': None}, context=context)
+        student_obj.drop_out(cr, uid, student_ids, context=context)
         self.write(cr, uid, ids, {'state': 'archived'}, context=context)
 
 school_class()

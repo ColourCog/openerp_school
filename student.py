@@ -278,6 +278,14 @@ class school_student(osv.osv):
             {'state': 'cancel', 'invoice_id': None, 'is_invoiced': False},
             context=context)
 
+    def drop_out(self, cr, uid, ids, context=None):
+        self.write(
+            cr,
+            uid,
+            ids,
+            {'current_class_id': None},
+            context=context)
+
     def validate_registration(self, cr, uid, ids, context=None):
         if not context:
             context = {}

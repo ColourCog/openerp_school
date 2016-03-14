@@ -36,7 +36,7 @@ school_student_enrolment_checklist()
 class school_enrolment(osv.osv):
     _name = 'school.enrolment'
     _inherit = ['mail.thread', 'ir.needaction_mixin']
-    _description = 'Student enrolment for a specific Class'
+    _description = 'Student enrolment'
     _order = "name"
     _track = {
         'state': {
@@ -208,7 +208,7 @@ class school_enrolment(osv.osv):
         student_obj = self.pool.get('school.student')
         """Allows to delete sales order lines in draft,cancel states"""
         for rec in self.browse(cr, uid, ids, context=context):
-            student_obj.write(cr, uid, [rec.student_id.id], {'current_class_id': None}, context=context)
+            student_obj.drop_out(cr, uid, [rec.student_id.id], context=context)
         return super(school_enrolment, self).unlink(cr, uid, ids, context=context)
 
     def enrolment_draft(self, cr, uid, ids, context=None):
@@ -244,12 +244,7 @@ class school_enrolment(osv.osv):
                         if enrolment.invoice_id]
         student_obj = self.pool.get('school.student')
         std_ids = [ enrolment.student_id.id for enrolment in self.browse(cr, uid, ids, context=context) ]
-        student_obj.write(
-            cr,
-            uid,
-            std_ids,
-            {'current_class_id': None, 'is_enrolled': False},
-            context=context)
+        student_obj.drop_out(cr, uid, std_ids, context=context)
         if inv_ids:
             inv_obj.action_cancel(cr, uid, inv_ids, context)
             inv_obj.action_cancel_draft(cr, uid, inv_ids, context)
@@ -363,6 +358,14 @@ class school_student(osv.osv):
                 reg_obj.enrolment_cancel(cr, uid, reg_ids, context)
                 reg_obj.unlink(cr, uid, reg_ids, context)
         return super(school_student, self).student_cancel(cr, uid, ids, context=context)
+
+    def drop_out(self, cr, uid, ids, context=None):
+        self.write(
+            cr,
+            uid,
+            ids,
+            {'current_class_id': None, 'is_enrolled': False},
+            context=context)
 
     def enroll_student(self, cr, uid, ids, context=None):
         dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'school', 'view_school_enrolment_form')
