@@ -135,11 +135,20 @@ class school_academic_period(osv.osv):
 
     _columns = {
         'name': fields.char('Name', size=255, required=True),
+        'date_from': fields.date(
+            'Start Date',
+            select=True,
+            help="Date of school opening"),
+        'date_to': fields.date(
+            'End Date',
+            select=True,
+            help="Date of school closing"),
         'class_ids': fields.one2many(
             'school.class',
             'year_id',
             'Classes for this Year'),
         'state': fields.selection([
+            ('draft', 'Draft'),
             ('open', 'Current'),
             ('archived', 'Archived')],
             'Status',
@@ -149,14 +158,21 @@ class school_academic_period(osv.osv):
             help="The archive status of this Year" ),
     }
     _defaults = {
-        'state': "open",
+        'state': "draft",
     }
 
     def archive_year(self, cr, uid, ids, context=None):
         class_obj = self.pool.get('school.class')
-        class_ids = class_obj.search(cr, uid, [('year_id','=',year.id)], context=context)
-        class_obj.archive_class(cr, uid, class_ids, context=context)
+        for year in self.browse(cr, uid, ids, context=context):
+            class_ids = class_obj.search(cr, uid, [('year_id','=',year.id)], context=context)
+            class_obj.archive_class(cr, uid, class_ids, context=context)
         self.write(cr, uid, ids, {'state': 'archived'}, context=context)
+
+    def set_current(self, cr, uid, ids, context=None):
+        assert len(ids) == 1, 'This option can only be used for a single id at a time.'
+        open_ids = self.search(cr, uid, [('state','=','open')], context=context)
+        self.archive_year(cr, uid, open_ids, context=context)
+        self.write(cr, uid, ids, {'state': 'open'}, context=context)
 
 school_academic_period()
 

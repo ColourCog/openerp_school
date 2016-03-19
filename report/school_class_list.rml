@@ -27,7 +27,7 @@
       <lineStyle kind="LINEABOVE" colorName="#000000" />
     </blockTableStyle>
     <paraStyle name="default_7" rightIndent="0.0" leftIndent="0.0" fontSize="7.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
-    <paraStyle name="file_header" fontSize="12.0" leading="15" alignment="CENTER" spaceBefore="24.0" spaceAfter="12.0"/>
+    <paraStyle name="file_header" fontSize="12.0" leading="15" alignment="CENTER"/>
     <initialize>
       <paraStyle name="all" alignment="JUSTIFY"/>
     </initialize>
@@ -36,6 +36,7 @@
   <story>
 
     <!-- Document header-->
+    <para style="file_header"><b>[[ year.name ]]</b></para>
     <para style="file_header"><b>Student Class List</b></para>
     <pto>
     <pto_header><!-- Must be after setLang() -->
@@ -44,7 +45,7 @@
         <td><para style="default_7"><b>Class</b></para></td>
         <td><para style="default_7"><b>Name</b></para></td>
         <td><para style="default_7"><b>Date of Birth</b></para></td>
-        <td><para style="default_7"><b>Age on</b></para></td>
+        <td><para style="default_7"><b>Placement age</b></para></td>
         <td><para style="default_7"><b>Sex</b></para></td>
         <td><para style="default_7"><b>Ad. No.</b></para></td>
       </tr>
@@ -55,7 +56,7 @@
         <td><para style="default_7"><b>Class</b></para></td>
         <td><para style="default_7"><b>Name</b></para></td>
         <td><para style="default_7"><b>Date of Birth</b></para></td>
-        <td><para style="default_7"><b>Age on [[ ' ' ]]</b></para></td>
+        <td><para style="default_7"><b>Placement age</b></para></td>
         <td><para style="default_7"><b>Sex</b></para></td>
         <td><para style="default_7"><b>Ad. No.</b></para></td>
       </tr>
@@ -79,7 +80,7 @@
           <td><para style="default_7">[[ '']]</para></td>
           <td><para style="default_7">[[ e.student_id.surname ]], [[ e.student_id.firstname ]]</para></td>
           <td><para style="default_7">[[ formatLang(e.student_id.birthday , date=True) ]]</para></td>
-          <td><para style="default_7">[[ age(e.student_id.birthday) ]]</para></td>
+          <td><para style="default_7">[[ age(e.student_id.birthday, year.date_from) ]]</para></td>
           <td><para style="default_7">[[ e.student_id.gender ]]</para></td>
           <td><para style="default_7">[[ e.student_id.reg_num ]]</para></td>
         </tr>

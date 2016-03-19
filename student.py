@@ -204,6 +204,8 @@ class school_student(osv.osv):
     def write(self, cr, uid, ids, vals, context=None):
         for student in self.browse(cr, uid, ids, context=context):
             vals['name'] = ' '.join([student.surname.upper(), student.firstname.title()])
+            if not student.reg_num:
+                vals['reg_num'] = self.pool.get('ir.sequence').get(cr, uid, 'school.registration')
             student_id = super(school_student, self).write(cr, uid, [student.id], vals, context=context)
         return ids
 

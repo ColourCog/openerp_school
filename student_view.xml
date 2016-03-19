@@ -31,7 +31,8 @@
               attrs="{'invisible':['|',('is_invoiced','=',True),'|',('waive_registration_fee','=',True)]}"/>
             <button name="student_suspend" type="object" states="student"
               string="Deactivate" groups="school.group_school_manager"/>
-            <button name="student_resume" type="object" states="suspend" string="Activate" groups="school.group_school_manager"/>
+            <button name="student_resume" type="object" states="suspend"
+              string="Activate" groups="school.group_school_manager"/>
             <button name="cancel" states="student" string="Cancel" groups="school.group_school_manager"/>
             <field name="state" widget="statusbar" statusbar_visible="draft,student" statusbar_colors='{"cancel":"red"}'/>
           </header>

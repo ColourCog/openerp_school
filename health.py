@@ -31,6 +31,7 @@ class school_health(osv.osv):
     _description = "Health Detail for Student"
 
     _columns = {
+        'date': fields.date('Creation Date', required=True),
         'student_id': fields.many2one(
             'school.student',
             'Student',
@@ -42,6 +43,9 @@ class school_health(osv.osv):
             type='char',
             relation='school.student',
             string="Student Name"),
+        'family_doctor': fields.many2one(
+            'res.partner',
+            'Family doctor'),
         'height': fields.float('Height(cm)'),
         'weight': fields.float('Weight (kgs)'),
         'blood_group': fields.selection([
@@ -69,6 +73,11 @@ class school_health(osv.osv):
             'Checkup Lines'),
 
     }
+
+    _defaults = {
+        'date': fields.date.context_today,
+    }
+
 school_health()
 
 

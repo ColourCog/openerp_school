@@ -121,6 +121,8 @@ def generic_generate_invoice(cr, uid, product_id, partner_id, student_name, tran
 def age(when, on=None):
     fmt = '%Y-%m-%d'
     when = datetime.strptime(when, fmt)
+    if on:
+        on = datetime.strptime(on, fmt)
     if on is None:
         on = date.today()
     earl = (on.month, on.day) < (when.month, when.day)
@@ -139,3 +141,14 @@ def count(items, children=None):
         return sums
     return len(items)
 
+# current year start
+def get_current_academic_period(cr, uid, context=None):
+    if not context:
+        context = {}
+    pool_obj = pooler.get_pool(cr.dbname)
+    period_obj = pool_obj.get('school.academic.period')
+    per_ids = period_obj.search(cr, uid, [('state','=','open')], context=context)
+    periods = period_obj.browse(cr, uid, per_ids, context)
+    # there should only ever be one.
+    assert len(periods) == 1, 'There has to be exactly one.'
+    return periods[0]

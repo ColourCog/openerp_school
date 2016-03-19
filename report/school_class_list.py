@@ -2,7 +2,7 @@
 
 import time
 from openerp.report import report_sxw
-from school.tools import age, count
+from school.tools import age, count, get_current_academic_period
 
 class school_report_class(report_sxw.rml_parse):
     def __init__(self, cr, uid, name, context=None):
@@ -14,6 +14,7 @@ class school_report_class(report_sxw.rml_parse):
         self.localcontext.update({
             'age': age,
             'count': count,
+            'year': get_current_academic_period(self.cr, self.uid, context=context)
         })
 
     def set_context(self, objects, data, ids, report_type=None):

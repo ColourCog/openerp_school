@@ -20,11 +20,18 @@
         <form string="Academic Period" version="7.0">
           <header>
             <button name="archive_year" type="object" states="open" string="Archive" groups="school.group_school_manager"/>
+            <button name="set_current" type="object" string="Set as current" groups="school.group_school_manager"/>
             <field name="state" widget="statusbar" statusbar_visible="open,archived" statusbar_colors='{"archived":"grey"}'/>
           </header>
           <sheet>
+            <h1> <field name="name" class="oe_inline" /> </h1>
             <group>
-              <field name="name"/>
+              <group>
+                <field name="date_from"/>
+              </group>
+              <group>
+                <field name="date_to"/>
+              </group>
             </group>
             <notebook>
               <page string="Classes">
