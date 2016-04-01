@@ -98,9 +98,6 @@
                   </tree>
                 </field>
               </page>
-              <page string="Past Invoices">
-                <field name="invoice_ids"/>
-              </page>
               <page string="Misc">
                 <group>
                   <group>

@@ -137,11 +137,6 @@ class school_enrolment(osv.osv):
             'Tuition invoice',
             readonly=True,
             ondelete='cascade'),
-        'invoice_ids': fields.one2many(
-            'account.invoice',
-            'enrolment_id',
-            'Invoice history',
-            readonly=True),
         'invoice_state': fields.related(
             'invoice_id',
             'state',
@@ -430,14 +425,3 @@ class school_student(osv.osv):
         }
 
 school_student()
-
-
-class account_invoice(osv.osv):
-    _inherit = 'account.invoice'
-    _name = 'account.invoice'
-    _columns = {
-        'enrolment_id': fields.many2one(
-            'school.enrolment',
-            'Enrolment'),
-    }
-account_invoice()
