@@ -6,7 +6,7 @@
       <field name="name">school.student.tree</field>
       <field name="model">school.student</field>
       <field name="arch" type="xml">
-        <tree string="Students" colors="green:state=='draft';grey:state=='suspend'">
+        <tree string="Students" colors="green:state=='draft';grey:state=='suspend';blue:state=='student'">
           <field name="surname"/>
           <field name="firstname"/>
           <field name="state"/>
@@ -29,7 +29,7 @@
               groups="account.group_account_user"
               states="draft"
               attrs="{'invisible':['|',('is_invoiced','=',True),'|',('waive_registration_fee','=',True)]}"/>
-            <button name="student_suspend" type="object" states="student"
+            <button name="student_suspend" type="object" states="student,enrolled"
               string="Deactivate" groups="school.group_school_manager"/>
             <button name="student_resume" type="object" states="suspend"
               string="Activate" groups="school.group_school_manager"/>
@@ -129,8 +129,9 @@
         <search string="Search Students">
           <field name="surname"/>
           <separator/>
-          <filter string="Registrations" domain="[('state','=','draft')]"/>
+          <filter string="Draft" domain="[('state','=','draft')]"/>
           <filter string="Students" domain="[('state','=','student')]" />
+          <filter string="Enrolled" domain="[('state','=','enrolled')]" />
           <group expand="0" string="Group By..." >
             <filter string="Surname" domain="[]" context="{'group_by':'surname'}"/>
             <filter string="Status" domain="[]" context="{'group_by':'state'}"/>

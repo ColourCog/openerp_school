@@ -138,7 +138,7 @@ class school_student(osv.osv):
             'account.invoice',
             'Registration invoice',
             readonly=True,
-            ),
+            ondelete='cascade'),
         #financial
         'invoice_state': fields.related(
             'invoice_id',
@@ -167,6 +167,7 @@ class school_student(osv.osv):
             ('draft', 'Draft'),
             ('cancel', 'Cancelled'),
             ('suspend', 'Inactive'),
+            ('enrolled', 'Enrolled'),
             ('student', 'Student')],
             'Status',
             readonly=True,
@@ -214,6 +215,7 @@ class school_student(osv.osv):
         if not default:
             default = {}
         default.update({
+            'state':'draft',
             'name':None,
             'reg_num':False,
             'invoice_id':False,
@@ -244,6 +246,22 @@ class school_student(osv.osv):
                 'user_valid': uid},
             context=context)
 
+    def student_enrolled(self, cr, uid, ids, context=None):
+        return self.write(
+            cr,
+            uid,
+            ids,
+            {'state': 'enrolled'},
+            context=context)
+
+    def student_derolled(self, cr, uid, ids, context=None):
+        return self.write(
+            cr,
+            uid,
+            ids,
+            {'state': 'student'},
+            context=context)
+
     # custom
     def student_suspend(self, cr, uid, ids, context=None):
         return self.write(
@@ -264,29 +282,28 @@ class school_student(osv.osv):
 
     def student_cancel(self, cr, uid, ids, context=None):
         inv_obj = self.pool.get('account.invoice')
-        std_ids = [ student.invoice_id.id for student in self.browse(cr, uid, ids, context=context)
-                        if student.invoice_id]
-        if std_ids:
-            inv_obj.action_cancel(cr, uid, std_ids, context)
-            inv_obj.action_cancel_draft(cr, uid, std_ids, context)
-            try:
-                inv_obj.unlink(cr, uid, std_ids, context=context)
-            except:
-                pass
-        return self.write(
-            cr,
-            uid,
-            ids,
-            {'state': 'cancel', 'invoice_id': None, 'is_invoiced': False},
-            context=context)
+        return_ids = []
+        for student in self.browse(cr, uid, ids, context=context):
+            vals = {'state': 'cancel'}
+            if student.invoice_id:
+                #if possible, delete invoice
+                try:
+                    inv_obj.action_cancel(cr, uid, [student.invoice_id.id], context)
+                    inv_obj.action_cancel_draft(cr, uid, [student.invoice_id.id], context)
+                    inv_obj.unlink(cr, uid, [student.invoice_id.id], context=context)
+                    vals['invoice_id'] = None
+                    vals['is_invoiced'] = False
+                except:
+                    pass
+            return_ids.append(
+                self.write(
+                    cr,
+                    uid,
+                    ids,
+                    vals,
+                    context=context))
+        return return_ids
 
-    def drop_out(self, cr, uid, ids, context=None):
-        self.write(
-            cr,
-            uid,
-            ids,
-            {'current_class_id': None},
-            context=context)
 
     def validate_registration(self, cr, uid, ids, context=None):
         if not context:

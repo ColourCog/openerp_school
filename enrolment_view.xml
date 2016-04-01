@@ -1,12 +1,12 @@
 <openerp>
-  <data>
+  <data noupdate="0">
 
     <!-- Student enrolment -->
     <record id="view_school_enrolment_tree" model="ir.ui.view">
       <field name="name">school.enrolment.tree</field>
       <field name="model">school.enrolment</field>
       <field name="arch" type="xml">
-        <tree string="Enrolments" colors="green:state=='draft';grey:state=='suspend'">
+        <tree string="Enrolments" colors="green:state=='draft';grey:state=='cancel'">
           <field name="year_id"/>
           <field name="date_valid"/>
           <field name="student_id"/>
@@ -84,7 +84,7 @@
         <search string="Search enrolments">
           <field name="class_id"/>
           <field name="student_id"/>
-          <filter icon="terp-check" name="open" string="Current" domain="[('state','!=','archived')]"/>
+          <filter icon="terp-check" name="open" string="Current" domain="[('state','=','enrolled')]"/>
           <filter icon="terp-check" name="archived" string="Archived" domain="[('state','=','archived')]"/>
           <group expand="0" string="Group By..." >
             <filter string="Year" domain="[]" context="{'group_by':'year_id'}"/>
@@ -214,7 +214,7 @@
       <field name="inherit_id" ref="school.view_school_registration_tree"/>
       <field name="arch" type="xml">
         <xpath expr="//field[@name='state']" position="after">
-          <field name="is_enrolled"/>
+          <field name="is_enrolled" invisible="1"/>
         </xpath>
       </field>
     </record>
@@ -256,8 +256,8 @@
       <field name="model">school.student</field>
       <field name="inherit_id" ref="school.view_school_registration_filter"/>
       <field name="arch" type="xml">
-        <xpath expr="//filter[@string='Students']" position="after">
-          <filter string="Enrolled" domain="[('is_enrolled','!=',False)]" />
+        <xpath expr="//filter[@string='Enrolled']" position="after">
+          <filter string="Obsolete" domain="[('is_enrolled','!=',False)]" />
         </xpath>
       </field>
     </record>

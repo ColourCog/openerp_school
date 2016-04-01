@@ -135,7 +135,8 @@ class school_enrolment(osv.osv):
         'invoice_id': fields.many2one(
             'account.invoice',
             'Tuition invoice',
-            readonly=True),
+            readonly=True,
+            ondelete='cascade'),
         'invoice_state': fields.related(
             'invoice_id',
             'state',
@@ -226,7 +227,7 @@ class school_enrolment(osv.osv):
                 cr,
                 uid,
                 [enrolment.student_id.id],
-                {'current_class_id': enrolment.class_id.id, 'is_enrolled': True},
+                {'current_class_id': enrolment.class_id.id, 'state': 'enrolled'},
                 context=context)
         return self.write(
             cr,
@@ -240,24 +241,29 @@ class school_enrolment(osv.osv):
 
     def enrolment_cancel(self, cr, uid, ids, context=None):
         inv_obj = self.pool.get('account.invoice')
-        inv_ids = [ enrolment.invoice_id.id for enrolment in self.browse(cr, uid, ids, context=context)
-                        if enrolment.invoice_id]
         student_obj = self.pool.get('school.student')
-        std_ids = [ enrolment.student_id.id for enrolment in self.browse(cr, uid, ids, context=context) ]
-        student_obj.drop_out(cr, uid, std_ids, context=context)
-        if inv_ids:
-            inv_obj.action_cancel(cr, uid, inv_ids, context)
-            inv_obj.action_cancel_draft(cr, uid, inv_ids, context)
-            try:
-                inv_obj.unlink(cr, uid, inv_ids, context=context)
-            except:
-                pass
-        return self.write(
-            cr,
-            uid,
-            ids,
-            {'state': 'cancel', 'invoice_id': None, 'is_invoiced': False},
-            context=context)
+        return_ids = []
+        for enrolment in self.browse(cr, uid, ids, context=context):
+            vals = {'state': 'cancel'}
+            student_obj.drop_out(cr, uid, [enrolment.student_id.id], context=context)
+            if enrolment.invoice_id:
+                #if possible, delete invoice
+                try:
+                    inv_obj.action_cancel(cr, uid, [enrolment.invoice_id.id], context)
+                    inv_obj.action_cancel_draft(cr, uid, [enrolment.invoice_id.id], context)
+                    inv_obj.unlink(cr, uid, [enrolment.invoice_id.id], context=context)
+                    vals['invoice_id'] = None
+                    vals['is_invoiced'] = False
+                except:
+                    pass
+            return_ids.append(
+                self.write(
+                    cr,
+                    uid,
+                    ids,
+                    vals,
+                    context=context))
+        return return_ids
 
     def validate_enrolment(self, cr, uid, ids, context=None):
         if not context:
@@ -329,20 +335,18 @@ class school_student(osv.osv):
             'school.enrolment',
             'student_id',
             'enrolment history'),
+        'is_enrolled': fields.boolean(
+            'obsolete field'),
         'current_class_id': fields.many2one(
             'school.class',
             'Current class'),
-        'is_enrolled': fields.boolean(
-            'Currently enrolled'),
     }
 
     def copy(self, cr, uid, student_id, default=None, context=None):
-        """We need to drop any invoice issues for now"""
         if not default:
             default = {}
         default.update({
             'current_class_id':False,
-            'is_enrolled':False,
             'enrolment_ids':[],
             })
 
@@ -350,21 +354,28 @@ class school_student(osv.osv):
         return new_id
 
     def student_cancel(self, cr, uid, ids, context=None):
-        reg_obj = self.pool.get('school.enrolment')
-        inv_obj = self.pool.get('account.invoice')
+        enr_obj = self.pool.get('school.enrolment')
         for student in self.browse(cr, uid, ids, context=context):
-            reg_ids = [ enr.id for enr in student.enrolment_ids]
-            if reg_ids:
-                reg_obj.enrolment_cancel(cr, uid, reg_ids, context)
-                reg_obj.unlink(cr, uid, reg_ids, context)
+            enr_ids = [ enr.id for enr in student.enrolment_ids]
+            if enr_ids:
+                enr_obj.enrolment_cancel(cr, uid, enr_ids, context)
+                enr_obj.unlink(cr, uid, enr_ids, context)
         return super(school_student, self).student_cancel(cr, uid, ids, context=context)
+
+    def student_suspend(self, cr, uid, ids, context=None):
+        enr_obj = self.pool.get('school.enrolment')
+        for student in self.browse(cr, uid, ids, context=context):
+            enr_ids = [ enr.id for enr in student.enrolment_ids]
+            if enr_ids:
+                enr_obj.enrolment_cancel(cr, uid, enr_ids, context)
+        return super(school_student, self).student_suspend(cr, uid, ids, context=context)
 
     def drop_out(self, cr, uid, ids, context=None):
         self.write(
             cr,
             uid,
             ids,
-            {'current_class_id': None, 'is_enrolled': False},
+            {'current_class_id': None, 'state': 'student'},
             context=context)
 
     def enroll_student(self, cr, uid, ids, context=None):
@@ -372,7 +383,7 @@ class school_student(osv.osv):
 
         student_obj = self.pool.get('school.student')
         student = student_obj.browse(cr, uid, context['student_id'], context=context)
-        if student.is_enrolled:
+        if student.state == 'enrolled':
             raise osv.except_osv(
                 _('Duplicate Error!'),
                 _("It seems an enrolment has already been created for %s.\nPlease check the draft enrolments." % student.name ))
