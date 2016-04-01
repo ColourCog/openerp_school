@@ -44,6 +44,7 @@
             context="{'partner_id':billing_partner_id}"
             type="action"
             states="draft"
+            attrs="{'invisible':['|',('is_invoiced','=',True),'|',('waive_registration_fee','=',True)]}"
             groups="school.group_school_manager"/>
         </xpath>
 
@@ -97,6 +98,7 @@
             context="{'student_id':student_id}"
             type="action"
             states="draft"
+            attrs="{'invisible':['|',('is_invoiced','=',True),'|',('waive_tuition_fee','=',True)]}"
             groups="school.group_school_manager"/>
         </xpath>
 

@@ -139,6 +139,11 @@ class school_student(osv.osv):
             'Registration invoice',
             readonly=True,
             ondelete='cascade'),
+        'invoice_ids': fields.one2many(
+            'account.invoice',
+            'student_id',
+            'Invoice history',
+            readonly=True),
         #financial
         'invoice_state': fields.related(
             'invoice_id',
@@ -254,30 +259,23 @@ class school_student(osv.osv):
             {'state': 'enrolled'},
             context=context)
 
-    def student_derolled(self, cr, uid, ids, context=None):
-        return self.write(
-            cr,
-            uid,
-            ids,
-            {'state': 'student'},
-            context=context)
-
     # custom
     def student_suspend(self, cr, uid, ids, context=None):
+        for student in self.browse(cr, uid, ids):
+            if student.invoice_id:
+                #move current reg invoice to history
+                vals = {
+                    'invoice_ids': [(4, student.invoice_id.id)],
+                    'invoice_id': None,
+                    'is_invoiced': False,
+                }
+                self.write(cr, uid, [student.id], vals, context=context)
+
         return self.write(
             cr,
             uid,
             ids,
             {'state': 'suspend'},
-            context=context)
-
-    # custom
-    def student_resume(self, cr, uid, ids, context=None):
-        return self.write(
-            cr,
-            uid,
-            ids,
-            {'state': 'student'},
             context=context)
 
     def student_cancel(self, cr, uid, ids, context=None):
@@ -371,3 +369,14 @@ class school_student(osv.osv):
         return res
 
 school_student()
+
+
+class account_invoice(osv.osv):
+    _inherit = 'account.invoice'
+    _name = 'account.invoice'
+    _columns = {
+        'student_id': fields.many2one(
+            'school.student',
+            'Student'),
+    }
+account_invoice()

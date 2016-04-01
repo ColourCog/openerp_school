@@ -322,11 +322,8 @@ class school_class(osv.osv):
         for sclass in self.browse(cr, uid, ids, context=context):
             for enr in sclass.enrolment_ids:
                 enr_ids.append(enr.id)
-                student_ids.append(enr.student_id.id)
         enr_obj = self.pool.get('school.enrolment')
-        enr_obj.write(cr, uid, enr_ids, {'state': 'archived'}, context=context)
-        student_obj = self.pool.get('school.student')
-        student_obj.drop_out(cr, uid, student_ids, context=context)
+        enr_obj.enrolment_archive(cr, uid, enr_ids, context=context)
         self.write(cr, uid, ids, {'state': 'archived'}, context=context)
 
 school_class()

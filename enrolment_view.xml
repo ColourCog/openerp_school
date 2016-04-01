@@ -67,6 +67,9 @@
                   </tree>
                 </field>
               </page>
+              <page string="Extra invoices">
+                <field name="invoice_ids"/>
+              </page>
             </notebook>
           </sheet>
           <div class="oe_chatter">
@@ -89,6 +92,7 @@
           <group expand="0" string="Group By..." >
             <filter string="Year" domain="[]" context="{'group_by':'year_id'}"/>
             <filter string="Class" domain="[]" context="{'group_by':'class_id'}"/>
+            <filter string="Student" domain="[]" context="{'group_by':'student_id'}"/>
           </group>
         </search>
       </field>

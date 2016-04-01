@@ -6,7 +6,7 @@
       <field name="name">school.student.tree</field>
       <field name="model">school.student</field>
       <field name="arch" type="xml">
-        <tree string="Students" colors="green:state=='draft';grey:state=='suspend';blue:state=='student'">
+        <tree string="Students" colors="green:state=='draft';grey:state=='suspend';red:state=='cancel';blue:state=='student'">
           <field name="surname"/>
           <field name="firstname"/>
           <field name="state"/>
@@ -20,7 +20,7 @@
       <field name="arch" type="xml">
         <form string="Students" version="7.0">
           <header>
-            <button name="student_draft" states="cancel" string="Set to Draft" type="object" />
+            <button name="student_draft" states="cancel,suspend" string="Set to Draft" type="object" />
             <button name="validate" states="draft" string="Validate" class="oe_highlight" groups="school.group_school_headteacher"/>
             <button
               name="generate_invoice"
@@ -31,8 +31,6 @@
               attrs="{'invisible':['|',('is_invoiced','=',True),'|',('waive_registration_fee','=',True)]}"/>
             <button name="student_suspend" type="object" states="student,enrolled"
               string="Deactivate" groups="school.group_school_manager"/>
-            <button name="student_resume" type="object" states="suspend"
-              string="Activate" groups="school.group_school_manager"/>
             <button name="cancel" states="student" string="Cancel" groups="school.group_school_manager"/>
             <field name="state" widget="statusbar" statusbar_visible="draft,student" statusbar_colors='{"cancel":"red"}'/>
           </header>
@@ -59,7 +57,7 @@
                 <field name="billing_partner_id"/>
                 <field name="invoice_id"/>
                 <field name="invoice_state"/>
-                <field name="is_invoiced" invisible="1"/>
+                <field name="is_invoiced" groups="school.group_school_manager"/>
               </group>
               <group>
                 <field name="waive_registration_fee" groups="school.group_school_manager"/>
@@ -100,6 +98,9 @@
                   </tree>
                 </field>
               </page>
+              <page string="Past Invoices">
+                <field name="invoice_ids"/>
+              </page>
               <page string="Misc">
                 <group>
                   <group>
@@ -132,6 +133,8 @@
           <filter string="Draft" domain="[('state','=','draft')]"/>
           <filter string="Students" domain="[('state','=','student')]" />
           <filter string="Enrolled" domain="[('state','=','enrolled')]" />
+          <filter string="Deactivated" domain="[('state','=','suspend')]" />
+          <filter string="Cancelled" domain="[('state','=','cancel')]" />
           <group expand="0" string="Group By..." >
             <filter string="Surname" domain="[]" context="{'group_by':'surname'}"/>
             <filter string="Status" domain="[]" context="{'group_by':'state'}"/>
