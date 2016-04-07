@@ -92,7 +92,8 @@ class school_student_relative(osv.osv):
             ('father', 'Father'),
             ('mother', 'Mother'),
             ('guardian', 'Guardian')],
-            'Relationship to student'),
+            'Relationship to student',
+            required=True),
 
     }
     _sql_constraints = [(
@@ -271,7 +272,8 @@ class school_class(osv.osv):
         'enrolment_ids': fields.one2many(
             'school.enrolment',
             'class_id',
-            'Class Roll'),
+            'Class Roll',
+            domain=[('state','=','enrolled')]),
         'state': fields.selection([
             ('open', 'Enrolments open'),
             ('closed', 'Enrolments closed'),

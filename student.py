@@ -146,7 +146,7 @@ class school_student(osv.osv):
             type='char',
             string="Invoice status",
             readonly=True),
-        'enrolement_checklist_id': fields.many2one(
+        'registration_checklist_id': fields.many2one(
             'school.checklist',
             'Checklist',
             readonly=True,
@@ -178,7 +178,7 @@ class school_student(osv.osv):
 
     _defaults = {
         'registration_fee_id': _default_registration_fee,
-        'enrolement_checklist_id': _default_checklist,
+        'registration_checklist_id': _default_checklist,
         'date': fields.date.context_today,
         'state': 'draft',
         'user_id': lambda cr, uid, id, c={}: id,
@@ -193,6 +193,8 @@ class school_student(osv.osv):
 
 
     def create(self, cr, uid, vals, context=None):
+        if not context:
+            context = {}
         vals['firstname'] = vals.get('firstname').title()
         vals['surname'] = vals.get('surname').upper()
         vals['name'] = ' '.join([vals.get('surname'), vals.get('firstname')])
@@ -203,6 +205,8 @@ class school_student(osv.osv):
         return super(school_student, self).create(cr, uid, vals, context=context)
 
     def write(self, cr, uid, ids, vals, context=None):
+        if not context:
+            context = {}
         for student in self.browse(cr, uid, ids, context=context):
             vals['name'] = ' '.join([student.surname.upper(), student.firstname.title()])
             if not student.reg_num:
@@ -212,6 +216,8 @@ class school_student(osv.osv):
 
     def copy(self, cr, uid, student_id, default=None, context=None):
         """We need to drop any invoice issues for now"""
+        if not context:
+            context = {}
         if not default:
             default = {}
         default.update({
@@ -227,14 +233,44 @@ class school_student(osv.osv):
         new_id = super(school_student, self).copy(cr, uid, student_id, default, context=context)
         return new_id
 
+    def unlink(self, cr, uid, ids, context=None):
+        wf_service = netsvc.LocalService("workflow")
+        if context is None:
+            context = {}
+        for student in self.browse(cr, uid, ids, context=context):
+            if student.state not in ['draft','cancel']:
+                raise osv.except_osv(
+                    _('Active registration!'),
+                    _("You must either cancel or reset to draft to be able to delete."))
+            if student.invoice_id:
+                #if possible, delete invoice
+                try:
+                    inv_obj.action_cancel(cr, uid, [student.invoice_id.id], context)
+                    inv_obj.action_cancel_draft(cr, uid, [student.invoice_id.id], context)
+                    inv_obj.unlink(cr, uid, [student.invoice_id.id], context=context)
+                    vals['invoice_id'] = None
+                    vals['is_invoiced'] = False
+                except:
+                    pass
+        return super(school_student, self).unlink(cr, uid, ids, context=context)
+
     def student_draft(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
         wf_service = netsvc.LocalService("workflow")
         for student in self.browse(cr, uid, ids):
             wf_service.trg_delete(uid, 'school.student', student.id, cr)
             wf_service.trg_create(uid, 'school.student', student.id, cr)
-        return self.write(cr, uid, ids, {'state': 'draft', 'date_valid': None, 'user_valid': None}, context=context)
+        return self.write(
+            cr,
+            uid,
+            ids,
+            {'state': 'draft', 'date_valid': None, 'user_valid': None},
+            context=context)
 
     def student_validate(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
         self.validate_registration(cr, uid, ids, context)
         return self.write(
             cr,
@@ -247,6 +283,8 @@ class school_student(osv.osv):
             context=context)
 
     def student_enrolled(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
         return self.write(
             cr,
             uid,
@@ -256,6 +294,8 @@ class school_student(osv.osv):
 
     # custom
     def student_suspend(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
         return self.write(
             cr,
             uid,
@@ -264,6 +304,8 @@ class school_student(osv.osv):
             context=context)
 
     def student_cancel(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
         inv_obj = self.pool.get('account.invoice')
         return_ids = []
         for student in self.browse(cr, uid, ids, context=context):

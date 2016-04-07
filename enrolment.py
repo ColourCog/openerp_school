@@ -46,12 +46,18 @@ class school_enrolment(osv.osv):
     }
 
     def _default_student_id(self, cr, uid, context=None):
+        if not context:
+            context = {}
         return resolve_id_from_context('student_id', context)
 
     def _default_class_id(self, cr, uid, context=None):
+        if not context:
+            context = {}
         return resolve_id_from_context('class_id', context)
 
     def _default_checklist(self, cr, uid, context=None):
+        if not context:
+            context = {}
         user = self.pool.get('res.users').browse(cr, uid, uid, context=context)
         if user.company_id.default_enrolment_checklist_id:
             return user.company_id.default_enrolment_checklist_id.id
@@ -59,6 +65,8 @@ class school_enrolment(osv.osv):
 
     def onchange_class_id(self, cr, uid, ids, class_id,
                         context=None):
+        if not context:
+            context = {}
         class_obj = self.pool.get('school.class')
         prod_id = False
         if class_id:
@@ -73,6 +81,8 @@ class school_enrolment(osv.osv):
 
     def onchange_checklist_id(self, cr, uid, ids, checklist_id,
                         context=None):
+        if not context:
+            context = {}
         chkitem_obj = self.pool.get('school.checklist.item')
         chk_ids = []
         if checklist_id:
@@ -184,6 +194,8 @@ class school_enrolment(osv.osv):
     ]
 
     def create(self, cr, uid, vals, context=None):
+        if not context:
+            context = {}
         class_obj = self.pool.get('school.class')
         sclass = class_obj.browse(cr, uid, vals['class_id'], context=context)
         # assert only enrolment to current class
@@ -216,6 +228,8 @@ class school_enrolment(osv.osv):
 
     def enrolment_draft(self, cr, uid, ids, context=None):
         wf_service = netsvc.LocalService("workflow")
+        if not context:
+            context = {}
         for enrolment in self.browse(cr, uid, ids):
             wf_service.trg_delete(uid, 'school.enrolment', enrolment.id, cr)
             wf_service.trg_create(uid, 'school.enrolment', enrolment.id, cr)
@@ -223,10 +237,12 @@ class school_enrolment(osv.osv):
 
     def enrolment_validate(self, cr, uid, ids, context=None):
         wf_service = netsvc.LocalService("workflow")
+        if not context:
+            context = {}
         self.validate_enrolment(cr, uid, ids, context)
         student_obj = self.pool.get('school.student')
         for enrolment in self.browse(cr, uid, ids, context=context):
-            wf_service.trg_validate(uid, 'school.student', enrolment.student_id.id, 'enrolled', cr)
+            wf_service.trg_validate(uid, 'school.student', enrolment.student_id.id, 'enroll', cr)
             student_obj.write(
                 cr,
                 uid,
@@ -245,8 +261,11 @@ class school_enrolment(osv.osv):
 
     def enrolment_archive(self, cr, uid, ids, context=None):
         wf_service = netsvc.LocalService("workflow")
+        if not context:
+            context = {}
         for enrolment in self.browse(cr, uid, ids, context=context):
-            wf_service.trg_validate(uid, 'school.student', enrolment.student_id.id, 'student', cr)
+            if not context.get('skip_deroll', False):
+                wf_service.trg_validate(uid, 'school.student', enrolment.student_id.id, 'deroll', cr)
         return self.write(
             cr,
             uid,
@@ -256,11 +275,14 @@ class school_enrolment(osv.osv):
 
     def enrolment_cancel(self, cr, uid, ids, context=None):
         wf_service = netsvc.LocalService("workflow")
+        if not context:
+            context = {}
         inv_obj = self.pool.get('account.invoice')
         return_ids = []
         for enrolment in self.browse(cr, uid, ids, context=context):
             vals = {'state': 'cancel'}
-            wf_service.trg_validate(uid, 'school.student', enrolment.student_id.id, 'student', cr)
+            if not context.get('skip_deroll', False):
+                wf_service.trg_validate(uid, 'school.student', enrolment.student_id.id, 'deroll', cr)
             if enrolment.invoice_id:
                 #if possible, delete invoice
                 try:
@@ -351,6 +373,8 @@ class school_student(osv.osv):
     }
 
     def copy(self, cr, uid, student_id, default=None, context=None):
+        if not context:
+            context = {}
         if not default:
             default = {}
         default.update({
@@ -362,6 +386,8 @@ class school_student(osv.osv):
         return new_id
 
     def student_validate(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
         self.write(
             cr,
             uid,
@@ -370,25 +396,50 @@ class school_student(osv.osv):
             context=context)
         return super(school_student, self).student_validate(cr, uid, ids, context=context)
 
+    def student_draft(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
+        self.write(
+            cr,
+            uid,
+            ids,
+            {'current_class_id': False},
+            context=context)
+        return super(school_student, self).student_draft(cr, uid, ids, context=context)
+
 
     def student_cancel(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
         enr_obj = self.pool.get('school.enrolment')
         for student in self.browse(cr, uid, ids, context=context):
-            enr_ids = [ enr.id for enr in student.enrolment_ids]
+            enr_ids = [ enr.id for enr in student.enrolment_ids if enr.state == 'enrolled']
             if enr_ids:
                 enr_obj.enrolment_cancel(cr, uid, enr_ids, context)
                 enr_obj.unlink(cr, uid, enr_ids, context)
         return super(school_student, self).student_cancel(cr, uid, ids, context=context)
 
     def student_suspend(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
         enr_obj = self.pool.get('school.enrolment')
         for student in self.browse(cr, uid, ids, context=context):
-            enr_ids = [ enr.id for enr in student.enrolment_ids]
+            enr_ids = [ enr.id for enr in student.enrolment_ids if enr.state == 'enrolled']
             if enr_ids:
-                enr_obj.enrolment_cancel(cr, uid, enr_ids, context)
+                ctx = context.copy()
+                ctx['skip_deroll'] = True
+                enr_obj.enrolment_archive(cr, uid, enr_ids, ctx)
+        self.write(
+            cr,
+            uid,
+            ids,
+            {'current_class_id': False},
+            context=context)
         return super(school_student, self).student_suspend(cr, uid, ids, context=context)
 
     def enroll_student(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
         dummy, view_id = self.pool.get('ir.model.data').get_object_reference(cr, uid, 'school', 'view_school_enrolment_form')
 
         student_obj = self.pool.get('school.student')

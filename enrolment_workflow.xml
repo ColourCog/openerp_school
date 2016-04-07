@@ -23,11 +23,20 @@
             <field name="action">enrolment_validate()</field>
         </record>
 
+
         <record id="reg_cancel" model="workflow.activity">
             <field name="wkf_id" ref="wkf_enrolments"/>
             <field name="name">cancel</field>
             <field name="kind">function</field>
             <field name="action">enrolment_cancel()</field>
+            <field name="flow_stop">True</field>
+        </record>
+
+        <record id="reg_archive" model="workflow.activity">
+            <field name="wkf_id" ref="wkf_enrolments"/>
+            <field name="name">archive</field>
+            <field name="kind">function</field>
+            <field name="action">enrolment_archive()</field>
             <field name="flow_stop">True</field>
         </record>
 
@@ -43,6 +52,12 @@
             <field name="act_from" ref="reg_enrolment"/>
             <field name="act_to" ref="reg_cancel"/>
             <field name="signal">cancel</field>
+        </record>
+
+        <record id="eg_t3" model="workflow.transition">
+            <field name="act_from" ref="reg_enrolment"/>
+            <field name="act_to" ref="reg_archive"/>
+            <field name="signal">archive</field>
         </record>
 
     </data>

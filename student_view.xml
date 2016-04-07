@@ -62,7 +62,7 @@
               <group>
                 <field name="waive_registration_fee" groups="school.group_school_manager"/>
                 <field name="registration_fee_id"/>
-                <field name="enrolement_checklist_id" on_change="onchange_checklist_id(enrolement_checklist_id)"/>
+                <field name="registration_checklist_id" on_change="onchange_checklist_id(registration_checklist_id)"/>
               </group>
             </group>
             <notebook name="details">

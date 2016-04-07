@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name" : "School Management",
-    "version" : "0.7",
+    "version" : "0.8",
     "category" : "Accounting",
     "sequence": 60,
     "complexity" : "normal",
@@ -41,7 +41,6 @@ Features:
       'enrolment_data.xml',
       'grading_view.xml',
       'res_config_view.xml',
-      'school_data.xml',
       'wizards_view.xml',
       'school_report.xml',
     ],
