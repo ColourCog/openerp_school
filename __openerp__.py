@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name" : "School Management",
-    "version" : "0.8",
+    "version" : "0.9",
     "category" : "Accounting",
     "sequence": 60,
     "complexity" : "normal",
@@ -43,6 +43,7 @@ Features:
       'res_config_view.xml',
       'wizards_view.xml',
       'school_report.xml',
+      'school_data.xml',
     ],
     "application": False,
     "installable": True
