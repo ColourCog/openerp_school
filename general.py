@@ -277,7 +277,7 @@ class school_class(osv.osv):
         'state': fields.selection([
             ('open', 'Enrolments open'),
             ('closed', 'Enrolments closed'),
-            ('archive', 'Archived')],
+            ('archived', 'Archived')],
             'Status',
             readonly=True,
             track_visibility='onchange',
