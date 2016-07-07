@@ -84,6 +84,7 @@
       <field name="arch" type="xml">
         <tree string="Year">
           <field name="name"/>
+          <field name="promotion_idx"/>
           <field name="tuition_fee_id"/>
         </tree>
       </field>
@@ -98,6 +99,7 @@
             <group>
               <group>
                 <field name="name"/>
+          			<field name="promotion_idx"/>
               </group>
               <group>
                 <field name="tuition_fee_id"/>

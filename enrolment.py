@@ -370,7 +370,7 @@ class school_student(osv.osv):
         'current_class_id': fields.many2one(
             'school.class',
             'Current class'),
-    }
+	}
 
     def copy(self, cr, uid, student_id, default=None, context=None):
         if not context:

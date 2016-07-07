@@ -1,61 +1,60 @@
 <openerp>
-    <data noupdate="0">
+  <data noupdate="0">
 
+    <!-- TODO: Rounding method -->
 
-        <!-- TODO: Rounding method -->
+    <!-- Checklist -->
+    <record id="school_checklist_registration" model="school.checklist">
+      <field name="name">Registration</field>
+    </record>
+    <record id="school_checklist_enrolment" model="school.checklist">
+      <field name="name">Enrolment</field>
+    </record>
 
-        <!-- Checklist -->
-        <record id="school_checklist_registration" model="school.checklist">
-            <field name="name">Registration</field>
-        </record>
-        <record id="school_checklist_enrolment" model="school.checklist">
-            <field name="name">Enrolment</field>
-        </record>
+    <!-- Checklist Items-->
+    <record id="school_checklist_item_certificate" model="school.checklist.item">
+      <field name="name">Birth Certificate</field>
+      <field name="checklist_id" ref="school_checklist_registration"/>
+    </record>
+    <record id="school_checklist_item_vaccination" model="school.checklist.item">
+	    <field name="name">Vaccination card</field>
+	    <field name="checklist_id" ref="school_checklist_registration"/>
+    </record>
+    <record id="school_checklist_item_schoolreports" model="school.checklist.item">
+      <field name="name">Previous school reports</field>
+      <field name="checklist_id" ref="school_checklist_registration"/>
+    </record>
 
-        <!-- Checklist Items-->
-        <record id="school_checklist_item_certificate" model="school.checklist.item">
-            <field name="name">Birth Certificate</field>
-            <field name="checklist_id" ref="school_checklist_registration"/>
-        </record>
-        <record id="school_checklist_item_vaccination" model="school.checklist.item">
-            <field name="name">Vaccination card</field>
-            <field name="checklist_id" ref="school_checklist_registration"/>
-        </record>
-        <record id="school_checklist_item_schoolreports" model="school.checklist.item">
-            <field name="name">Previous school reports</field>
-            <field name="checklist_id" ref="school_checklist_registration"/>
-        </record>
-
-        <!-- Academic level-->
-        <record id="school_kindergarten" model="school.academic.year">
-            <field name="name">Playschool</field>
-        </record>
-        <record id="school_nursery" model="school.academic.year">
-            <field name="name">Nursery</field>
-        </record>
-        <record id="school_reception" model="school.academic.year">
-            <field name="name">Reception</field>
-        </record>
-        <record id="school_level_1" model="school.academic.year">
-            <field name="name">Year 1</field>
-        </record>
-        <record id="school_level_2" model="school.academic.year">
-            <field name="name">Year 2</field>
-        </record>
-        <record id="school_level_3" model="school.academic.year">
-            <field name="name">Year 3</field>
-        </record>
-        <record id="school_level_4" model="school.academic.year">
-            <field name="name">Year 4</field>
-        </record>
-        <record id="school_level_5" model="school.academic.year">
-            <field name="name">Year 5</field>
-        </record>
-        <record id="school_level_6" model="school.academic.year">
-            <field name="name">Year 6</field>
-        </record>
-        <record id="school_level_7" model="school.academic.year">
-            <field name="name">Year 7</field>
+    <!-- Academic level-->
+    <record id="school_kindergarten" model="school.academic.year">
+        <field name="name">Playschool</field>
+    </record>
+    <record id="school_nursery" model="school.academic.year">
+      <field name="name">Nursery</field>
+    </record>
+    <record id="school_reception" model="school.academic.year">
+      <field name="name">Reception</field>
+      </record>
+    <record id="school_level_1" model="school.academic.year">
+      <field name="name">Year 1</field>
+    </record>
+    <record id="school_level_2" model="school.academic.year">
+      <field name="name">Year 2</field>
+    </record>
+    <record id="school_level_3" model="school.academic.year">
+      <field name="name">Year 3</field>
+    </record>
+    <record id="school_level_4" model="school.academic.year">
+      <field name="name">Year 4</field>
+    </record>
+    <record id="school_level_5" model="school.academic.year">
+      <field name="name">Year 5</field>
+    </record>
+    <record id="school_level_6" model="school.academic.year">
+      <field name="name">Year 6</field>
+    </record>
+    <record id="school_level_7" model="school.academic.year">
+      <field name="name">Year 7</field>
         </record>
         <record id="school_level_8" model="school.academic.year">
             <field name="name">Year 8</field>

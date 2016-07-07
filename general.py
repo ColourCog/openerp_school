@@ -184,6 +184,7 @@ class school_academic_year(osv.osv):
 
     _columns = {
         'name': fields.char('Name', size=255, required=True),
+        'promotion_idx': fields.integer('Promotion index'),
         'tuition_fee_id': fields.many2one(
             'product.product',
             'Default tuition Fee',
