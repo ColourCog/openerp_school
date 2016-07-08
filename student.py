@@ -269,6 +269,7 @@ class school_student(osv.osv):
             context=context)
 
     def student_validate(self, cr, uid, ids, context=None):
+        _logger.debug("running student_validate")
         if not context:
             context = {}
         self.validate_registration(cr, uid, ids, context)
@@ -279,7 +280,8 @@ class school_student(osv.osv):
             {
                 'state': 'student',
                 'date_valid': time.strftime('%Y-%m-%d'),
-                'user_valid': uid},
+                'user_valid': uid
+            },
             context=context)
 
     def student_enrolled(self, cr, uid, ids, context=None):
@@ -346,7 +348,7 @@ class school_student(osv.osv):
             for check in student.checklist_ids:
                 if not check.done:
                     raise osv.except_osv(
-                        _('Validation error!'),
+                        _('Validation error for student %s!' % student.name),
                         _("Please verify '%s'" % check.item_id.name))
 
     def generate_invoice(self, cr, uid, ids, context):
