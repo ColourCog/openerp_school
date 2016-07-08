@@ -1,0 +1,97 @@
+<openerp>
+  <data noupdate="0">
+
+    <!-- Academic Period -->
+    <record id="view_school_academic_period_tree" model="ir.ui.view">
+      <field name="name">school.academic.period.tree</field>
+      <field name="model">school.academic.period</field>
+      <field name="arch" type="xml">
+        <tree string="Academic Period" colors="grey:state=='archived'">
+          <field name="name"/>
+          <field name="state"/>
+        </tree>
+      </field>
+    </record>
+
+    <record id="view_school_academic_period_form" model="ir.ui.view">
+      <field name="name">school.academic.period.form</field>
+      <field name="model">school.academic.period</field>
+      <field name="arch" type="xml">
+        <form string="Academic Period" version="7.0">
+          <header>
+            <button
+              name="archive_year"
+              type="object"
+              states="closed"
+              string="Archive"
+              groups="school.group_school_manager"
+            />
+            <button
+              name="close_year"
+              type="object"
+              states="open"
+              string="Close"
+              groups="school.group_school_manager"
+            />
+            <field
+              name="state"
+              widget="statusbar"
+              statusbar_visible="open,closed,archived"
+              statusbar_colors='{"archived":"grey"}'/>
+          </header>
+          <sheet>
+            <h1> <field name="name" class="oe_inline" /> </h1>
+            <group>
+              <group>
+                <field name="date_from"/>
+              </group>
+              <group>
+                <field name="date_to"/>
+              </group>
+            </group>
+            <notebook>
+              <page string="Classes">
+                <field name="class_ids" context="{'year_id': active_id}">
+                  <tree editable="bottom">
+                    <field name="level_id" />
+                    <field name="teacher_id"/>
+                  </tree>
+                </field>
+              </page>
+            </notebook>
+          </sheet>
+        </form>
+      </field>
+    </record>
+
+    <record id="view_school_academic_period_filter" model="ir.ui.view">
+      <field name="name">school.academic.period.filter</field>
+      <field name="model">school.academic.period</field>
+      <field name="arch" type="xml">
+        <search string="Search Academic periods">
+          <field name="name"/>
+          <filter icon="terp-check" name="open" string="Current" domain="[('state','=','open')]"/>
+          <filter icon="terp-check" name="closed" string="Archived" domain="[('state','=','archived')]"/>
+        </search>
+      </field>
+    </record>
+
+    <record id="action_school_academic_period_form" model="ir.actions.act_window">
+      <field name="name">Academic period</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.academic.period</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">tree,form</field>
+      <field name="context">{"search_default_open":1}</field>
+      <field name="search_view_id" ref="view_school_academic_period_filter"/>
+      <field name="help" type="html">
+        <p class="oe_view_nocontent_create">
+          Click to create a new Academic period.
+        </p>
+      </field>
+    </record>
+
+    <menuitem action="action_school_academic_period_form" id="menu_school_academic_period" parent="menu_school_configuration" sequence="1" />
+
+  </data>
+</openerp>

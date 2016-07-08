@@ -39,9 +39,7 @@ class school_subject(osv.osv):
         if sub:
             return sub.grading_method
         return False
-
 school_subject()
-
 
 class school_enrolment(osv.osv):
     _name = 'school.enrolment'
@@ -53,7 +51,6 @@ class school_enrolment(osv.osv):
             'Grades'),
     }
 school_enrolment()
-
 
 class school_year_subject(osv.osv):
     _name = 'school.year.subject'
@@ -113,9 +110,7 @@ class school_year_subject(osv.osv):
         if sub:
             return sub.weight
         return 1.0
-
 school_year_subject()
-
 
 class school_academic_year(osv.osv):
     _name = 'school.academic.year'
@@ -127,9 +122,7 @@ class school_academic_year(osv.osv):
             'level_id',
             'Subjects'),
     }
-
 school_academic_year()
-
 
 class school_class_subject(osv.osv):
     _name = 'school.class.subject'
@@ -197,9 +190,7 @@ class school_class_subject(osv.osv):
         if sub:
             return sub.weight
         return 1.0
-
 school_class_subject()
-
 
 class school_class(osv.osv):
     _name = 'school.class'
@@ -211,7 +202,6 @@ class school_class(osv.osv):
             'class_id',
             'Subjects'),
     }
-
 school_class()
 
 class school_teacher(osv.osv):
@@ -225,6 +215,7 @@ class school_teacher(osv.osv):
             'Subjects'),
     }
 school_teacher()
+
 class school_grade(osv.osv):
     _name = 'school.grade'
 

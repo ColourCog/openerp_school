@@ -6,7 +6,7 @@
       <field name="name">school.enrolment.tree</field>
       <field name="model">school.enrolment</field>
       <field name="arch" type="xml">
-        <tree string="Enrolments" colors="green:state=='draft';grey:state=='cancel'">
+        <tree string="Enrolments" colors="green:state=='draft';grey:state=='archived';red:state=='cancel'">
           <field name="year_id"/>
           <field name="date_valid"/>
           <field name="student_id"/>
@@ -227,13 +227,21 @@
       <field name="inherit_id" ref="school.view_school_registration_form"/>
       <field name="arch" type="xml">
         <xpath expr="//button[@name='validate']" position="after">
-          <button name="enroll_student"
+          <button
+            name="enroll_student"
             string="Enroll"
             context="{'student_id':active_id}"
             type="object"
             states="student"
             groups="school.group_school_headteacher"
-            class="oe_highlight"/>
+            class="oe_highlight"
+          />
+          <button
+            name="deroll"
+            string="Deroll"
+            states="enrolled"
+            groups="school.group_school_headteacher"
+          />
         </xpath>
         <xpath expr="//field[@name='is_invoiced']" position="after">
           <field name="is_enrolled" invisible="1"/>

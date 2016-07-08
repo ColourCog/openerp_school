@@ -264,7 +264,8 @@ class school_enrolment(osv.osv):
         if not context:
             context = {}
         for enrolment in self.browse(cr, uid, ids, context=context):
-            if not context.get('skip_deroll', False):
+            if context.get('skip_deroll', False) == False:
+                _logger.error("running workflow trigger deroll")
                 wf_service.trg_validate(uid, 'school.student', enrolment.student_id.id, 'deroll', cr)
         return self.write(
             cr,
@@ -281,7 +282,8 @@ class school_enrolment(osv.osv):
         return_ids = []
         for enrolment in self.browse(cr, uid, ids, context=context):
             vals = {'state': 'cancel'}
-            if not context.get('skip_deroll', False):
+            if context.get('skip_deroll', False) == False:
+                _logger.debug("running workflow trigger deroll")
                 wf_service.trg_validate(uid, 'school.student', enrolment.student_id.id, 'deroll', cr)
             if enrolment.invoice_id:
                 #if possible, delete invoice
@@ -380,19 +382,24 @@ class school_student(osv.osv):
         default.update({
             'current_class_id':False,
             'enrolment_ids':[],
-            })
+            'is_enrolled': False,
+        })
 
         new_id = super(school_student, self).copy(cr, uid, student_id, default, context=context)
         return new_id
 
     def student_validate(self, cr, uid, ids, context=None):
+        _logger.debug("running overloaded student_validate")
         if not context:
             context = {}
         self.write(
             cr,
             uid,
             ids,
-            {'current_class_id': False},
+            {
+                'current_class_id': False,
+                'is_enrolled': False,
+            },
             context=context)
         return super(school_student, self).student_validate(cr, uid, ids, context=context)
 
@@ -403,7 +410,10 @@ class school_student(osv.osv):
             cr,
             uid,
             ids,
-            {'current_class_id': False},
+            {
+                'current_class_id': False,
+                'is_enrolled': False,
+            },
             context=context)
         return super(school_student, self).student_draft(cr, uid, ids, context=context)
 
