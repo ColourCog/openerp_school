@@ -144,7 +144,6 @@ class school_academic_period(osv.osv):
             'year_id',
             'Classes for this Year'),
         'state': fields.selection([
-            ('draft', 'Draft'),
             ('open', 'Open For registration'),
             ('closed', 'Closed for registration'),
             ('archived', 'Archived')],
@@ -155,8 +154,21 @@ class school_academic_period(osv.osv):
             help="The archive status of this Year" ),
     }
     _defaults = {
-        'state': "draft",
+        'state': "open",
     }
+
+    def copy(self, cr, uid, per_id, default=None, context=None):
+        if not context:
+            context = {}
+        if not default:
+            default = {}
+        default.update({
+            'state':'open',
+            'class_ids': [],
+            'name': context.get('name', '/'),
+        })
+        new_id = super(school_academic_period, self).copy(cr, uid, per_id, default, context=context)
+        return new_id
 
     def close_year(self, cr, uid, ids, context=None):
         class_obj = self.pool.get('school.class')
@@ -172,8 +184,9 @@ class school_academic_period(osv.osv):
             class_obj.archive_class(cr, uid, class_ids, context=context)
         self.write(cr, uid, ids, {'state': 'archived'}, context=context)
 
-    def set_current(self, cr, uid, ids, context=None):
+    def new_from_current(self, cr, uid, old_id, context=None):
         assert len(ids) == 1, 'This option can only be used for a single id at a time.'
+        class_obj = self.pool.get('school.class')
         open_ids = self.search(cr, uid, [('state','=','open')], context=context)
         self.close_year(cr, uid, open_ids, context=context)
         self.write(cr, uid, ids, {'state': 'open'}, context=context)

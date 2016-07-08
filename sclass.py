@@ -42,8 +42,7 @@ class school_class(osv.osv):
         'enrolment_ids': fields.one2many(
             'school.enrolment',
             'class_id',
-            'Class Roll',
-            domain=[('state','=','enrolled')]),
+            'Class Roll'),
         'state': fields.selection([
             ('open', 'Enrolments open'),
             ('closed', 'Enrolments closed'),
@@ -86,7 +85,8 @@ class school_class(osv.osv):
             default = {}
         default.update({
             'state':'open',
-            'year_id': contex.get('default_year_id'),
+            'enrolment_ids': [],
+            'year_id': context.get('default_year_id'),
             })
         new_id = super(school_class, self).copy(cr, uid, class_id, default, context=context)
         return new_id

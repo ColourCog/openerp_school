@@ -114,3 +114,37 @@ class school_enrolment_invoice(osv.osv_memory):
         return {'type': 'ir.actions.act_window_close'}
 
 school_enrolment_invoice()
+
+class school_academic_period_new(osv.osv_memory):
+    """
+    This wizard creates a new year (school.academic.period) from the current one
+    """
+
+    _name = "school.academic.period.new"
+    _description = "Create new Academic period"
+
+    _columns = {
+        'name': fields.char('Name', size=255, required=True),
+    }
+
+    def create_period(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        pool_obj = pooler.get_pool(cr.dbname)
+        per_obj = pool_obj.get('school.academic.period')
+        class_obj = pool_obj.get('school.class')
+        per = per_obj.browse(cr, uid, context.get('active_id'), context=context)
+        # create a new period from dialog data
+        context.update({
+            'name': self.browse(cr, uid, ids)[0].name,
+        })
+        new_per_id = per_obj.copy(cr, uid, per.id, context=context)
+        # make ourself a copy of classes in previous year
+        ctx = {'default_year_id': new_per_id}
+        for sclass in per.class_ids:
+            class_obj.copy(cr, uid, sclass.id, context=ctx)
+        # now close previous year
+        per_obj.archive_year(cr, uid, [per.id], context=context)
+        return {'type': 'ir.actions.act_window_close'}
+
+school_academic_period_new()

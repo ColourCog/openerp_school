@@ -6,7 +6,7 @@
       <field name="name">school.enrolment.tree</field>
       <field name="model">school.enrolment</field>
       <field name="arch" type="xml">
-        <tree string="Enrolments" colors="green:state=='draft';grey:state=='cancel'">
+        <tree string="Enrolments" colors="green:state=='draft';grey:state=='archived';red:state=='cancel'">
           <field name="year_id"/>
           <field name="date_valid"/>
           <field name="student_id"/>
