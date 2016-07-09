@@ -25,6 +25,7 @@ Features:
 * enrolment process
 * Automatic invoice generation
 * Subjects and grading
+* Student / Class Promotion
     """,
     "data" : [
       "security/ir_rule.xml",
