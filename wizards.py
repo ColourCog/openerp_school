@@ -205,3 +205,53 @@ class school_enrolment_promote(osv.osv_memory):
         return {'type': 'ir.actions.act_window_close'}
 
 school_enrolment_promote()
+
+
+class school_class_promote(osv.osv_memory):
+    """
+    This wizard promotes all students in current class
+    """
+
+    _name = "school.class.promote"
+    _description = "Promote class"
+
+    def _default_promotion_idx(self, cr, uid, context=None):
+        sclass = self.pool.get('school.class').browse(
+            cr,
+            uid,
+            context.get('active_id'),
+            context=context)
+        return sclass.level_id.promotion_idx + 1
+
+    _columns = {
+        'promotion_idx': fields.integer('Promotion index'),
+        'class_id': fields.many2one(
+            'school.class',
+            'Applicable classes',
+            required=True),
+    }
+
+    _defaults = {
+        'promotion_idx': _default_promotion_idx,
+    }
+
+    def promote(self, cr, uid, ids, context=None):
+        if context is None:
+            context = {}
+        pool_obj = pooler.get_pool(cr.dbname)
+        class_obj = pool_obj.get('school.class')
+        enr_obj = pool_obj.get('school.enrolment')
+        sclass = class_obj.browse(cr, uid, context.get('active_id'), context=context)
+
+        context.update({
+            'class_id': self.browse(cr, uid, ids)[0].class_id.id,
+        })
+        for enr in sclass.enrolment_ids:
+            new_enr_id = enr_obj.copy(cr, uid, enr.id, context=context)
+            # archive if need be
+        if sclass.state != 'archived':
+            class_obj.archive_class(cr, uid, [sclass.id], context=context)
+
+        return {'type': 'ir.actions.act_window_close'}
+
+school_class_promote()

@@ -6,7 +6,7 @@
       <field name="name">school.enrolment.promote.form</field>
       <field name="model">school.enrolment.promote</field>
       <field name="arch" type="xml">
-        <form string="Import promote" version="7.0">
+        <form string="Promote student" version="7.0">
           <p>Select target class to promote to</p>
           <group>
             <field

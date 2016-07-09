@@ -199,15 +199,15 @@ class school_enrolment(osv.osv):
         class_obj = self.pool.get('school.class')
         sclass = class_obj.browse(cr, uid, vals['class_id'], context=context)
         # assert only enrolment to current class
-        if sclass.state == 'closed':
+        if sclass.state in ['closed', 'archived']:
             raise osv.except_osv(
                 _('Error!'),
-                _('This class is already archived'))
+                _('This class is not open for enrolments'))
         student_obj = self.pool.get('school.student')
         student = student_obj.browse(cr, uid, vals['student_id'], context=context)
         if student.current_class_id:
             raise osv.except_osv(
-                _('Duplicate Error!'),
+                _('Duplicate Error for %s!' % student.name),
                 _("This student is currently enrolled in '%s'" % student.current_class_id.name ))
         if student.invoice_id and student.invoice_id.state in ['draft', 'open']:
             raise osv.except_osv(
