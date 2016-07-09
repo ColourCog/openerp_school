@@ -89,7 +89,6 @@
           <filter icon="terp-check" name="open" string="Current" domain="[('state','=','enrolled')]"/>
           <filter icon="terp-check" name="archived" string="Archived" domain="[('state','=','archived')]"/>
           <group expand="0" string="Group By..." >
-            <filter string="Year" domain="[]" context="{'group_by':'year_id'}"/>
             <filter string="Class" domain="[]" context="{'group_by':'class_id'}"/>
             <filter string="Student" domain="[]" context="{'group_by':'student_id'}"/>
           </group>
