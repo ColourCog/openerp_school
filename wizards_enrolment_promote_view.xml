@@ -1,0 +1,65 @@
+<openerp>
+  <data>
+
+    <!-- Enrolment promote student -->
+    <record id="view_school_enrolment_promote_form" model="ir.ui.view">
+      <field name="name">school.enrolment.promote.form</field>
+      <field name="model">school.enrolment.promote</field>
+      <field name="arch" type="xml">
+        <form string="Import promote" version="7.0">
+          <p>Select target class to promote to</p>
+          <group>
+            <field
+              name="current_class_id"
+              on_change="onchange_current_class_id(current_class_id, context)"
+              invisible="1"
+            />
+            <field
+              name="promotion_idx"
+              invisible="1"
+            />
+            <field
+              name="class_id"
+              domain="[('level_id.promotion_idx', '=', promotion_idx),('state', '=', 'open')]"
+            />
+          </group>
+          <footer>
+              <button string="Promote" name="promote" type="object" default_focus="1" class="oe_highlight"/>
+              or
+              <button string="Cancel" class="oe_link" special="cancel"/>
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_school_enrolment_promote" model="ir.actions.act_window">
+      <field name="name">Promote student</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.enrolment.promote</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">form</field>
+      <field name="context">{}</field>
+      <field name="view_id" ref="view_school_enrolment_promote_form"/>
+      <field name="target">new</field>
+    </record>
+
+    <record id="view_school_enrolment_promote_inherit_form" model="ir.ui.view">
+      <field name="name">school.enrolment.form.promote.inherit</field>
+      <field name="model">school.enrolment</field>
+      <field name="inherit_id" ref="school.view_school_enrolment_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//button[@name='validate']" position="after">
+          <button name="%(action_school_enrolment_promote)d"
+            string="Promote student"
+            context="{'class_id':class_id}"
+            type="action"
+            states="enrolled,archived"
+            groups="school.group_school_manager"/>
+        </xpath>
+
+      </field>
+    </record>
+
+
+  </data>
+</openerp>
