@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<document filename="School_class_list.pdf">
+  <template title="School Class List" author="Colourcog" allowSplitting="20">
+    <pageTemplate id="first">
+      <frame id="first" x1="34.0" y1="28.0" width="530" height="786"/>
+    </pageTemplate>
+  </template>
+  <stylesheet>
+    <blockTableStyle id="Header_Table">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBELOW" colorName="#000000"/>
+    </blockTableStyle>
+    <blockTableStyle id="Data_Table">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBELOW" colorName="#e6e6e6" />
+    </blockTableStyle>
+    <blockTableStyle id="MidSum_Table">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEBELOW" colorName="#BFBFBF" />
+    </blockTableStyle>
+    <blockTableStyle id="Sum_Table">
+      <blockAlignment value="LEFT"/>
+      <blockValign value="TOP"/>
+      <lineStyle kind="LINEABOVE" colorName="#000000" />
+    </blockTableStyle>
+    <paraStyle name="default_7" rightIndent="0.0" leftIndent="0.0" fontSize="7.0" leading="10" alignment="LEFT" spaceBefore="0.0" spaceAfter="0.0"/>
+    <paraStyle name="file_header" fontSize="12.0" leading="15" alignment="CENTER"/>
+    <initialize>
+      <paraStyle name="all" alignment="JUSTIFY"/>
+    </initialize>
+    <images/>
+  </stylesheet>
+  <story>
+
+    <!-- Document header-->
+    <para style="file_header"><b>[[ year.name ]]</b></para>
+    <para style="file_header"><b>Student Provisional Class List</b></para>
+    <pto>
+    <pto_header><!-- Must be after setLang() -->
+    <blockTable colWidths="50.0,205.0,85.0,85.0,50.0,50.0" style="Header_Table">
+      <tr>
+        <td><para style="default_7"><b>Class</b></para></td>
+        <td><para style="default_7"><b>Name</b></para></td>
+        <td><para style="default_7"><b>Date of Birth</b></para></td>
+        <td><para style="default_7"><b>Placement age</b></para></td>
+        <td><para style="default_7"><b>Sex</b></para></td>
+        <td><para style="default_7"><b>Ad. No.</b></para></td>
+      </tr>
+    </blockTable>
+    </pto_header>
+    <blockTable colWidths="50.0,205.0,85.0,85.0,50.0,50.0" style="Header_Table">
+      <tr>
+        <td><para style="default_7"><b>Class</b></para></td>
+        <td><para style="default_7"><b>Name</b></para></td>
+        <td><para style="default_7"><b>Date of Birth</b></para></td>
+        <td><para style="default_7"><b>Placement age</b></para></td>
+        <td><para style="default_7"><b>Sex</b></para></td>
+        <td><para style="default_7"><b>Ad. No.</b></para></td>
+      </tr>
+    </blockTable>
+    <section>
+    <para >[[ repeatIn(objects,'o') ]]</para>
+    <blockTable colWidths="50.0,205.0,85.0,85.0,50.0,50.0" style="Data_Table">
+        <tr>
+          <td><para style="default_7">[[ o.name ]]</para></td>
+          <td><para style="default_7">[[ '']]</para></td>
+          <td><para style="default_7">[[ '']]</para></td>
+          <td><para style="default_7">[[ '']]</para></td>
+          <td><para style="default_7">[[ ' ' ]]</para></td>
+          <td><para style="default_7">[[ '']]</para></td>
+        </tr>
+      </blockTable>
+      <section>
+      <para >[[ repeatIn(o.enrolment_ids, 'e') ]]</para>
+      <blockTable colWidths="50.0,205.0,85.0,85.0,50.0,50.0" style="Data_Table">
+        <tr>
+          <td><para style="default_7">[[ '']]</para></td>
+          <td><para style="default_7">[[ e.student_id.surname ]], [[ e.student_id.firstname ]]</para></td>
+          <td><para style="default_7">[[ formatLang(e.student_id.birthday , date=True) ]]</para></td>
+          <td><para style="default_7">[[ age(e.student_id.birthday, year.date_from) ]]</para></td>
+          <td><para style="default_7">[[ e.student_id.gender ]]</para></td>
+          <td><para style="default_7">[[ e.student_id.reg_num ]]</para></td>
+        </tr>
+      </blockTable>
+      </section>
+      <blockTable colWidths="50.0,425.0,50.0" style="MidSum_Table">
+        <tr>
+          <td><para style="default_7">[[ '']]</para></td>
+          <td><para style="default_7"><b>Total</b></para></td>
+          <td><para style="default_7"><b>[[ count(o.enrolment_ids) ]]</b></para></td>
+        </tr>
+      </blockTable>
+    </section>
+    <blockTable colWidths="475.0,50.0" style="Sum_Table">
+      <tr>
+        <td><para style="default_7"><b>Total All Classes</b></para></td>
+        <td><para style="default_7"><b>[[ count(objects, 'enrolment_ids') ]]</b></para></td>
+      </tr>
+    </blockTable>
+    </pto>
+  </story>
+</document>
