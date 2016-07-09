@@ -1,86 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-    <data noupdate="0">
+  <data noupdate="0">
 
-        <!-- Workflow definition -->
+    <!-- Workflow definition -->
 
-        <record id="wkf_students" model="workflow">
-            <field name="name">school.wkf.students</field>
-            <field name="osv">school.student</field>
-            <field name="on_create">True</field>
-        </record>
+    <record id="wkf_students" model="workflow">
+      <field name="name">school.wkf.students</field>
+      <field name="osv">school.student</field>
+      <field name="on_create">True</field>
+    </record>
 
-        <record id="std_draft" model="workflow.activity">
-            <field name="wkf_id" ref="wkf_students"/>
-            <field name="name">draft</field>
-            <field name="flow_start">True</field>
-        </record>
+    <record id="std_draft" model="workflow.activity">
+      <field name="wkf_id" ref="wkf_students"/>
+      <field name="name">draft</field>
+      <field name="flow_start">True</field>
+    </record>
 
-        <record id="std_student" model="workflow.activity">
-            <field name="wkf_id" ref="wkf_students"/>
-            <field name="name">student</field>
-            <field name="kind">function</field>
-            <field name="action">student_validate()</field>
-        </record>
+    <record id="std_student" model="workflow.activity">
+      <field name="wkf_id" ref="wkf_students"/>
+      <field name="name">student</field>
+      <field name="kind">function</field>
+      <field name="action">student_validate()</field>
+    </record>
 
-        <record id="std_enroll" model="workflow.activity">
-            <field name="wkf_id" ref="wkf_students"/>
-            <field name="name">enrolled</field>
-            <field name="kind">function</field>
-            <field name="action">student_enrolled()</field>
-        </record>
+    <record id="std_enroll" model="workflow.activity">
+      <field name="wkf_id" ref="wkf_students"/>
+      <field name="name">enrolled</field>
+      <field name="kind">function</field>
+      <field name="action">student_enrolled()</field>
+    </record>
 
-        <record id="std_cancel" model="workflow.activity">
-            <field name="wkf_id" ref="wkf_students"/>
-            <field name="name">cancel</field>
-            <field name="kind">function</field>
-            <field name="action">student_cancel()</field>
-            <field name="flow_stop">True</field>
-        </record>
+    <record id="std_cancel" model="workflow.activity">
+      <field name="wkf_id" ref="wkf_students"/>
+      <field name="name">cancel</field>
+      <field name="kind">function</field>
+      <field name="action">student_cancel()</field>
+      <field name="flow_stop">True</field>
+    </record>
 
-        <record id="std_suspend" model="workflow.activity">
-            <field name="wkf_id" ref="wkf_students"/>
-            <field name="name">suspend</field>
-            <field name="kind">function</field>
-            <field name="action">student_suspend()</field>
-            <field name="flow_stop">True</field>
-        </record>
+    <record id="std_suspend" model="workflow.activity">
+      <field name="wkf_id" ref="wkf_students"/>
+      <field name="name">suspend</field>
+      <field name="kind">function</field>
+      <field name="action">student_suspend()</field>
+      <field name="flow_stop">True</field>
+    </record>
 
-        <!-- Transitions -->
-        <record id="std_t1" model="workflow.transition">
-            <field name="act_from" ref="std_draft"/>
-            <field name="act_to" ref="std_student"/>
-            <field name="signal">validate</field>
-        </record>
+    <!-- Transitions -->
+    <record id="std_t1" model="workflow.transition">
+      <field name="act_from" ref="std_draft"/>
+      <field name="act_to" ref="std_student"/>
+      <field name="signal">validate</field>
+    </record>
 
-        <record id="std_t2" model="workflow.transition">
-            <field name="act_from" ref="std_student"/>
-            <field name="act_to" ref="std_cancel"/>
-            <field name="signal">cancel</field>
-        </record>
+    <record id="std_t2" model="workflow.transition">
+      <field name="act_from" ref="std_student"/>
+      <field name="act_to" ref="std_cancel"/>
+      <field name="signal">cancel</field>
+    </record>
 
-        <record id="std_t3" model="workflow.transition">
-            <field name="act_from" ref="std_student"/>
-            <field name="act_to" ref="std_suspend"/>
-            <field name="signal">suspend</field>
-        </record>
-        <record id="std_t6" model="workflow.transition">
-            <field name="act_from" ref="std_enroll"/>
-            <field name="act_to" ref="std_suspend"/>
-            <field name="signal">suspend</field>
-        </record>
+    <record id="std_t3" model="workflow.transition">
+      <field name="act_from" ref="std_student"/>
+      <field name="act_to" ref="std_suspend"/>
+      <field name="signal">suspend</field>
+    </record>
+    <record id="std_t6" model="workflow.transition">
+      <field name="act_from" ref="std_enroll"/>
+      <field name="act_to" ref="std_suspend"/>
+      <field name="signal">suspend</field>
+    </record>
 
-        <record id="std_t4" model="workflow.transition">
-            <field name="act_from" ref="std_student"/>
-            <field name="act_to" ref="std_enroll"/>
-            <field name="signal">enroll</field>
-        </record>
+    <record id="std_t4" model="workflow.transition">
+      <field name="act_from" ref="std_student"/>
+      <field name="act_to" ref="std_enroll"/>
+      <field name="signal">enroll</field>
+    </record>
 
-        <record id="std_t5" model="workflow.transition">
-            <field name="act_from" ref="std_enroll"/>
-            <field name="act_to" ref="std_student"/>
-            <field name="signal">deroll</field>
-        </record>
+    <record id="std_t5" model="workflow.transition">
+      <field name="act_from" ref="std_enroll"/>
+      <field name="act_to" ref="std_student"/>
+      <field name="signal">deroll</field>
+    </record>
 
-    </data>
+  </data>
 </openerp>

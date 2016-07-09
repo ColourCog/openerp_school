@@ -1,5 +1,6 @@
 import tools
 import general
+import sclass
 import student
 import health
 import enrolment

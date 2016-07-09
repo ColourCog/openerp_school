@@ -1,0 +1,50 @@
+<openerp>
+  <data>
+
+    <!-- Clone Academic Period -->
+    <record id="view_school_academic_period_new_form" model="ir.ui.view">
+      <field name="name">school.academic.period.new.form</field>
+      <field name="model">school.academic.period.new</field>
+      <field name="arch" type="xml">
+        <form string="Import Invoice" version="7.0">
+          <p>New Academic period from current</p>
+          <field name="name" />
+          <footer>
+              <button string="Create" name="create_period" type="object" default_focus="1" class="oe_highlight"/>
+              or
+              <button string="Cancel" class="oe_link" special="cancel"/>
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_school_academic_period_new" model="ir.actions.act_window">
+      <field name="name">New period from current</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.academic.period.new</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">form</field>
+      <field name="context">{}</field>
+      <field name="view_id" ref="view_school_academic_period_new_form"/>
+      <field name="target">new</field>
+    </record>
+
+    <record id="view_school_academic_period_new_inherit_form" model="ir.ui.view">
+      <field name="name">school.academic.period.form.new.inherit</field>
+      <field name="model">school.academic.period</field>
+      <field name="inherit_id" ref="school.view_school_academic_period_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//button[@name='close_year']" position="after">
+          <button name="%(action_school_academic_period_new)d"
+            string="New from current"
+            type="action"
+            states="open"
+            groups="school.group_school_manager"
+          />
+        </xpath>
+
+      </field>
+    </record>
+
+  </data>
+</openerp>

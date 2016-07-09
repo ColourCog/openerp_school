@@ -1,11 +1,6 @@
 #/bin/env python2
 
-## STUDENT
-# The sudent database works like the sales database. The first stage
-# of a student is an registration.
-# A validated registration becomes a student.
-# The views are the ones that make the difference; especially
-# the fields_view_get
+## GENERAL
 
 import time
 import logging
@@ -149,8 +144,8 @@ class school_academic_period(osv.osv):
             'year_id',
             'Classes for this Year'),
         'state': fields.selection([
-            ('draft', 'Draft'),
-            ('open', 'Current'),
+            ('open', 'Open For registration'),
+            ('closed', 'Closed for registration'),
             ('archived', 'Archived')],
             'Status',
             readonly=True,
@@ -159,8 +154,28 @@ class school_academic_period(osv.osv):
             help="The archive status of this Year" ),
     }
     _defaults = {
-        'state': "draft",
+        'state': "open",
     }
+
+    def copy(self, cr, uid, per_id, default=None, context=None):
+        if not context:
+            context = {}
+        if not default:
+            default = {}
+        default.update({
+            'state':'open',
+            'class_ids': [],
+            'name': context.get('name', '/'),
+        })
+        new_id = super(school_academic_period, self).copy(cr, uid, per_id, default, context=context)
+        return new_id
+
+    def close_year(self, cr, uid, ids, context=None):
+        class_obj = self.pool.get('school.class')
+        for year in self.browse(cr, uid, ids, context=context):
+            class_ids = class_obj.search(cr, uid, [('year_id','=',year.id)], context=context)
+            class_obj.close_class(cr, uid, class_ids, context=context)
+        self.write(cr, uid, ids, {'state': 'archived'}, context=context)
 
     def archive_year(self, cr, uid, ids, context=None):
         class_obj = self.pool.get('school.class')
@@ -169,10 +184,11 @@ class school_academic_period(osv.osv):
             class_obj.archive_class(cr, uid, class_ids, context=context)
         self.write(cr, uid, ids, {'state': 'archived'}, context=context)
 
-    def set_current(self, cr, uid, ids, context=None):
+    def new_from_current(self, cr, uid, old_id, context=None):
         assert len(ids) == 1, 'This option can only be used for a single id at a time.'
+        class_obj = self.pool.get('school.class')
         open_ids = self.search(cr, uid, [('state','=','open')], context=context)
-        self.archive_year(cr, uid, open_ids, context=context)
+        self.close_year(cr, uid, open_ids, context=context)
         self.write(cr, uid, ids, {'state': 'open'}, context=context)
 
 school_academic_period()
@@ -240,93 +256,3 @@ class school_teacher(osv.osv):
         self.write(cr, uid, ids, {'state': 'archived'}, context=context)
 
 school_teacher()
-
-
-class school_class(osv.osv):
-    _name = 'school.class'
-    _description = 'Class'
-
-    def _default_year_id(self, cr, uid, context=None):
-        return resolve_id_from_context('year_id', context)
-
-    def _default_level_id(self, cr, uid, context=None):
-        return resolve_id_from_context('level_id', context)
-
-    def _default_teacher_id(self, cr, uid, context=None):
-        return resolve_id_from_context('teacher_id', context)
-
-    _columns = {
-        'name': fields.char('Name', size=255, select=True),
-        'year_id': fields.many2one(
-            'school.academic.period',
-            'Academic period',
-            domain=[('state','=','open')],
-            required=True),
-        'level_id': fields.many2one(
-            'school.academic.year',
-            'Year',
-            required=True),
-        'teacher_id': fields.many2one(
-            'school.teacher',
-            'Class (Homeroom) Teacher',
-            required=True),
-        'enrolment_ids': fields.one2many(
-            'school.enrolment',
-            'class_id',
-            'Class Roll',
-            domain=[('state','=','enrolled')]),
-        'state': fields.selection([
-            ('open', 'Enrolments open'),
-            ('closed', 'Enrolments closed'),
-            ('archived', 'Archived')],
-            'Status',
-            readonly=True,
-            track_visibility='onchange',
-            select=True,
-            help="The status of this Class" ),
-    }
-    _defaults = {
-        'name': '/',
-        'state': 'open',
-        'year_id': _default_year_id,
-        'level_id': _default_level_id,
-        'teacher_id': _default_teacher_id,
-    }
-
-    _sql_constraints = [(
-        'year_level_teacher_unique',
-        'unique (year_id, level_id, teacher_id)',
-        'This class already exists!'),
-    ]
-
-    def create(self, cr, uid, vals, context=None):
-        teacher_obj = self.pool.get('school.teacher')
-        level_obj = self.pool.get('school.academic.year')
-        year_obj = self.pool.get('school.academic.period')
-        if vals.get('name', '/') == '/':
-            teacher = teacher_obj.browse(cr, uid, vals['teacher_id'], context)
-            level = level_obj.browse(cr, uid, vals['level_id'], context)
-            year = year_obj.browse(cr, uid, vals['year_id'], context)
-            vals['name'] = ' '.join([level.name, teacher.name, year.name])
-        return super(school_class, self).create(cr, uid, vals, context=context)
-
-    def close_class(self, cr, uid, ids, context=None):
-        """lock class for enrolments"""
-        self.write(cr, uid, ids, {'state': 'closed'}, context=context)
-
-    def open_class(self, cr, uid, ids, context=None):
-        """re-open class for enrolments"""
-        self.write(cr, uid, ids, {'state': 'open'}, context=context)
-
-    def archive_class(self, cr, uid, ids, context=None):
-        """Archives class and releases students for new enrolment"""
-        student_ids = []
-        enr_ids = []
-        for sclass in self.browse(cr, uid, ids, context=context):
-            for enr in sclass.enrolment_ids:
-                enr_ids.append(enr.id)
-        enr_obj = self.pool.get('school.enrolment')
-        enr_obj.enrolment_archive(cr, uid, enr_ids, context=context)
-        self.write(cr, uid, ids, {'state': 'archived'}, context=context)
-
-school_class()
