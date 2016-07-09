@@ -10,12 +10,19 @@
           <p>Select target class to promote to</p>
           <group>
             <field
+              name="current_class_id"
+              invisible="1"
+            />
+            <field
               name="promotion_idx"
               invisible="1"
             />
             <field
               name="class_id"
               domain="[('level_id.promotion_idx', '=', promotion_idx),('state', '=', 'open')]"
+            />
+            <field name="enrolment_ids"
+              domain="[('class_id', '=', current_class_id)]"/>
             />
           </group>
           <footer>
@@ -45,7 +52,7 @@
       <field name="arch" type="xml">
         <xpath expr="//button[@name='open_class']" position="after">
           <button name="%(action_school_class_promote)d"
-            string="Promote whole class"
+            string="Promote students"
             type="action"
             states="closed,archived"
             groups="school.group_school_manager"/>

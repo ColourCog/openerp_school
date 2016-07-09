@@ -215,6 +215,9 @@ class school_class_promote(osv.osv_memory):
     _name = "school.class.promote"
     _description = "Promote class"
 
+    def _default_class_id(self, cr, uid, context=None):
+        return context.get('active_id')
+
     def _default_promotion_idx(self, cr, uid, context=None):
         sclass = self.pool.get('school.class').browse(
             cr,
@@ -224,14 +227,25 @@ class school_class_promote(osv.osv_memory):
         return sclass.level_id.promotion_idx + 1
 
     _columns = {
+        'current_class_id': fields.many2one(
+            'school.class',
+            'Current class',
+            required=True),
         'promotion_idx': fields.integer('Promotion index'),
         'class_id': fields.many2one(
             'school.class',
             'Applicable classes',
             required=True),
+        'enrolment_ids': fields.many2many(
+            'school.enrolment',
+            'wizard_enrolment_rel',
+            'wizard_id',
+            'enrolment_id',
+            'Students'),
     }
 
     _defaults = {
+        'current_class_id': _default_class_id,
         'promotion_idx': _default_promotion_idx,
     }
 
@@ -246,7 +260,7 @@ class school_class_promote(osv.osv_memory):
         context.update({
             'class_id': self.browse(cr, uid, ids)[0].class_id.id,
         })
-        for enr in sclass.enrolment_ids:
+        for enr in self.browse(cr, uid, ids)[0].enrolment_ids:
             new_enr_id = enr_obj.copy(cr, uid, enr.id, context=context)
             # archive if need be
         if sclass.state != 'archived':
