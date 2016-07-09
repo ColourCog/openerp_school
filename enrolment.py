@@ -63,8 +63,7 @@ class school_enrolment(osv.osv):
             return user.company_id.default_enrolment_checklist_id.id
         return False
 
-    def onchange_class_id(self, cr, uid, ids, class_id,
-                        context=None):
+    def onchange_class_id(self, cr, uid, ids, class_id, context=None):
         if not context:
             context = {}
         class_obj = self.pool.get('school.class')
@@ -79,8 +78,7 @@ class school_enrolment(osv.osv):
                 prod_id = sclass.level_id.tuition_fee_id.id
         return {'value': {'tuition_fee_id': prod_id}}
 
-    def onchange_checklist_id(self, cr, uid, ids, checklist_id,
-                        context=None):
+    def onchange_checklist_id(self, cr, uid, ids, checklist_id, context=None):
         if not context:
             context = {}
         chkitem_obj = self.pool.get('school.checklist.item')
@@ -179,6 +177,7 @@ class school_enrolment(osv.osv):
             select=True,
             help="Gives the status of the enrolment" ),
     }
+
     _defaults = {
         'date': fields.date.context_today,
         'student_id': _default_student_id,
@@ -187,6 +186,7 @@ class school_enrolment(osv.osv):
         'state': 'draft',
         'user_id': lambda cr, uid, id, c={}: id,
     }
+
     _sql_constraints = [(
         'student_enrolment_unique',
         'unique (student_id, class_id)',
@@ -199,21 +199,56 @@ class school_enrolment(osv.osv):
         class_obj = self.pool.get('school.class')
         sclass = class_obj.browse(cr, uid, vals['class_id'], context=context)
         # assert only enrolment to current class
-        if sclass.state == 'closed':
+        if sclass.state in ['closed', 'archived']:
             raise osv.except_osv(
                 _('Error!'),
-                _('This class is already archived'))
+                _('This class is not open for enrolments'))
         student_obj = self.pool.get('school.student')
         student = student_obj.browse(cr, uid, vals['student_id'], context=context)
         if student.current_class_id:
             raise osv.except_osv(
-                _('Duplicate Error!'),
+                _('Duplicate Error for %s!' % student.name),
                 _("This student is currently enrolled in '%s'" % student.current_class_id.name ))
         if student.invoice_id and student.invoice_id.state in ['draft', 'open']:
             raise osv.except_osv(
                 _('Unpaid Error!'),
                 _("Registration invoice '%s' is still pending." % student.invoice_id.number ))
         return super(school_enrolment, self).create(cr, uid, vals, context=context)
+
+    def copy(self, cr, uid, enr_id, default=None, context=None):
+        if not context:
+            context = {}
+        if not default:
+            default = {}
+        enr = self.browse(cr, uid, enr_id, context=context)
+        class_id = resolve_id_from_context('class_id', context)
+        prod_id = self.onchange_class_id(
+                cr,
+                uid,
+                None,
+                class_id,
+                context=context)['value']['tuition_fee_id']
+        checklist_ids = self.onchange_checklist_id(
+                cr,
+                uid,
+                None,
+                enr.enrolment_checklist_id.id,
+                context=context)['value']['checklist_ids']
+
+        default.update({
+            'date': time.strftime('%Y-%m-%d'),
+            'state':'draft',
+            'user_id': uid,
+            'class_id': class_id,
+            'tuition_fee_id': prod_id,
+            'invoice_id': None,
+            'user_valid': None,
+            'date_valid': None,
+            'is_invoiced': False,
+            'checklist_ids': checklist_ids,
+        })
+        new_id = super(school_enrolment, self).copy(cr, uid, enr_id, default, context=context)
+        return new_id
 
     def unlink(self, cr, uid, ids, context=None):
         wf_service = netsvc.LocalService("workflow")

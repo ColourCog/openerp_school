@@ -1,0 +1,59 @@
+<openerp>
+  <data>
+
+    <!-- Class promote all students -->
+    <record id="view_school_class_promote_form" model="ir.ui.view">
+      <field name="name">school.class.promote.form</field>
+      <field name="model">school.class.promote</field>
+      <field name="arch" type="xml">
+        <form string="Promote class" version="7.0">
+          <p>Select target class to promote to</p>
+          <group>
+            <field
+              name="promotion_idx"
+              invisible="1"
+            />
+            <field
+              name="class_id"
+              domain="[('level_id.promotion_idx', '=', promotion_idx),('state', '=', 'open')]"
+            />
+          </group>
+          <footer>
+              <button string="Promote" name="promote" type="object" default_focus="1" class="oe_highlight"/>
+              or
+              <button string="Cancel" class="oe_link" special="cancel"/>
+          </footer>
+        </form>
+      </field>
+    </record>
+
+    <record id="action_school_class_promote" model="ir.actions.act_window">
+      <field name="name">Promote student</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">school.class.promote</field>
+      <field name="view_type">form</field>
+      <field name="view_mode">form</field>
+      <field name="context">{}</field>
+      <field name="view_id" ref="view_school_class_promote_form"/>
+      <field name="target">new</field>
+    </record>
+
+    <record id="view_school_class_promote_inherit_form" model="ir.ui.view">
+      <field name="name">school.class.form.promote.inherit</field>
+      <field name="model">school.class</field>
+      <field name="inherit_id" ref="school.view_school_class_form"/>
+      <field name="arch" type="xml">
+        <xpath expr="//button[@name='open_class']" position="after">
+          <button name="%(action_school_class_promote)d"
+            string="Promote whole class"
+            type="action"
+            states="closed,archived"
+            groups="school.group_school_manager"/>
+        </xpath>
+
+      </field>
+    </record>
+
+
+  </data>
+</openerp>

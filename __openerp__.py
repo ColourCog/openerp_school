@@ -47,6 +47,8 @@ Features:
       'wizards_registration_import_invoice_view.xml',
       'wizards_enrolment_import_invoice_view.xml',
       'wizards_academic_period_new_view.xml',
+      'wizards_enrolment_promote_view.xml',
+      'wizards_class_promote_view.xml',
       'school_report.xml',
       'school_data.xml',
     ],
