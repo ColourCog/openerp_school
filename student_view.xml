@@ -86,7 +86,7 @@
                 </field>
               </page>
               <page string="Languages">
-                <field name="language_ids"/>
+                <field name="language_ids" />
               </page>
               <page string="Nationalities">
                 <field name="nationality_ids" context="{'default_student_id': active_id}"/>

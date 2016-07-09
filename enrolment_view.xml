@@ -7,10 +7,10 @@
       <field name="model">school.enrolment</field>
       <field name="arch" type="xml">
         <tree string="Enrolments" colors="green:state=='draft';grey:state=='archived';red:state=='cancel'">
-          <field name="year_id"/>
           <field name="date_valid"/>
           <field name="student_id"/>
           <field name="class_id"/>
+          <field name="year_id"/>
           <field name="state"/>
         </tree>
       </field>
@@ -89,7 +89,6 @@
           <filter icon="terp-check" name="open" string="Current" domain="[('state','=','enrolled')]"/>
           <filter icon="terp-check" name="archived" string="Archived" domain="[('state','=','archived')]"/>
           <group expand="0" string="Group By..." >
-            <filter string="Year" domain="[]" context="{'group_by':'year_id'}"/>
             <filter string="Class" domain="[]" context="{'group_by':'class_id'}"/>
             <filter string="Student" domain="[]" context="{'group_by':'student_id'}"/>
           </group>
@@ -103,7 +102,7 @@
       <field name="res_model">school.enrolment</field>
       <field name="view_type">form</field>
       <field name="view_mode">tree,form</field>
-      <field name="context">{'stage': 'administrative', 'search_default_open':1}</field>
+      <field name="context">{'stage': 'administrative', 'search_default_draft':1}</field>
       <field name="search_view_id" ref="view_school_enrolment_filter"/>
       <field name="view_id" ref="view_school_enrolment_tree"/>
       <field name="help" type="html">

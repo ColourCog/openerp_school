@@ -18,5 +18,13 @@
             multi="True"
             auto="False"/>
 
+    <report id="school_class_list_provisional_report"
+            string="Student Provisional Class List"
+            model="school.class"
+            name="school.class.print.provisional"
+            rml="school/report/school_class_lprovisional_ist.rml"
+            multi="True"
+            auto="False"/>
+
     </data>
 </openerp>

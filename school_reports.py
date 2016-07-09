@@ -49,6 +49,7 @@ class school_class(osv.osv):
     def print_report(self, cr, uid, ids, context=None):
         report_map = {
             'surname': 'school.class.print.surname',
+            'provisional': 'school.class.print.provisional',
         }
         return {
             'type': 'ir.actions.report.xml',
