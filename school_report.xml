@@ -22,7 +22,7 @@
             string="Student Provisional Class List"
             model="school.class"
             name="school.class.print.provisional"
-            rml="school/report/school_class_lprovisional_ist.rml"
+            rml="school/report/school_class_provisional_list.rml"
             multi="True"
             auto="False"/>
 
