@@ -383,7 +383,7 @@ class school_student(osv.osv):
 
     def action_view_invoice(self, cr, uid, ids, context=None):
         '''
-        This function returns an action that display existing invoices of given sales order ids. It can either be a in a list or in a form view, if there is only one invoice to show.
+        This function returns an action that display existing invoices of given registrations. It can either be a in a list or in a form view, if there is only one invoice to show.
         '''
         mod_obj = self.pool.get('ir.model.data')
         act_obj = self.pool.get('ir.actions.act_window')

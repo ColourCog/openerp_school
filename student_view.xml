@@ -29,6 +29,7 @@
               string="Generate Invoice"
               groups="account.group_account_user"
               states="draft"
+              class="oe_highlight"
               attrs="{'invisible':['|',('is_invoiced','=',True),'|',('waive_registration_fee','=',True)]}"/>
             <button
               name="action_view_invoice"
@@ -37,7 +38,7 @@
               groups="account.group_account_user"
               states="student,enrolled"
               class="oe_highlight"
-              attrs="{'invisible':[('waive_registration_fee','=',True)]}"/>
+              attrs="{'invisible':[('is_invoiced','=',False),'|',('waive_registration_fee','=',True)]}"/>
             <button name="student_suspend" type="object" states="student,enrolled"
               string="Deactivate" groups="school.group_school_manager"/>
             <button name="cancel" states="student,suspend" string="Cancel" groups="school.group_school_manager"/>
@@ -64,7 +65,8 @@
               <group>
                 <field name="reg_num"/>
                 <field name="billing_partner_id"/>
-                <field name="is_invoiced" groups="school.group_school_manager"/>
+                <field name="is_invoiced" invisible="1"/>
+                <field name="invoice_id" invisible="1"/>
                 <field name="invoice_state"/>
               </group>
               <group>
