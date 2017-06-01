@@ -349,7 +349,7 @@ class school_student(osv.osv):
                         _('Validation error for student %s!' % student.name),
                         _("Please verify '%s'" % check.item_id.name))
 
-    def generate_invoice(self, cr, uid, ids, context):
+    def action_generate_invoice(self, cr, uid, ids, context):
         if not context:
             context = {}
         ctx = context.copy()
@@ -380,6 +380,29 @@ class school_student(osv.osv):
             self.write(cr, uid, [student.id], {'invoice_id': invoice_id, 'is_invoiced': True}, context=ctx)
 
         return True
+
+    def action_view_invoice(self, cr, uid, ids, context=None):
+        '''
+        This function returns an action that display existing invoices of given sales order ids. It can either be a in a list or in a form view, if there is only one invoice to show.
+        '''
+        mod_obj = self.pool.get('ir.model.data')
+        act_obj = self.pool.get('ir.actions.act_window')
+
+        result = mod_obj.get_object_reference(cr, uid, 'account', 'action_invoice_tree1')
+        id = result and result[1] or False
+        result = act_obj.read(cr, uid, [id], context=context)[0]
+        #compute the number of invoices to display
+        inv_ids = []
+        for so in self.browse(cr, uid, ids, context=context):
+            inv_ids += [so.invoice_id.id]
+        #choose the view_mode accordingly
+        if len(inv_ids) > 1:
+            result['domain'] = "[('id','in',[{}])]".format(','.join(map(str, inv_ids)))
+        else:
+            res = mod_obj.get_object_reference(cr, uid, 'account', 'invoice_form')
+            result['views'] = [(res and res[1] or False, 'form')]
+            result['res_id'] = inv_ids and inv_ids[0] or False
+        return result
 
 
     def fields_view_get(self, cr, uid, view_id=None, view_type=False, context=None, toolbar=False, submenu=False):

@@ -86,8 +86,9 @@
           <field name="class_id"/>
           <field name="student_id"/>
           <filter icon="terp-check" name="draft" string="Draft" domain="[('state','=','draft')]"/>
-          <filter icon="terp-check" name="open" string="Current" domain="[('state','=','enrolled')]"/>
+          <filter icon="terp-check" name="open" string="Enrolled" domain="[('state','=','enrolled')]"/>
           <filter icon="terp-check" name="archived" string="Archived" domain="[('state','=','archived')]"/>
+          <filter icon="terp-check" name="interrupted" string="Interrupted" domain="[('state','=','interrupted')]"/>
           <group expand="0" string="Group By..." >
             <filter string="Class" domain="[]" context="{'group_by':'class_id'}"/>
             <filter string="Student" domain="[]" context="{'group_by':'student_id'}"/>
@@ -172,7 +173,7 @@
       <field name="arch" type="xml">
         <search string="Search Students">
           <field name="student_id"/>
-          <filter icon="terp-check" name="open" string="Current" domain="[('state','=','enrolled')]"/>
+          <filter icon="terp-check" name="open" string="Enrolled" domain="[('state','=','enrolled')]"/>
           <separator/>
           <group expand="0" string="Group By..." >
             <filter string="Class" domain="[]" context="{'group_by':'current_class_id'}"/>
@@ -262,17 +263,6 @@
           </page>
         </xpath>
 
-      </field>
-    </record>
-
-    <record id="view_school_registration_filter_enrolment" model="ir.ui.view">
-      <field name="name">school.student.filter.enrolment.inherit</field>
-      <field name="model">school.student</field>
-      <field name="inherit_id" ref="school.view_school_registration_filter"/>
-      <field name="arch" type="xml">
-        <xpath expr="//filter[@string='Enrolled']" position="after">
-          <filter string="Obsolete" domain="[('is_enrolled','!=',False)]" />
-        </xpath>
       </field>
     </record>
 

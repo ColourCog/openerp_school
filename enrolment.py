@@ -17,6 +17,7 @@ ENROLLED = 'enrolled'
 CANCELLED = 'cancel'
 ARCHIVED = 'archived'
 CLOSED = 'closed'
+INTERRUPT = 'interrupted'
 
 
 class school_student_enrolment_checklist(osv.osv):
@@ -177,6 +178,7 @@ class school_enrolment(osv.osv):
             (DRAFT, 'Draft'),
             (CANCELLED, 'Cancelled'),
             (ENROLLED, 'Enrolled'),
+            (INTERRUPT, 'Interrupted'),
             (ARCHIVED, 'Archived'),],
             'Status',
             readonly=True,
@@ -298,7 +300,8 @@ class school_enrolment(osv.osv):
             {
                 'state': ENROLLED,
                 'date_valid': time.strftime('%Y-%m-%d'),
-                'user_valid': uid},
+                'user_valid': uid
+            },
             context=context)
 
     def enrolment_archive(self, cr, uid, ids, context=None):
@@ -314,6 +317,21 @@ class school_enrolment(osv.osv):
             uid,
             ids,
             {'state': ARCHIVED},
+            context=context)
+
+    def enrolment_interrupt(self, cr, uid, ids, context=None):
+        if not context:
+            context = {}
+        item_ids = self.search(
+            cr,
+            uid,
+            [('state','=', ENROLLED), ('id', 'in', ids)],
+            context=context)
+        return self.write(
+            cr,
+            uid,
+            item_ids,
+            {'state': INTERRUPT},
             context=context)
 
     def enrolment_cancel(self, cr, uid, ids, context=None):
@@ -480,7 +498,7 @@ class school_student(osv.osv):
             if enr_ids:
                 ctx = context.copy()
                 ctx['skip_deroll'] = True
-                enr_obj.enrolment_archive(cr, uid, enr_ids, ctx)
+                enr_obj.enrolment_interrupt(cr, uid, enr_ids, ctx)
         self.write(
             cr,
             uid,

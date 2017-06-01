@@ -64,6 +64,7 @@
       <field name="act_to" ref="std_suspend"/>
       <field name="signal">suspend</field>
     </record>
+
     <record id="std_t6" model="workflow.transition">
       <field name="act_from" ref="std_enroll"/>
       <field name="act_to" ref="std_suspend"/>

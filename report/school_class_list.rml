@@ -74,7 +74,7 @@
         </tr>
       </blockTable>
       <section>
-      <para >[[ repeatIn(filter(lambda l: l.state != 'draft', o.enrolment_ids), 'e') ]]</para>
+      <para >[[ repeatIn(filter(lambda l: l.state not in ['draft', 'interrupted'], o.enrolment_ids), 'e') ]]</para>
       <blockTable colWidths="50.0,205.0,85.0,85.0,50.0,50.0" style="Data_Table">
         <tr>
           <td><para style="default_7">[[ '']]</para></td>
