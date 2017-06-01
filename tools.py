@@ -53,7 +53,7 @@ def resolve_from_context(target, context=None):
         context = {}
     try:
         return context[target]
-    except AttributeError:
+    except KeyError:
         return None
 
 
