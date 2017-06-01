@@ -8,7 +8,15 @@
       <field name="arch" type="xml">
         <form string="Import Invoice" version="7.0">
           <p>New Academic period from current</p>
-          <field name="name" />
+          <field name="name"/>
+          <group>
+            <group>
+              <field name="date_from"/>
+            </group>
+            <group>
+              <field name="date_to"/>
+            </group>
+          </group>
           <footer>
               <button string="Create" name="create_period" type="object" default_focus="1" class="oe_highlight"/>
               or
@@ -36,6 +44,7 @@
       <field name="arch" type="xml">
         <xpath expr="//button[@name='close_year']" position="after">
           <button name="%(action_school_academic_period_new)d"
+            context="{'date_from':date_from, 'date_to':date_to}"
             string="New from current"
             type="action"
             states="open"

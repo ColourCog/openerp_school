@@ -151,7 +151,7 @@ class school_academic_period(osv.osv):
             readonly=True,
             track_visibility='onchange',
             select=True,
-            help="The archive status of this Year" ),
+            help="The archive status of this Year"),
     }
     _defaults = {
         'state': "open",
@@ -166,9 +166,18 @@ class school_academic_period(osv.osv):
             'state':'open',
             'class_ids': [],
             'name': context.get('name', '/'),
+            'date_from': context.get('date_from'),
+            'date_to': context.get('date_to'),
         })
         new_id = super(school_academic_period, self).copy(cr, uid, per_id, default, context=context)
         return new_id
+
+    def unlink(self, cr, uid, ids, context=None):
+        class_obj = self.pool.get('school.class')
+        for year in self.browse(cr, uid, ids, context=context):
+            class_ids = class_obj.search(cr, uid, [('year_id','=',year.id)], context=context)
+            class_obj.unlink(cr, uid, class_ids, context=context)
+        return super(school_academic_period, self).unlink(cr, uid, ids, context=context)
 
     def close_year(self, cr, uid, ids, context=None):
         class_obj = self.pool.get('school.class')
@@ -184,11 +193,10 @@ class school_academic_period(osv.osv):
             class_obj.archive_class(cr, uid, class_ids, context=context)
         self.write(cr, uid, ids, {'state': 'archived'}, context=context)
 
-    def new_from_current(self, cr, uid, old_id, context=None):
-        assert len(ids) == 1, 'This option can only be used for a single id at a time.'
+    def new_from_current(self, cr, uid, ids, context=None):
         class_obj = self.pool.get('school.class')
-        open_ids = self.search(cr, uid, [('state','=','open')], context=context)
-        self.close_year(cr, uid, open_ids, context=context)
+        # open_ids = self.search(cr, uid, [('state','=','open')], context=context)
+        # self.close_year(cr, uid, open_ids, context=context)
         self.write(cr, uid, ids, {'state': 'open'}, context=context)
 
 school_academic_period()

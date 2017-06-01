@@ -67,8 +67,7 @@ class school_student(osv.osv):
             return user.company_id.default_registration_checklist_id.id
         return False
 
-    def onchange_checklist_id(self, cr, uid, ids, checklist_id,
-                        context=None):
+    def onchange_checklist_id(self, cr, uid, ids, checklist_id, context=None):
         chkitem_obj = self.pool.get('school.checklist.item')
         chk_ids = []
         if checklist_id:
@@ -173,7 +172,7 @@ class school_student(osv.osv):
             readonly=True,
             track_visibility='onchange',
             select=True,
-            help="Gives the status of the registration" ),
+            help="Gives the status of the registration"),
     }
 
     _defaults = {
@@ -221,20 +220,21 @@ class school_student(osv.osv):
         if not default:
             default = {}
         default.update({
-            'state':'draft',
-            'name':None,
-            'reg_num':False,
-            'invoice_id':False,
-            'is_invoiced':False,
-            'date_valid':False,
-            'user_valid':False,
-            })
+            'state': 'draft',
+            'name': None,
+            'reg_num': False,
+            'invoice_id': False,
+            'is_invoiced': False,
+            'date_valid': False,
+            'user_valid': False,
+        })
 
         new_id = super(school_student, self).copy(cr, uid, student_id, default, context=context)
         return new_id
 
     def unlink(self, cr, uid, ids, context=None):
         wf_service = netsvc.LocalService("workflow")
+        invoice_obj = self.pool.get('account.invoice')
         if context is None:
             context = {}
         for student in self.browse(cr, uid, ids, context=context):
@@ -245,12 +245,10 @@ class school_student(osv.osv):
             if student.invoice_id:
                 #if possible, delete invoice
                 try:
-                    inv_obj.action_cancel(cr, uid, [student.invoice_id.id], context)
-                    inv_obj.action_cancel_draft(cr, uid, [student.invoice_id.id], context)
-                    inv_obj.unlink(cr, uid, [student.invoice_id.id], context=context)
-                    vals['invoice_id'] = None
-                    vals['is_invoiced'] = False
-                except:
+                    invoice_obj.action_cancel(cr, uid, [student.invoice_id.id], context)
+                    invoice_obj.action_cancel_draft(cr, uid, [student.invoice_id.id], context)
+                    invoice_obj.unlink(cr, uid, [student.invoice_id.id], context=context)
+                except Exception:
                     pass
         return super(school_student, self).unlink(cr, uid, ids, context=context)
 
@@ -308,19 +306,19 @@ class school_student(osv.osv):
     def student_cancel(self, cr, uid, ids, context=None):
         if not context:
             context = {}
-        inv_obj = self.pool.get('account.invoice')
+        invoice_obj = self.pool.get('account.invoice')
         return_ids = []
         for student in self.browse(cr, uid, ids, context=context):
             vals = {'state': 'cancel'}
             if student.invoice_id:
                 #if possible, delete invoice
                 try:
-                    inv_obj.action_cancel(cr, uid, [student.invoice_id.id], context)
-                    inv_obj.action_cancel_draft(cr, uid, [student.invoice_id.id], context)
-                    inv_obj.unlink(cr, uid, [student.invoice_id.id], context=context)
+                    invoice_obj.action_cancel(cr, uid, [student.invoice_id.id], context)
+                    invoice_obj.action_cancel_draft(cr, uid, [student.invoice_id.id], context)
+                    invoice_obj.unlink(cr, uid, [student.invoice_id.id], context=context)
                     vals['invoice_id'] = None
                     vals['is_invoiced'] = False
-                except:
+                except Exception:
                     pass
             return_ids.append(
                 self.write(
@@ -370,7 +368,7 @@ class school_student(osv.osv):
                     _('Invoice Already Generated!'),
                     _("Please refer to the linked registration Invoice"))
 
-            inv_id = generic_generate_invoice(
+            invoice_id = generic_generate_invoice(
                 cr,
                 uid,
                 student.registration_fee_id.id,
@@ -379,7 +377,7 @@ class school_student(osv.osv):
                 "Registration Fee",
                 ctx)
 
-            self.write(cr, uid, [student.id], {'invoice_id': inv_id, 'is_invoiced': True}, context=ctx)
+            self.write(cr, uid, [student.id], {'invoice_id': invoice_id, 'is_invoiced': True}, context=ctx)
 
         return True
 

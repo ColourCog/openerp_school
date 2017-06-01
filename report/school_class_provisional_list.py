@@ -17,12 +17,12 @@ class school_report_class_provisional(report_sxw.rml_parse):
             'year': get_current_academic_period(self.cr, self.uid, context=context)
         })
 
-    def set_context(self, objects, data, ids, report_type=None):
-        new_ids = ids
-        if data.get('model') and data['model'] == 'ir.ui.menu':
-            new_ids = self.pool.get('school.class').search(self.cr, self.uid, [('state','in',['open','draft'])])
-            objects = self.pool.get('school.class').browse(self.cr, self.uid, new_ids)
-        return super(school_report_class_provisional, self).set_context(objects, data, new_ids, report_type=report_type)
+    # def set_context(self, objects, data, ids, report_type=None):
+    #     new_ids = ids
+    #     if data.get('model') and data['model'] == 'ir.ui.menu':
+    #         new_ids = self.pool.get('school.class').search(self.cr, self.uid, [('state', 'in', ['open', 'draft'])])
+    #         objects = self.pool.get('school.class').browse(self.cr, self.uid, new_ids)
+    #     return super(school_report_class_provisional, self).set_context(objects, data, new_ids, report_type=report_type)
 
 
 report_sxw.report_sxw(

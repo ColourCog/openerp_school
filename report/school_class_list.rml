@@ -36,7 +36,7 @@
   <story>
 
     <!-- Document header-->
-    <para style="file_header"><b>[[ year.name ]]</b></para>
+    <para style="file_header"><b>Current Year: [[ year.name ]]</b></para>
     <para style="file_header"><b>Student Class List</b></para>
     <pto>
     <pto_header><!-- Must be after setLang() -->
@@ -65,7 +65,7 @@
     <para >[[ repeatIn(objects,'o') ]]</para>
     <blockTable colWidths="50.0,205.0,85.0,85.0,50.0,50.0" style="Data_Table">
         <tr>
-          <td><para style="default_7">[[ o.name ]]</para></td>
+          <td><para style="default_7">[[ o.name ]] [[o.year_id.name]]</para></td>
           <td><para style="default_7">[[ '']]</para></td>
           <td><para style="default_7">[[ '']]</para></td>
           <td><para style="default_7">[[ '']]</para></td>
@@ -74,7 +74,7 @@
         </tr>
       </blockTable>
       <section>
-      <para >[[ repeatIn(o.enrolment_ids, 'e') ]]</para>
+      <para >[[ repeatIn(filter(lambda l: l.state != 'draft', o.enrolment_ids), 'e') ]]</para>
       <blockTable colWidths="50.0,205.0,85.0,85.0,50.0,50.0" style="Data_Table">
         <tr>
           <td><para style="default_7">[[ '']]</para></td>

@@ -70,7 +70,7 @@
       <field name="arch" type="xml">
         <search string="Search Academic periods">
           <field name="name"/>
-          <filter icon="terp-check" name="open" string="Current" domain="[('state','=','open')]"/>
+          <filter icon="terp-check" name="open" string="Open" domain="[('state','=','open')]"/>
           <filter icon="terp-check" name="closed" string="Archived" domain="[('state','=','archived')]"/>
         </search>
       </field>

@@ -55,7 +55,7 @@ class school_class(osv.osv):
             'type': 'ir.actions.report.xml',
             'report_name': report_map.get(context.get('format')),
             'datas': {
-                    'model':'school.class',
+                    'model': 'school.class',
                     'id': ids and ids[0] or False,
                     'ids': ids and ids or [],
                     'report_type': 'pdf'

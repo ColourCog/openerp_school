@@ -1,6 +1,6 @@
 import tools
 import general
-import sclass
+import period_class
 import student
 import health
 import enrolment

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name" : "School Management",
-    "version" : "0.12",
+    "version" : "0.13",
     "category" : "Accounting",
     "sequence": 60,
     "complexity" : "normal",
@@ -9,6 +9,7 @@
     "website" : "http://colourcog.com",
     "depends" : [
         "base",
+        "hr",
         "sale",
         "account",
     ],
@@ -32,7 +33,7 @@ Features:
       "security/ir.model.access.csv",
       'top_menu.xml',
       'general_view.xml',
-      'sclass_view.xml',
+      'period_class_view.xml',
       'academic_period_view.xml',
       'academic_year_view.xml',
       'student_view.xml',

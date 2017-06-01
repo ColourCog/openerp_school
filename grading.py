@@ -39,7 +39,9 @@ class school_subject(osv.osv):
         if sub:
             return sub.grading_method
         return False
+
 school_subject()
+
 
 class school_enrolment(osv.osv):
     _name = 'school.enrolment'
@@ -50,7 +52,9 @@ class school_enrolment(osv.osv):
             'enrolment_id',
             'Grades'),
     }
+
 school_enrolment()
+
 
 class school_year_subject(osv.osv):
     _name = 'school.year.subject'
@@ -110,7 +114,9 @@ class school_year_subject(osv.osv):
         if sub:
             return sub.weight
         return 1.0
+
 school_year_subject()
+
 
 class school_academic_year(osv.osv):
     _name = 'school.academic.year'
@@ -122,7 +128,9 @@ class school_academic_year(osv.osv):
             'level_id',
             'Subjects'),
     }
+
 school_academic_year()
+
 
 class school_class_subject(osv.osv):
     _name = 'school.class.subject'
@@ -190,7 +198,9 @@ class school_class_subject(osv.osv):
         if sub:
             return sub.weight
         return 1.0
+
 school_class_subject()
+
 
 class school_class(osv.osv):
     _name = 'school.class'
@@ -202,7 +212,9 @@ class school_class(osv.osv):
             'class_id',
             'Subjects'),
     }
+
 school_class()
+
 
 class school_teacher(osv.osv):
     _name = 'school.teacher'
@@ -214,7 +226,9 @@ class school_teacher(osv.osv):
             'teacher_id',
             'Subjects'),
     }
+
 school_teacher()
+
 
 class school_grade(osv.osv):
     _name = 'school.grade'
@@ -244,7 +258,7 @@ class school_grade(osv.osv):
         for l in self.browse(cr, uid, ids, context=context):
             if l.grading_method == 'numeric':
                 res[l.id] = ' / '.join([str(l.numeric_val), str(l.numeric_ceil)])
-            if l.grading_method == 'alpha':
+            elif l.grading_method == 'alpha':
                 res[l.id] = ALPHA_DICT.get(l.alpha_val, False)
         return res
 
@@ -317,4 +331,5 @@ class school_grade(osv.osv):
             vals['enrolment_id'],
             context=context)
         return super(school_grade, self).create(cr, uid, vals, context=context)
+
 school_grade()

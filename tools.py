@@ -32,7 +32,7 @@ ALPHA_GRADING = [
     ('7', 'D-'),
     ('0', 'F')]
 
-ALPHA_DICT= {
+ALPHA_DICT = {
     '43': 'A+',
     '40': 'A',
     '37': 'A-',
@@ -47,12 +47,23 @@ ALPHA_DICT= {
     '7': 'D-',
     '0': 'F'}
 
+
+def resolve_from_context(target, context=None):
+    if context is None:
+        context = {}
+    try:
+        return context[target]
+    except AttributeError:
+        return None
+
+
 def resolve_id_from_context(target, context=None):
     if context is None:
         context = {}
     if type(context.get(target)) in (int, long):
         return context[target]
     return None
+
 
 def generic_generate_invoice(cr, uid, product_id, partner_id, student_name, transaction_name, context):
     if not context:
@@ -62,8 +73,8 @@ def generic_generate_invoice(cr, uid, product_id, partner_id, student_name, tran
     pool_obj = pooler.get_pool(cr.dbname)
 
     period_obj = pool_obj.get('account.period')
-    inv_obj = pool_obj.get('account.invoice')
-    inv_line_obj = pool_obj.get('account.invoice.line')
+    invoice_obj = pool_obj.get('account.invoice')
+    invoice_line_obj = pool_obj.get('account.invoice.line')
     product_obj = pool_obj.get('product.product')
 
     product = product_obj.browse(cr, uid, product_id, context)
@@ -73,9 +84,9 @@ def generic_generate_invoice(cr, uid, product_id, partner_id, student_name, tran
         'name': "%s for %s" % (product.name, student_name),
         'product_id': product_id,
         'quantity': 1,
-        }
-    # run inv_line_obj's onchange to update
-    n = inv_line_obj.product_id_change(
+    }
+    # run invoice_line_obj's onchange to update
+    n = invoice_line_obj.product_id_change(
         cr,
         uid,
         False,
@@ -96,9 +107,9 @@ def generic_generate_invoice(cr, uid, product_id, partner_id, student_name, tran
         'type': 'out_invoice',
         'partner_id': partner_id,
         'invoice_line': [inv_line],
-        }
-    # run inv_obj's onchange to update
-    n = inv_obj.onchange_partner_id(
+    }
+    # run invoice_obj's onchange to update
+    n = invoice_obj.onchange_partner_id(
         cr,
         uid,
         False,
@@ -110,29 +121,33 @@ def generic_generate_invoice(cr, uid, product_id, partner_id, student_name, tran
         company_id=False)['value']
     invoice.update(n)
 
-    inv_id = inv_obj.create(cr, uid, invoice, context=ctx)
-    #~ inv_obj.action_date_assign(cr,uid,[inv_id],context)
-    #~ inv_obj.action_move_create(cr,uid,[inv_id],context=context)
-    #~ inv_obj.action_number(cr,uid,[inv_id],context)
-    #~ inv_obj.invoice_validate(cr,uid,[inv_id],context=context)
+    inv_id = invoice_obj.create(cr, uid, invoice, context=ctx)
+    #~ invoice_obj.action_date_assign(cr,uid,[inv_id],context)
+    #~ invoice_obj.action_move_create(cr,uid,[inv_id],context=context)
+    #~ invoice_obj.action_number(cr,uid,[inv_id],context)
+    #~ invoice_obj.invoice_validate(cr,uid,[inv_id],context=context)
 
     return inv_id
 
-def age(when, on=None):
+
+def age(birthday, on_date=None):
+    """Age string according"""
     fmt = '%Y-%m-%d'
-    when = datetime.strptime(when, fmt)
-    if on:
-        on = datetime.strptime(on, fmt)
-    if on is None:
-        on = date.today()
-    earl = (on.month, on.day) < (when.month, when.day)
-    year = on.year - when.year - (earl)
-    month = earl and (11 - when.month + on.month) or (on.month - when.month)
+    birthday = datetime.strptime(birthday, fmt)
+    if on_date is None:
+        on_date = date.today()
+    if on_date:
+        on_date = datetime.strptime(on_date, fmt)
+    month_difference = (on_date.month, on_date.day) < (birthday.month, birthday.day)
+    year = on_date.year - birthday.year - (month_difference)
+    month = month_difference and (11 - birthday.month + on_date.month) or (on_date.month - birthday.month)
     return "{0}yrs. {1}m.".format(year, month)
+
 
 def count(items, children=None):
     if children:
         sums = 0
+        # return(sum([len(getattr(item, children, 0) for item  in items])
         for item in items:
             try:
                 sums += len(getattr(item, children, 0))
@@ -141,14 +156,14 @@ def count(items, children=None):
         return sums
     return len(items)
 
-# current year start
+
 def get_current_academic_period(cr, uid, context=None):
+    """Get the first of currently open years, sorted by creation data"""
     if not context:
         context = {}
     pool_obj = pooler.get_pool(cr.dbname)
     period_obj = pool_obj.get('school.academic.period')
-    per_ids = period_obj.search(cr, uid, [('state','=','open')], context=context)
+    per_ids = period_obj.search(cr, uid, [('state', '=', 'open')], context=context)
     periods = period_obj.browse(cr, uid, per_ids, context)
     # there should only ever be one.
-    assert len(periods) == 1, 'There has to be exactly one.'
     return periods[0]

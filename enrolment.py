@@ -12,6 +12,13 @@ from tools import resolve_id_from_context
 from tools import generic_generate_invoice
 _logger = logging.getLogger(__name__)
 
+DRAFT = 'draft'
+ENROLLED = 'enrolled'
+CANCELLED = 'cancel'
+ARCHIVED = 'archived'
+CLOSED = 'closed'
+
+
 class school_student_enrolment_checklist(osv.osv):
     _name = 'school.enrolment.checklist'
 
@@ -40,8 +47,8 @@ class school_enrolment(osv.osv):
     _order = "name"
     _track = {
         'state': {
-            'school.mt_enrolment_enrolled': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'enrolled',
-            'school.mt_enrolment_cancelled': lambda self, cr, uid, obj, ctx=None: obj['state'] == 'cancel',
+            'school.mt_enrolment_enrolled': lambda self, cr, uid, obj, ctx=None: obj['state'] == ENROLLED,
+            'school.mt_enrolment_cancelled': lambda self, cr, uid, obj, ctx=None: obj['state'] == CANCELLED,
         },
     }
 
@@ -67,16 +74,16 @@ class school_enrolment(osv.osv):
         if not context:
             context = {}
         class_obj = self.pool.get('school.class')
-        prod_id = False
+        product_id = False
         if class_id:
-            sclass = class_obj.browse(
+            year_class = class_obj.browse(
                 cr,
                 uid,
                 class_id,
                 context=context)
-            if sclass.level_id.tuition_fee_id:
-                prod_id = sclass.level_id.tuition_fee_id.id
-        return {'value': {'tuition_fee_id': prod_id}}
+            if year_class and year_class.level_id.tuition_fee_id:
+                product_id = year_class.level_id.tuition_fee_id.id
+        return {'value': {'tuition_fee_id': product_id}}
 
     def onchange_checklist_id(self, cr, uid, ids, checklist_id, context=None):
         if not context:
@@ -155,7 +162,7 @@ class school_enrolment(osv.osv):
             'school.checklist',
             'Checklist',
             readonly=True,
-            states={'draft': [('readonly', False)]}),
+            states={DRAFT: [('readonly', False)]}),
         'checklist_ids': fields.one2many(
             'school.enrolment.checklist',
             'enrolment_id',
@@ -167,15 +174,15 @@ class school_enrolment(osv.osv):
         'date': fields.date('Creation Date', required=True),
         'date_valid': fields.date('Validation Date', readonly=True),
         'state': fields.selection([
-            ('draft', 'Draft'),
-            ('cancel', 'Cancelled'),
-            ('enrolled', 'Enrolled'),
-            ('archived', 'Archived'),],
+            (DRAFT, 'Draft'),
+            (CANCELLED, 'Cancelled'),
+            (ENROLLED, 'Enrolled'),
+            (ARCHIVED, 'Archived'),],
             'Status',
             readonly=True,
             track_visibility='onchange',
             select=True,
-            help="Gives the status of the enrolment" ),
+            help="Gives the status of the enrolment"),
     }
 
     _defaults = {
@@ -183,7 +190,7 @@ class school_enrolment(osv.osv):
         'student_id': _default_student_id,
         'class_id': _default_class_id,
         'enrolment_checklist_id': _default_checklist,
-        'state': 'draft',
+        'state': DRAFT,
         'user_id': lambda cr, uid, id, c={}: id,
     }
 
@@ -197,19 +204,19 @@ class school_enrolment(osv.osv):
         if not context:
             context = {}
         class_obj = self.pool.get('school.class')
-        sclass = class_obj.browse(cr, uid, vals['class_id'], context=context)
+        year_class = class_obj.browse(cr, uid, vals['class_id'], context=context)
         # assert only enrolment to current class
-        if sclass.state in ['closed', 'archived']:
+        if year_class and year_class.state in [CLOSED, ARCHIVED]:
             raise osv.except_osv(
                 _('Error!'),
                 _('This class is not open for enrolments'))
         student_obj = self.pool.get('school.student')
         student = student_obj.browse(cr, uid, vals['student_id'], context=context)
-        if student.current_class_id:
+        if student and student.current_class_id:
             raise osv.except_osv(
                 _('Duplicate Error for %s!' % student.name),
                 _("This student is currently enrolled in '%s'" % student.current_class_id.name ))
-        if student.invoice_id and student.invoice_id.state in ['draft', 'open']:
+        if student.invoice_id and student.invoice_id.state in [DRAFT, 'open']:
             raise osv.except_osv(
                 _('Unpaid Error!'),
                 _("Registration invoice '%s' is still pending." % student.invoice_id.number ))
@@ -220,9 +227,9 @@ class school_enrolment(osv.osv):
             context = {}
         if not default:
             default = {}
-        enr = self.browse(cr, uid, enr_id, context=context)
+        enrolment = self.browse(cr, uid, enr_id, context=context)
         class_id = resolve_id_from_context('class_id', context)
-        prod_id = self.onchange_class_id(
+        product_id = self.onchange_class_id(
                 cr,
                 uid,
                 None,
@@ -232,15 +239,15 @@ class school_enrolment(osv.osv):
                 cr,
                 uid,
                 None,
-                enr.enrolment_checklist_id.id,
+                enrolment.enrolment_checklist_id.id,
                 context=context)['value']['checklist_ids']
 
         default.update({
             'date': time.strftime('%Y-%m-%d'),
-            'state':'draft',
+            'state':DRAFT,
             'user_id': uid,
             'class_id': class_id,
-            'tuition_fee_id': prod_id,
+            'tuition_fee_id': product_id,
             'invoice_id': None,
             'user_valid': None,
             'date_valid': None,
@@ -254,8 +261,8 @@ class school_enrolment(osv.osv):
         wf_service = netsvc.LocalService("workflow")
         if context is None:
             context = {}
-        for rec in self.browse(cr, uid, ids, context=context):
-            if rec.state not in ['draft','cancel']:
+        for record in self.browse(cr, uid, ids, context=context):
+            if record.state not in [DRAFT,CANCELLED]:
                 raise osv.except_osv(
                     _('Active enrolment!'),
                     _("You must either cancel or reset to draft to be able to delete."))
@@ -268,7 +275,7 @@ class school_enrolment(osv.osv):
         for enrolment in self.browse(cr, uid, ids):
             wf_service.trg_delete(uid, 'school.enrolment', enrolment.id, cr)
             wf_service.trg_create(uid, 'school.enrolment', enrolment.id, cr)
-        return self.write(cr, uid, ids, {'state': 'draft'}, context=context)
+        return self.write(cr, uid, ids, {'state': DRAFT}, context=context)
 
     def enrolment_validate(self, cr, uid, ids, context=None):
         wf_service = netsvc.LocalService("workflow")
@@ -289,7 +296,7 @@ class school_enrolment(osv.osv):
             uid,
             ids,
             {
-                'state': 'enrolled',
+                'state': ENROLLED,
                 'date_valid': time.strftime('%Y-%m-%d'),
                 'user_valid': uid},
             context=context)
@@ -299,14 +306,14 @@ class school_enrolment(osv.osv):
         if not context:
             context = {}
         for enrolment in self.browse(cr, uid, ids, context=context):
-            if context.get('skip_deroll', False) == False:
+            if context.get('skip_deroll', False) is False:
                 _logger.error("running workflow trigger deroll")
                 wf_service.trg_validate(uid, 'school.student', enrolment.student_id.id, 'deroll', cr)
         return self.write(
             cr,
             uid,
             ids,
-            {'state': 'archived'},
+            {'state': ARCHIVED},
             context=context)
 
     def enrolment_cancel(self, cr, uid, ids, context=None):
@@ -316,19 +323,19 @@ class school_enrolment(osv.osv):
         inv_obj = self.pool.get('account.invoice')
         return_ids = []
         for enrolment in self.browse(cr, uid, ids, context=context):
-            vals = {'state': 'cancel'}
-            if context.get('skip_deroll', False) == False:
+            vals = {'state': CANCELLED}
+            if 'skip_deroll' in context:
                 _logger.debug("running workflow trigger deroll")
                 wf_service.trg_validate(uid, 'school.student', enrolment.student_id.id, 'deroll', cr)
             if enrolment.invoice_id:
-                #if possible, delete invoice
+                # if possible, delete invoice
                 try:
                     inv_obj.action_cancel(cr, uid, [enrolment.invoice_id.id], context)
                     inv_obj.action_cancel_draft(cr, uid, [enrolment.invoice_id.id], context)
                     inv_obj.unlink(cr, uid, [enrolment.invoice_id.id], context=context)
                     vals['invoice_id'] = None
                     vals['is_invoiced'] = False
-                except:
+                except Exception:
                     pass
             return_ids.append(
                 self.write(
@@ -348,7 +355,7 @@ class school_enrolment(osv.osv):
                     raise osv.except_osv(
                         _('No Invoice!'),
                         _("Tuition hasn't been invoiced"))
-            if enrolment.invoice_id and enrolment.invoice_id.state == 'draft' :
+            if enrolment.invoice_id and enrolment.invoice_id.state == DRAFT:
                 raise osv.except_osv(
                     _('No validated invoice'),
                     _("Tuition invoice hasn't been validated"))
@@ -356,7 +363,7 @@ class school_enrolment(osv.osv):
                 if not check.done:
                     raise osv.except_osv(
                         _('Validation error!'),
-                        _("Please verify '%s'" % check.item_id.name))
+                        _("Please verify '{0}'").format(check.item_id.name))
 
     def generate_invoice(self, cr, uid, ids, context):
         if not context:
@@ -364,30 +371,30 @@ class school_enrolment(osv.osv):
         ctx = context.copy()
         ctx.update({'account_period_prefer_normal': True})
 
-        for enr in self.browse(cr, uid, ids, context=ctx):
-            if enr.waive_tuition_fee:
+        for enrolment in self.browse(cr, uid, ids, context=ctx):
+            if enrolment.waive_tuition_fee:
                 raise osv.except_osv(
                     _('Cannot generate tuition invoice!'),
                     _("Tuition fees have been waived."))
-            if not enr.tuition_fee_id:
+            if not enrolment.tuition_fee_id:
                 raise osv.except_osv(
                     _("Can't generate invoice"),
                     _("No tuition fee found."))
-            if enr.invoice_id:
+            if enrolment.invoice_id:
                 raise osv.except_osv(
                     _('Invoice Already Generated!'),
                     _("Please refer to the linked Tuition Invoice"))
 
-            inv_id = generic_generate_invoice(
+            invoice_id = generic_generate_invoice(
                 cr,
                 uid,
-                enr.tuition_fee_id.id,
-                enr.student_id.billing_partner_id.id,
-                enr.student_id.name,
+                enrolment.tuition_fee_id.id,
+                enrolment.student_id.billing_partner_id.id,
+                enrolment.student_id.name,
                 "Tuition Fee",
                 ctx)
 
-            self.write(cr, uid, [enr.id], {'invoice_id': inv_id, 'is_invoiced': True}, context=ctx)
+            self.write(cr, uid, [enrolment.id], {'invoice_id': invoice_id, 'is_invoiced': True}, context=ctx)
 
         return True
 
@@ -458,7 +465,7 @@ class school_student(osv.osv):
             context = {}
         enr_obj = self.pool.get('school.enrolment')
         for student in self.browse(cr, uid, ids, context=context):
-            enr_ids = [ enr.id for enr in student.enrolment_ids if enr.state == 'enrolled']
+            enr_ids = [ enrolment.id for enrolment in student.enrolment_ids if enrolment.state == ENROLLED]
             if enr_ids:
                 enr_obj.enrolment_cancel(cr, uid, enr_ids, context)
                 enr_obj.unlink(cr, uid, enr_ids, context)
@@ -469,7 +476,7 @@ class school_student(osv.osv):
             context = {}
         enr_obj = self.pool.get('school.enrolment')
         for student in self.browse(cr, uid, ids, context=context):
-            enr_ids = [ enr.id for enr in student.enrolment_ids if enr.state == 'enrolled']
+            enr_ids = [ enrolment.id for enrolment in student.enrolment_ids if enrolment.state == ENROLLED]
             if enr_ids:
                 ctx = context.copy()
                 ctx['skip_deroll'] = True
@@ -489,10 +496,10 @@ class school_student(osv.osv):
 
         student_obj = self.pool.get('school.student')
         student = student_obj.browse(cr, uid, context['student_id'], context=context)
-        if student.state == 'enrolled':
+        if student.state == ENROLLED:
             raise osv.except_osv(
                 _('Duplicate Error!'),
-                _("It seems an enrolment has already been created for %s.\nPlease check the draft enrolments." % student.name ))
+                _("It seems an enrolment has already been created for {0}.\nPlease check the draft enrolments.").format(student.name))
         if not student.waive_registration_fee:
             if not student.invoice_id:
                 raise osv.except_osv(
@@ -501,11 +508,11 @@ class school_student(osv.osv):
         if student.current_class_id:
             raise osv.except_osv(
                 _('Duplicate Error!'),
-                _("This student is currently enrolled in '%s'" % student.current_class_id.name ))
-        if student.invoice_id and student.invoice_id.state in ['draft', 'open']:
+                _("This student is currently enrolled in '{0}'").format(student.current_class_id.name))
+        if student.invoice_id and student.invoice_id.state in [DRAFT, 'open']:
             raise osv.except_osv(
                 _('Unpaid Error!'),
-                _("Registration invoice '%s' is still pending." % student.invoice_id.number ))
+                _("Registration invoice '{0}' is still pending.").format(student.invoice_id.number))
 
         return {
             'name': _("Enroll Student"),
