@@ -36,9 +36,9 @@
               type="object"
               string="View Invoice"
               groups="account.group_account_user"
-              states="student,enrolled"
+              states="draft,student,enrolled"
               class="oe_highlight"
-              attrs="{'invisible':[('is_invoiced','=',False),'|',('waive_registration_fee','=',True)]}"/>
+              attrs="{'invisible':['|',('is_invoiced','=',False),'|',('waive_registration_fee','=',True)]}"/>
             <button name="student_suspend" type="object" states="student,enrolled"
               string="Deactivate" groups="school.group_school_manager"/>
             <button name="cancel" states="student,suspend" string="Cancel" groups="school.group_school_manager"/>
