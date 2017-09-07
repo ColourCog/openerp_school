@@ -41,7 +41,7 @@
               attrs="{'invisible':['|',('is_invoiced','=',False),'|',('waive_tuition_fee','=',True)]}"/>
             <button name="cancel" states="enrolled" string="Cancel" groups="school.group_school_manager"/>
             <button name="archive" states="enrolled" string="Archive" groups="school.group_school_headteacher"/>
-            <button name="enrolment_draft" states="cancel" string="Set to Draft" type="object" />
+            <button name="enrolment_draft" states="enrolled,cancel" string="Set to Draft" type="object" />
             <field name="state" widget="statusbar" statusbar_visible="draft,enrolled,archived" statusbar_colors='{"cancel":"red"}'/>
           </header>
           <sheet>
@@ -260,7 +260,7 @@
           <field name="is_enrolled" invisible="1"/>
         </xpath>
         <xpath expr="//field[@name='registration_checklist_id']" position="after">
-          <field name="current_class_id"/>
+          <field name="current_class_id" readonly="1"/>
         </xpath>
         <xpath expr="//page[@string='Relatives']" position="after">
           <page string="Enrolments">
